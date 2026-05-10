@@ -1,0 +1,23 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+uv.lock
+
+# C++
+build/
+*.o
+*.a
+cti_to
+
+# Rust
+services/search-rust/target/
+
+# Go
+services/gateway-go/gateway-go
+
+# Docker
+.env
+
+# Claude
+.claude/settings.local.json

@@ -1,0 +1,83 @@
+services:
+
+  gateway-go:
+    build: ./gateway-go
+    ports:
+      - "9000:9000"
+    environment:
+      - CONTACTS_URL=http://contacts-cpp:8080
+      - SEARCH_URL=http://search-rust:8081
+    networks:
+      - contacts-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  contacts-cpp:
+    build: ./contacts-cpp
+    ports:
+      - "8080:8080"
+    environment:
+      - GATEWAY_URL=http://gateway-go:9000
+    networks:
+      - contacts-net
+    restart: unless-stopped
+    depends_on:
+      gateway-go:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  search-rust:
+    build: ./search-rust
+    ports:
+      - "8081:8081"
+    environment:
+      - GATEWAY_URL=http://gateway-go:9000
+      - CONTACTS_URL=http://contacts-cpp:8080
+      - SELF_URL=http://search-rust:8081
+    networks:
+      - contacts-net
+    restart: unless-stopped
+    depends_on:
+      contacts-cpp:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  bff-python:
+    build: ./bff-python
+    ports:
+      - "8989:8989"
+    environment:
+      - GATEWAY_URL=http://gateway-go:9000
+      - CONTACTS_URL=http://contacts-cpp:8080
+      - SEARCH_URL=http://search-rust:8081
+    networks:
+      - contacts-net
+    restart: unless-stopped
+    depends_on:
+      gateway-go:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8989/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  contacts-net:
+    driver: bridge

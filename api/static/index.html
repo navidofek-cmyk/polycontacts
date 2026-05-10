@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<title>Contacts</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; padding: 2rem; }
+  h1 { font-size: 1.4rem; font-weight: 600; margin-bottom: 1.5rem; color: #a78bfa; }
+
+  .toolbar { display: flex; gap: .75rem; margin-bottom: 1.25rem; }
+  input, select, button {
+    background: #1e2130; border: 1px solid #2d3148; border-radius: 6px;
+    color: #e2e8f0; padding: .45rem .75rem; font-size: .9rem;
+  }
+  input:focus, select:focus { outline: none; border-color: #7c3aed; }
+  input[type=search] { flex: 1; }
+  button { cursor: pointer; background: #7c3aed; border-color: #7c3aed; font-weight: 500; }
+  button:hover { background: #6d28d9; }
+  button.danger { background: #991b1b; border-color: #991b1b; }
+  button.danger:hover { background: #7f1d1d; }
+
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  th { text-align: left; padding: .6rem 1rem; background: #1a1d2e;
+       color: #94a3b8; font-weight: 500; border-bottom: 1px solid #2d3148; }
+  td { padding: .6rem 1rem; border-bottom: 1px solid #1a1d2e; vertical-align: top; }
+  tr:hover td { background: #1a1d2e; }
+
+  .badge {
+    display: inline-block; padding: .15rem .5rem; border-radius: 999px;
+    font-size: .75rem; font-weight: 600;
+  }
+  .badge-Friend { background: #1e3a5f; color: #60a5fa; }
+  .badge-Work   { background: #1a2e1a; color: #4ade80; }
+  .badge-Family { background: #3b1f2b; color: #f472b6; }
+  .badge-Other  { background: #1e2130; color: #94a3b8; }
+
+  .phones { color: #94a3b8; font-size: .82rem; }
+  .email  { color: #818cf8; font-size: .82rem; }
+  .del-btn { background: none; border: none; color: #6b7280; cursor: pointer;
+             padding: .2rem .4rem; border-radius: 4px; }
+  .del-btn:hover { color: #f87171; background: #1f1215; }
+
+  .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6);
+              align-items:center; justify-content:center; }
+  .modal-bg.open { display:flex; }
+  .modal { background:#1e2130; border:1px solid #2d3148; border-radius:10px;
+           padding:1.5rem; width:420px; display:flex; flex-direction:column; gap:.75rem; }
+  .modal h2 { color:#a78bfa; font-size:1rem; }
+  .modal label { font-size:.8rem; color:#94a3b8; display:block; margin-bottom:.25rem; }
+  .modal input, .modal select { width:100%; }
+  .modal-footer { display:flex; gap:.5rem; justify-content:flex-end; margin-top:.5rem; }
+  button.secondary { background:#2d3148; border-color:#2d3148; }
+  button.secondary:hover { background:#374151; }
+</style>
+</head>
+<body>
+
+<h1>📇 Contacts</h1>
+
+<div class="toolbar">
+  <input type="search" id="search" placeholder="Hledat..." oninput="load()">
+  <button onclick="openModal()">+ Přidat</button>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Jméno</th>
+      <th>Kategorie</th>
+      <th>Email</th>
+      <th>Telefony</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+
+<!-- modal -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h2>Nový kontakt</h2>
+    <div>
+      <label>Jméno</label>
+      <input id="m-first" placeholder="Jana">
+    </div>
+    <div>
+      <label>Příjmení</label>
+      <input id="m-last" placeholder="Nováková">
+    </div>
+    <div>
+      <label>Email</label>
+      <input id="m-email" type="email" placeholder="jana@example.com">
+    </div>
+    <div>
+      <label>Telefon (label:číslo)</label>
+      <input id="m-phone" placeholder="mobil:+420 601 111 222">
+    </div>
+    <div>
+      <label>Kategorie</label>
+      <select id="m-cat">
+        <option value="Friend">Přátelé</option>
+        <option value="Work">Práce</option>
+        <option value="Family">Rodina</option>
+        <option value="Other">Ostatní</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="secondary" onclick="closeModal()">Zrušit</button>
+      <button onclick="addContact()">Uložit</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '';
+
+async function load() {
+  const q = document.getElementById('search').value;
+  const res = await fetch(`${API}/contacts?q=${encodeURIComponent(q)}`);
+  const contacts = await res.json();
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = contacts.map(c => `
+    <tr>
+      <td><strong>${c.first_name} ${c.last_name}</strong></td>
+      <td><span class="badge badge-${c.category}">${labelCat(c.category)}</span></td>
+      <td class="email">${c.email ?? '—'}</td>
+      <td class="phones">${c.phones.map(p => `${p.label}: ${p.number}`).join('<br>')}</td>
+      <td><button class="del-btn" onclick="del('${c.first_name} ${c.last_name}')">✕</button></td>
+    </tr>
+  `).join('');
+}
+
+function labelCat(c) {
+  return {Friend:'Přátelé', Work:'Práce', Family:'Rodina', Other:'Ostatní'}[c] ?? c;
+}
+
+async function del(name) {
+  if (!confirm(`Smazat "${name}"?`)) return;
+  await fetch(`${API}/contacts/${encodeURIComponent(name)}`, {method:'DELETE'});
+  load();
+}
+
+function openModal()  { document.getElementById('modal').classList.add('open'); }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+async function addContact() {
+  const phone = document.getElementById('m-phone').value.trim();
+  const phones = phone ? [{ label: phone.split(':')[0], number: phone.split(':').slice(1).join(':').trim() }] : [];
+  const body = {
+    first_name: document.getElementById('m-first').value,
+    last_name:  document.getElementById('m-last').value,
+    email:      document.getElementById('m-email').value || null,
+    phones,
+    category:   document.getElementById('m-cat').value,
+  };
+  await fetch(`${API}/contacts`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(body),
+  });
+  closeModal();
+  load();
+}
+
+load();
+</script>
+</body>
+</html>

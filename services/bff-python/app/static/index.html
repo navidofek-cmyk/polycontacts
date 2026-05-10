@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<title>Contacts BFF</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; padding: 2rem; }
+  h1 { font-size: 1.4rem; font-weight: 600; margin-bottom: 1.5rem; color: #a78bfa; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 1px solid #2d3148; }
+  .tab-btn {
+    background: none; border: none; color: #94a3b8; padding: .6rem 1.2rem;
+    cursor: pointer; font-size: .9rem; border-bottom: 2px solid transparent;
+    margin-bottom: -1px; border-radius: 0;
+  }
+  .tab-btn:hover { color: #e2e8f0; background: #1a1d2e; }
+  .tab-btn.active { color: #a78bfa; border-bottom-color: #7c3aed; background: none; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Toolbar */
+  .toolbar { display: flex; gap: .75rem; margin-bottom: 1.25rem; }
+  input, select, button {
+    background: #1e2130; border: 1px solid #2d3148; border-radius: 6px;
+    color: #e2e8f0; padding: .45rem .75rem; font-size: .9rem;
+  }
+  input:focus, select:focus { outline: none; border-color: #7c3aed; }
+  input[type=search], input[type=text], input[type=email] { flex: 1; }
+  button { cursor: pointer; background: #7c3aed; border-color: #7c3aed; font-weight: 500; }
+  button:hover { background: #6d28d9; }
+  button.danger { background: #991b1b; border-color: #991b1b; }
+  button.danger:hover { background: #7f1d1d; }
+  button.secondary { background: #2d3148; border-color: #2d3148; }
+  button.secondary:hover { background: #374151; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  th {
+    text-align: left; padding: .6rem 1rem; background: #1a1d2e;
+    color: #94a3b8; font-weight: 500; border-bottom: 1px solid #2d3148;
+  }
+  td { padding: .6rem 1rem; border-bottom: 1px solid #1a1d2e; vertical-align: top; }
+  tr:hover td { background: #1a1d2e; }
+  .sep { color: #4b5563; padding: 0 .25rem; }
+
+  /* Badges */
+  .badge {
+    display: inline-block; padding: .15rem .5rem; border-radius: 999px;
+    font-size: .75rem; font-weight: 600;
+  }
+  .badge-Friend  { background: #1e3a5f; color: #60a5fa; }
+  .badge-Work    { background: #1a2e1a; color: #4ade80; }
+  .badge-Family  { background: #3b1f2b; color: #f472b6; }
+  .badge-Other   { background: #1e2130; color: #94a3b8; }
+
+  /* Status badges */
+  .status-badge {
+    display: inline-block; padding: .2rem .55rem; border-radius: 999px;
+    font-size: .75rem; font-weight: 700; color: #0f1117;
+  }
+  .status-healthy   { background: #4ade80; }
+  .status-unhealthy { background: #f87171; }
+  .status-unknown   { background: #6b7280; color: #e2e8f0; }
+
+  .phones { color: #94a3b8; font-size: .82rem; }
+  .email  { color: #818cf8; font-size: .82rem; }
+  .score  { color: #fbbf24; font-weight: 600; }
+
+  .del-btn {
+    background: none; border: none; color: #6b7280; cursor: pointer;
+    padding: .2rem .4rem; border-radius: 4px; font-size: .9rem;
+  }
+  .del-btn:hover { color: #f87171; background: #1f1215; }
+
+  /* Modal */
+  .modal-bg {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6);
+    align-items: center; justify-content: center;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: #1e2130; border: 1px solid #2d3148; border-radius: 10px;
+    padding: 1.5rem; width: 420px; display: flex; flex-direction: column; gap: .75rem;
+  }
+  .modal h2 { color: #a78bfa; font-size: 1rem; }
+  .modal label { font-size: .8rem; color: #94a3b8; display: block; margin-bottom: .25rem; }
+  .modal input, .modal select { width: 100%; }
+  .modal-footer { display: flex; gap: .5rem; justify-content: flex-end; margin-top: .5rem; }
+
+  /* Topology diagram */
+  .topo-diagram {
+    margin-top: 1.5rem; background: #1a1d2e; border: 1px solid #2d3148;
+    border-radius: 8px; padding: 1.5rem; font-family: monospace; font-size: .85rem;
+    color: #94a3b8; white-space: pre; line-height: 1.6;
+  }
+  .topo-diagram .node { color: #a78bfa; font-weight: 700; }
+  .topo-diagram .arrow { color: #7c3aed; }
+
+  .empty { color: #4b5563; font-size: .85rem; padding: 1rem 0; }
+  .refresh-note { font-size: .75rem; color: #4b5563; margin-bottom: .75rem; }
+
+  /* SVG diagram */
+  svg.topo { display: block; margin-top: 1.5rem; background: #1a1d2e;
+             border: 1px solid #2d3148; border-radius: 8px; }
+</style>
+</head>
+<body>
+
+<h1>&#128222; Contacts BFF</h1>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('contacts')">Kontakty</button>
+  <button class="tab-btn" onclick="switchTab('search')">Hled&#225;n&#237;</button>
+  <button class="tab-btn" onclick="switchTab('services')">Slu&#382;by</button>
+  <button class="tab-btn" onclick="switchTab('stats')">Statistiky</button>
+  <button class="tab-btn" onclick="switchTab('topology')">Topologie</button>
+</div>
+
+<!-- ===== KONTAKTY ===== -->
+<div id="tab-contacts" class="tab-panel active">
+  <div class="toolbar">
+    <input type="search" id="contacts-search" placeholder="Hledat kontakty..." oninput="loadContacts()">
+    <button onclick="openModal()">+ P&#345;idat</button>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Jm&#233;no</th>
+        <th>Kategorie</th>
+        <th>Email</th>
+        <th>Telefony</th>
+        <th>Akce</th>
+      </tr>
+    </thead>
+    <tbody id="contacts-tbody"></tbody>
+  </table>
+</div>
+
+<!-- ===== HLEDÁNÍ ===== -->
+<div id="tab-search" class="tab-panel">
+  <div class="toolbar">
+    <input type="search" id="search-input" placeholder="Hledat...">
+    <button onclick="doSearch()">Hledat</button>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Sk&#243;re</th>
+        <th>Jm&#233;no</th>
+        <th>Kategorie</th>
+        <th>Email</th>
+      </tr>
+    </thead>
+    <tbody id="search-tbody"></tbody>
+  </table>
+</div>
+
+<!-- ===== SLUŽBY ===== -->
+<div id="tab-services" class="tab-panel">
+  <p class="refresh-note">Auto-refresh ka&#382;d&#253;ch 10 sekund</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Slu&#382;ba</th>
+        <th>URL</th>
+        <th>Status</th>
+        <th>Latence (ms)</th>
+        <th>Posl. kontrola</th>
+      </tr>
+    </thead>
+    <tbody id="services-tbody"></tbody>
+  </table>
+</div>
+
+<!-- ===== STATISTIKY ===== -->
+<div id="tab-stats" class="tab-panel">
+  <div class="toolbar" style="margin-bottom:.75rem">
+    <button onclick="loadStats()">&#8635; Obnovit</button>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Slu&#382;ba</th>
+        <th>Po&#382;adavky</th>
+        <th>Chyby</th>
+        <th>Uptime</th>
+      </tr>
+    </thead>
+    <tbody id="stats-tbody"></tbody>
+  </table>
+</div>
+
+<!-- ===== TOPOLOGIE ===== -->
+<div id="tab-topology" class="tab-panel">
+  <div class="toolbar" style="margin-bottom:.75rem">
+    <button onclick="loadTopology()">&#8635; Obnovit</button>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Od</th>
+        <th>&#8594;</th>
+        <th>Do</th>
+      </tr>
+    </thead>
+    <tbody id="topology-tbody"></tbody>
+  </table>
+  <div id="topology-diagram" class="topo-diagram"></div>
+</div>
+
+<!-- ===== MODAL ===== -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h2>Nov&#253; kontakt</h2>
+    <div>
+      <label>Jm&#233;no</label>
+      <input id="m-first" type="text" placeholder="Jana">
+    </div>
+    <div>
+      <label>P&#345;&#237;jmen&#237;</label>
+      <input id="m-last" type="text" placeholder="Nov&#225;kov&#225;">
+    </div>
+    <div>
+      <label>Email</label>
+      <input id="m-email" type="email" placeholder="jana@example.com">
+    </div>
+    <div>
+      <label>Telefon (label:&#269;&#237;slo)</label>
+      <input id="m-phone" type="text" placeholder="mobil:+420 601 111 222">
+    </div>
+    <div>
+      <label>Kategorie</label>
+      <select id="m-cat">
+        <option value="Friend">P&#345;&#225;tel&#233;</option>
+        <option value="Work">Pr&#225;ce</option>
+        <option value="Family">Rodina</option>
+        <option value="Other">Ostatn&#237;</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="secondary" onclick="closeModal()">Zru&#353;it</button>
+      <button onclick="addContact()">Ulo&#382;it</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '';
+
+// ---------------------------------------------------------------------------
+// Tab switching
+// ---------------------------------------------------------------------------
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    const names = ['contacts','search','services','stats','topology'];
+    b.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+
+  if (name === 'contacts')  loadContacts();
+  if (name === 'services')  loadServices();
+  if (name === 'stats')     loadStats();
+  if (name === 'topology')  loadTopology();
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+function labelCat(c) {
+  return { Friend: 'Přátelé', Work: 'Práce', Family: 'Rodina', Other: 'Ostatní' }[c] ?? c;
+}
+
+function statusBadge(s) {
+  const cls = s === 'healthy' ? 'status-healthy' : s === 'unhealthy' ? 'status-unhealthy' : 'status-unknown';
+  const label = s === 'healthy' ? 'healthy' : s === 'unhealthy' ? 'unhealthy' : 'unknown';
+  return `<span class="status-badge ${cls}">${label}</span>`;
+}
+
+function fmtTime(ts) {
+  if (!ts) return '—';
+  try { return new Date(ts).toLocaleTimeString('cs-CZ'); } catch { return ts; }
+}
+
+// ---------------------------------------------------------------------------
+// Contacts
+// ---------------------------------------------------------------------------
+async function loadContacts() {
+  const q = document.getElementById('contacts-search').value;
+  try {
+    const res = await fetch(`${API}/api/contacts?q=${encodeURIComponent(q)}`);
+    const contacts = await res.json();
+    document.getElementById('contacts-tbody').innerHTML = contacts.map(c => `
+      <tr>
+        <td><strong>${c.first_name} ${c.last_name}</strong></td>
+        <td><span class="badge badge-${c.category}">${labelCat(c.category)}</span></td>
+        <td class="email">${c.email ?? '&mdash;'}</td>
+        <td class="phones">${(c.phones || []).map(p => `${p.label}: ${p.number}`).join('<br>')}</td>
+        <td><button class="del-btn" onclick="delContact('${encodeURIComponent(c.first_name + ' ' + c.last_name)}')" title="Smazat">&times;</button></td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    document.getElementById('contacts-tbody').innerHTML =
+      `<tr><td colspan="5" class="empty">Chyba načtení: ${e.message}</td></tr>`;
+  }
+}
+
+async function delContact(encodedName) {
+  const name = decodeURIComponent(encodedName);
+  if (!confirm(`Smazat "${name}"?`)) return;
+  await fetch(`${API}/api/contacts/${encodedName}`, { method: 'DELETE' });
+  loadContacts();
+}
+
+function openModal()  { document.getElementById('modal').classList.add('open'); }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+async function addContact() {
+  const phone = document.getElementById('m-phone').value.trim();
+  const phones = phone
+    ? [{ label: phone.split(':')[0], number: phone.split(':').slice(1).join(':').trim() }]
+    : [];
+  const body = {
+    first_name: document.getElementById('m-first').value,
+    last_name:  document.getElementById('m-last').value,
+    email:      document.getElementById('m-email').value || null,
+    phones,
+    category:   document.getElementById('m-cat').value,
+  };
+  await fetch(`${API}/api/contacts`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  closeModal();
+  // reset form
+  ['m-first','m-last','m-email','m-phone'].forEach(id => document.getElementById(id).value = '');
+  loadContacts();
+}
+
+// ---------------------------------------------------------------------------
+// Search
+// ---------------------------------------------------------------------------
+async function doSearch() {
+  const q = document.getElementById('search-input').value;
+  try {
+    const res = await fetch(`${API}/api/search?q=${encodeURIComponent(q)}`);
+    const results = await res.json();
+    const rows = Array.isArray(results) ? results : (results.results ?? []);
+    document.getElementById('search-tbody').innerHTML = rows.length
+      ? rows.map(r => `
+          <tr>
+            <td class="score">${(r.score ?? r.relevance ?? '—')}</td>
+            <td><strong>${r.first_name ?? ''} ${r.last_name ?? ''}</strong></td>
+            <td><span class="badge badge-${r.category}">${labelCat(r.category)}</span></td>
+            <td class="email">${r.email ?? '&mdash;'}</td>
+          </tr>
+        `).join('')
+      : `<tr><td colspan="4" class="empty">&#381;ádné výsledky.</td></tr>`;
+  } catch (e) {
+    document.getElementById('search-tbody').innerHTML =
+      `<tr><td colspan="4" class="empty">Chyba: ${e.message}</td></tr>`;
+  }
+}
+
+document.getElementById('search-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doSearch();
+});
+
+// ---------------------------------------------------------------------------
+// Services
+// ---------------------------------------------------------------------------
+async function loadServices() {
+  try {
+    const res = await fetch(`${API}/api/services`);
+    const data = await res.json();
+    const list = Array.isArray(data) ? data : (data.services ?? Object.values(data));
+    document.getElementById('services-tbody').innerHTML = list.map(s => `
+      <tr>
+        <td><strong>${s.name ?? s.service ?? '?'}</strong></td>
+        <td><span style="color:#818cf8">${s.url ?? s.address ?? '—'}</span></td>
+        <td>${statusBadge(s.status ?? s.health ?? 'unknown')}</td>
+        <td>${s.latency_ms ?? s.latency ?? '—'}</td>
+        <td>${fmtTime(s.last_check ?? s.checked_at ?? null)}</td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    document.getElementById('services-tbody').innerHTML =
+      `<tr><td colspan="5" class="empty">Chyba: ${e.message}</td></tr>`;
+  }
+}
+
+// Auto-refresh services every 10s when tab is active
+let servicesTimer = null;
+function startServicesRefresh() {
+  if (servicesTimer) return;
+  servicesTimer = setInterval(() => {
+    if (document.getElementById('tab-services').classList.contains('active')) {
+      loadServices();
+    }
+  }, 10000);
+}
+startServicesRefresh();
+
+// ---------------------------------------------------------------------------
+// Stats
+// ---------------------------------------------------------------------------
+async function loadStats() {
+  try {
+    const res = await fetch(`${API}/api/stats`);
+    const data = await res.json();
+    const list = Array.isArray(data) ? data : [data];
+    document.getElementById('stats-tbody').innerHTML = list.map(s => `
+      <tr>
+        <td><strong>${s.service ?? '?'}</strong></td>
+        <td>${s.requests ?? s.total_requests ?? '—'}</td>
+        <td>${s.errors ?? s.error_count ?? '—'}</td>
+        <td>${s.uptime ?? s.uptime_seconds != null ? fmtUptime(s.uptime_seconds ?? s.uptime) : '—'}</td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    document.getElementById('stats-tbody').innerHTML =
+      `<tr><td colspan="4" class="empty">Chyba: ${e.message}</td></tr>`;
+  }
+}
+
+function fmtUptime(val) {
+  if (val == null) return '—';
+  if (typeof val === 'string') return val;
+  const s = Math.floor(val);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  return `${h}h ${m}m ${sec}s`;
+}
+
+// ---------------------------------------------------------------------------
+// Topology
+// ---------------------------------------------------------------------------
+async function loadTopology() {
+  try {
+    const res = await fetch(`${API}/api/topology`);
+    const data = await res.json();
+
+    // edges may be under .edges, .connections, .links or be top-level array
+    const edges = Array.isArray(data)
+      ? data
+      : (data.edges ?? data.connections ?? data.links ?? []);
+
+    document.getElementById('topology-tbody').innerHTML = edges.length
+      ? edges.map(e => `
+          <tr>
+            <td><strong style="color:#a78bfa">${e.from ?? e.source ?? e.src ?? '?'}</strong></td>
+            <td style="color:#7c3aed;text-align:center">&rarr;</td>
+            <td><strong style="color:#a78bfa">${e.to ?? e.target ?? e.dst ?? '?'}</strong></td>
+          </tr>
+        `).join('')
+      : `<tr><td colspan="3" class="empty">&#381;ádné hrany.</td></tr>`;
+
+    renderTopoDiagram(edges);
+  } catch (e) {
+    document.getElementById('topology-tbody').innerHTML =
+      `<tr><td colspan="3" class="empty">Chyba: ${e.message}</td></tr>`;
+    document.getElementById('topology-diagram').textContent = '';
+  }
+}
+
+function renderTopoDiagram(edges) {
+  const el = document.getElementById('topology-diagram');
+  if (!edges.length) { el.textContent = ''; return; }
+
+  // Collect unique nodes
+  const nodes = [...new Set(edges.flatMap(e => [
+    e.from ?? e.source ?? e.src ?? '?',
+    e.to ?? e.target ?? e.dst ?? '?',
+  ]))];
+
+  // Build SVG diagram
+  const W = 600, H = 200;
+  const cx = W / (nodes.length + 1);
+  const cy = H / 2;
+  const positions = {};
+  nodes.forEach((n, i) => { positions[n] = { x: cx * (i + 1), y: cy }; });
+
+  const nodeR = 28;
+  const svgEdges = edges.map(e => {
+    const src = e.from ?? e.source ?? e.src ?? '?';
+    const dst = e.to ?? e.target ?? e.dst ?? '?';
+    const p1 = positions[src], p2 = positions[dst];
+    if (!p1 || !p2) return '';
+    // Offset y slightly for curves
+    const mx = (p1.x + p2.x) / 2, my = cy - 40;
+    return `<path d="M${p1.x},${p1.y} Q${mx},${my} ${p2.x},${p2.y}"
+      fill="none" stroke="#7c3aed" stroke-width="2" marker-end="url(#arrow)"/>`;
+  }).join('\n');
+
+  const svgNodes = nodes.map(n => {
+    const p = positions[n];
+    return `<circle cx="${p.x}" cy="${p.y}" r="${nodeR}" fill="#2d3148" stroke="#7c3aed" stroke-width="1.5"/>
+      <text x="${p.x}" y="${p.y + 4}" text-anchor="middle" fill="#a78bfa"
+        font-family="system-ui,sans-serif" font-size="11" font-weight="600">${n}</text>`;
+  }).join('\n');
+
+  el.innerHTML = `<svg class="topo" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+    <defs>
+      <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#7c3aed"/>
+      </marker>
+    </defs>
+    ${svgEdges}
+    ${svgNodes}
+  </svg>`;
+}
+
+// ---------------------------------------------------------------------------
+// Init
+// ---------------------------------------------------------------------------
+loadContacts();
+</script>
+</body>
+</html>
