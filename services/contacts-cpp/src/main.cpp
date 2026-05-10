@@ -8,11 +8,13 @@
 #include <condition_variable>
 #include <format>
 #include <iostream>
+#include <map>
 #include <mutex>
 #include <optional>
 #include <queue>
 #include <random>
 #include <ranges>
+#include <sstream>
 #include <string>
 #include <thread>
 #include <vector>
@@ -266,6 +268,164 @@ public:
         return r.affected_rows() > 0;
     }
 
+    // ── Fuzzy dedup ───────────────────────────────────────────────────────
+    static int levenshtein(const std::string& a, const std::string& b) {
+        size_t m = a.size(), n = b.size();
+        std::vector<std::vector<int>> dp(m+1, std::vector<int>(n+1));
+        for (size_t i = 0; i <= m; ++i) dp[i][0] = i;
+        for (size_t j = 0; j <= n; ++j) dp[0][j] = j;
+        for (size_t i = 1; i <= m; ++i)
+            for (size_t j = 1; j <= n; ++j)
+                dp[i][j] = (a[i-1] == b[j-1]) ? dp[i-1][j-1]
+                          : 1 + std::min({dp[i-1][j], dp[i][j-1], dp[i-1][j-1]});
+        return dp[m][n];
+    }
+
+    static double name_similarity(const Contact& a, const Contact& b) {
+        auto norm = [](std::string s) {
+            std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+            return s;
+        };
+        std::string na = norm(a.first_name + " " + a.last_name);
+        std::string nb = norm(b.first_name + " " + b.last_name);
+        int dist = levenshtein(na, nb);
+        int maxlen = std::max(na.size(), nb.size());
+        return maxlen == 0 ? 1.0 : 1.0 - (double)dist / maxlen;
+    }
+
+    json dedup(double threshold) const {
+        auto contacts = get_all();
+        std::vector<json> pairs;
+        for (size_t i = 0; i < contacts.size(); ++i) {
+            for (size_t j = i + 1; j < contacts.size(); ++j) {
+                double sim = name_similarity(contacts[i], contacts[j]);
+                if (sim >= threshold)
+                    pairs.push_back({
+                        {"contact_a",  contact_to_json(contacts[i])},
+                        {"contact_b",  contact_to_json(contacts[j])},
+                        {"similarity", std::round(sim * 1000) / 1000},
+                    });
+            }
+        }
+        std::ranges::sort(pairs, [](const json& a, const json& b) {
+            return a["similarity"].get<double>() > b["similarity"].get<double>();
+        });
+        return {{"pairs", json(pairs)}, {"total", pairs.size()}, {"threshold", threshold}};
+    }
+
+    // ── Analytics ─────────────────────────────────────────────────────────
+    json analytics() const {
+        auto contacts = get_all();
+
+        std::map<std::string, int> cats, domains, phone_labels;
+        int no_email = 0;
+        for (const auto& c : contacts) {
+            cats[c.category]++;
+            if (c.email.empty()) {
+                no_email++;
+            } else {
+                auto at = c.email.find('@');
+                if (at != std::string::npos)
+                    domains[c.email.substr(at + 1)]++;
+            }
+            for (const auto& p : c.phones)
+                phone_labels[p.label]++;
+        }
+
+        // top domains sorted desc
+        std::vector<std::pair<std::string,int>> dom_vec(domains.begin(), domains.end());
+        std::ranges::sort(dom_vec, [](const auto& a, const auto& b){ return a.second > b.second; });
+        json top_domains = json::array();
+        for (auto& [k,v] : dom_vec | std::views::take(10))
+            top_domains.push_back({{"domain", k}, {"count", v}});
+
+        return {
+            {"total",         (int)contacts.size()},
+            {"no_email",      no_email},
+            {"category_dist", cats},
+            {"top_domains",   top_domains},
+            {"phone_labels",  phone_labels},
+        };
+    }
+
+    // ── vCard export ──────────────────────────────────────────────────────
+    std::string export_vcard() const {
+        auto contacts = get_all();
+        std::ostringstream out;
+        for (const auto& c : contacts) {
+            out << "BEGIN:VCARD\r\nVERSION:3.0\r\n";
+            out << "FN:" << c.first_name << " " << c.last_name << "\r\n";
+            out << "N:" << c.last_name << ";" << c.first_name << ";;;\r\n";
+            if (!c.email.empty())
+                out << "EMAIL;TYPE=INTERNET:" << c.email << "\r\n";
+            for (const auto& p : c.phones)
+                out << "TEL;TYPE=" << p.label << ":" << p.number << "\r\n";
+            if (!c.category.empty())
+                out << "CATEGORIES:" << c.category << "\r\n";
+            out << "UID:" << c.id << "\r\n";
+            out << "END:VCARD\r\n";
+        }
+        return out.str();
+    }
+
+    // ── vCard import ──────────────────────────────────────────────────────
+    int import_vcard(const std::string& data) {
+        int imported = 0;
+        std::istringstream ss(data);
+        std::string line;
+        Contact current;
+        bool in_card = false;
+
+        auto trim = [](std::string s) {
+            s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char c){ return !std::isspace(c); }));
+            s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char c){ return !std::isspace(c); }).base(), s.end());
+            return s;
+        };
+
+        while (std::getline(ss, line)) {
+            if (!line.empty() && line.back() == '\r') line.pop_back();
+            line = trim(line);
+            if (line == "BEGIN:VCARD") {
+                current = Contact{};
+                current.id = generate_uuid();
+                current.category = "Other";
+                in_card = true;
+            } else if (line == "END:VCARD" && in_card) {
+                if (!current.first_name.empty() || !current.last_name.empty()) {
+                    if (current.first_name.empty()) current.first_name = current.last_name;
+                    add(current);
+                    imported++;
+                }
+                in_card = false;
+            } else if (in_card) {
+                auto colon = line.find(':');
+                if (colon == std::string::npos) continue;
+                std::string key = line.substr(0, colon);
+                std::string val = trim(line.substr(colon + 1));
+                if (key == "FN") {
+                    auto sp = val.find(' ');
+                    if (sp != std::string::npos) {
+                        current.first_name = val.substr(0, sp);
+                        current.last_name  = val.substr(sp + 1);
+                    } else {
+                        current.last_name = val;
+                    }
+                } else if (key.starts_with("EMAIL")) {
+                    current.email = val;
+                } else if (key.starts_with("TEL")) {
+                    std::string label = "tel";
+                    auto type_pos = key.find("TYPE=");
+                    if (type_pos != std::string::npos)
+                        label = key.substr(type_pos + 5);
+                    current.phones.push_back({label, val});
+                } else if (key == "CATEGORIES") {
+                    current.category = val;
+                }
+            }
+        }
+        return imported;
+    }
+
     json raw_tables() const {
         auto g = pool_.acquire();
         pqxx::work tx(g.get());
@@ -444,6 +604,35 @@ int main() {
 
     svr.Get("/db/tables", [&](const httplib::Request&, httplib::Response& res) {
         json_response(res, 200, store.raw_tables());
+    });
+
+    svr.Get("/dedup", [&](const httplib::Request& req, httplib::Response& res) {
+        ++req_count;
+        double threshold = 0.85;
+        if (req.has_param("threshold")) {
+            try { threshold = std::stod(req.get_param_value("threshold")); }
+            catch (...) {}
+        }
+        threshold = std::clamp(threshold, 0.0, 1.0);
+        json_response(res, 200, store.dedup(threshold));
+    });
+
+    svr.Get("/analytics", [&](const httplib::Request&, httplib::Response& res) {
+        ++req_count;
+        json_response(res, 200, store.analytics());
+    });
+
+    svr.Get("/export/vcard", [&](const httplib::Request&, httplib::Response& res) {
+        ++req_count;
+        res.status = 200;
+        res.set_header("Content-Disposition", "attachment; filename=\"contacts.vcf\"");
+        res.set_content(store.export_vcard(), "text/vcard; charset=utf-8");
+    });
+
+    svr.Post("/import/vcard", [&](const httplib::Request& req, httplib::Response& res) {
+        ++req_count;
+        int n = store.import_vcard(req.body);
+        json_response(res, 200, {{"imported", n}});
     });
 
     std::cout << "[contacts-cpp] listening on 0.0.0.0:8080\n";

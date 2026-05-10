@@ -121,6 +121,32 @@ async def db_tables(request: Request):
     return await _proxy(request, f"{CONTACTS_URL}/db/tables")
 
 
+# Dedup ----------------------------------------------------------------------
+
+@app.get("/api/dedup")
+async def dedup(request: Request, threshold: float = 0.85):
+    return await _proxy(request, f"{CONTACTS_URL}/dedup", params={"threshold": threshold})
+
+
+# Analytics ------------------------------------------------------------------
+
+@app.get("/api/analytics")
+async def analytics(request: Request):
+    return await _proxy(request, f"{CONTACTS_URL}/analytics")
+
+
+# vCard export / import ------------------------------------------------------
+
+@app.get("/api/export/vcard")
+async def export_vcard(request: Request):
+    return await _proxy(request, f"{CONTACTS_URL}/export/vcard")
+
+
+@app.post("/api/import/vcard")
+async def import_vcard(request: Request):
+    return await _proxy(request, f"{CONTACTS_URL}/import/vcard")
+
+
 # Services / topology --------------------------------------------------------
 
 @app.get("/api/services")

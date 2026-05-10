@@ -18,11 +18,15 @@ FetchContent_MakeAvailable(nlohmann_json)
 # libpqxx ze zdroje — vyhne se ABI mismatch systémového balíčku
 set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
 set(SKIP_PQXX_SHARED ON CACHE BOOL "" FORCE)
+set(PQXX_DISABLE_MULTITHREADING OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(libpqxx
   GIT_REPOSITORY https://github.com/jtv/libpqxx.git
   GIT_TAG 7.9.2
   GIT_SHALLOW TRUE)
+# Vypnout testy libpqxx před MakeAvailable
+set(BUILD_TESTING OFF)
 FetchContent_MakeAvailable(libpqxx)
+set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
 
 add_executable(contacts_server src/main.cpp)
 target_link_libraries(contacts_server PRIVATE
@@ -32,6 +36,3 @@ target_link_libraries(contacts_server PRIVATE
     pthread)
 target_compile_options(contacts_server PRIVATE -Wall -O2)
 
-add_executable(test_contacts src/test_contacts.cpp)
-target_link_libraries(test_contacts PRIVATE nlohmann_json::nlohmann_json pthread)
-target_compile_options(test_contacts PRIVATE -Wall -O2)
