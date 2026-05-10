@@ -1,31 +1,64 @@
-# Prompt: Contacts Microservices od nuly
+# Reverse Engineering Spec — Contacts Microservices
+
+> Dokument vznikl zpětnou analýzou běžícího systému a zdrojového kódu.
+> Slouží jako kompletní podklad pro reimplementaci od nuly.
 
 ---
 
-Vytvoř kompletní microservices projekt — adresář kontaktů — ve složce `contacts/`.
-Projekt musí být funkční, spustitelný přes Docker Compose, s testy a dokumentací.
+## Pozorované chování systému (black box)
+
+### Vstupní bod
+Jediný veřejně přístupný port je **8989**. Ostatní porty (8080, 8081, 9000) jsou interní — přístupné přes Docker síť i z hostitele, ale klienti je přímo nevolají.
+
+### Co systém dělá
+- CRUD pro kontakty (jméno, příjmení, email, telefony, kategorie)
+- Full-text vyhledávání s relevancí (příjmení má vyšší váhu než email)
+- Self-monitoring: každá služba reportuje stav, latenci, počet requestů
+- Topologie: gateway drží graf "kdo volá koho"
+
+### Startup sekvence (pozorovatelná zvenku)
+1. gateway-go nastartuje první, otevře port 9000
+2. contacts-cpp nastartuje, zaregistruje se u gateway, port 8080
+3. search-rust nastartuje, stáhne kontakty z contacts-cpp, zaindexuje je, zaregistruje se u gateway, port 8081
+4. bff-python nastartuje, zaregistruje se u gateway, port 8989
+5. Systém je ready — `GET /health` na všech portech vrací 200
 
 ---
 
-## Architektura
-
-4 nezávislé HTTP služby komunikující přes JSON:
+## Architektura (white box)
 
 ```
-Prohlížeč → bff-python:8989 → contacts-cpp:8080
-                             → search-rust:8081
-                             → gateway-go:9000
-contacts-cpp → search-rust (notifikace při změně dat)
-všechny služby → gateway-go (registrace při startu)
+[Browser]
+    │ HTTP :8989
+    ▼
+[bff-python]  FastAPI/Python
+    │
+    ├──────────────────────────────► [contacts-cpp]  C++20  :8080
+    │   /api/contacts → /contacts                     CRUD, in-memory
+    │   /api/contacts/{id} → /contacts/{id}           shared_mutex, thread pool 8
+    │                                │
+    │                                │ POST /index (při každém zápisu)
+    │                                ▼
+    ├──────────────────────────────► [search-rust]  Rust/Axum  :8081
+    │   /api/search?q= → /search?q=                   invertovaný index, weighted
+    │
+    └──────────────────────────────► [gateway-go]  Go  :9000
+        /api/services → /services                     service registry
+        /api/topology → /topology                     graf závislostí
+        /api/stats    → fan-out na všechny           parallel asyncio.gather
 ```
+
+### Co gateway NENÍ
+Gateway není na kritické cestě pro data. BFF volá contacts-cpp a search-rust **přímo** (ne přes gateway proxy). Gateway slouží výhradně jako registry a monitoring.
 
 ---
 
-## Datový model — Contact
+## Datové struktury
 
+### Contact
 ```json
 {
-  "id":         "uuid-v4",
+  "id":         "550e8400-e29b-41d4-a716-446655440000",
   "first_name": "Jana",
   "last_name":  "Nováková",
   "email":      "jana@example.com",
@@ -33,340 +66,281 @@ všechny služby → gateway-go (registrace při startu)
   "category":   "Friend"
 }
 ```
-Povolené kategorie: `Friend`, `Work`, `Family`, `Other`, `Colleague`
 
----
+**Invarianty:**
+- `id` je vždy UUID v4 (`xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx`), generuje ho contacts-cpp při POST
+- `first_name` a `last_name` jsou required — prázdné vrátí 400
+- `phones` může být prázdný array
+- `category` má defaultní hodnotu `"Other"` pokud chybí
+- Povolené kategorie: `Friend`, `Work`, `Family`, `Other`, `Colleague`
 
-## Struktura projektu
-
-```
-contacts/
-├── .gitignore
-├── README.md
-├── ARCHITECTURE.md
-├── start.sh
-├── src/                          # standalone C++20 verze (zachovat)
-├── api/                          # standalone FastAPI verze (zachovat)
-└── services/
-    ├── docker-compose.yml
-    ├── contacts-cpp/
-    │   ├── Dockerfile
-    │   ├── CMakeLists.txt
-    │   └── src/
-    │       ├── main.cpp
-    │       └── test_contacts.cpp
-    ├── search-rust/
-    │   ├── Dockerfile
-    │   ├── Cargo.toml
-    │   └── src/main.rs
-    ├── gateway-go/
-    │   ├── Dockerfile
-    │   ├── go.mod
-    │   ├── main.go
-    │   └── main_test.go
-    └── bff-python/
-        ├── Dockerfile
-        ├── pyproject.toml
-        └── app/
-            ├── main.py
-            ├── static/index.html
-            └── tests/
-                ├── __init__.py
-                └── test_main.py
-```
-
----
-
-## 1. contacts-cpp (C++20, port 8080)
-
-**Závislosti:** cpp-httplib v0.14.3, nlohmann/json v3.11.3 (přes CMake FetchContent)
-
-**ContactStore třída:**
-- `std::vector<Contact>` + `mutable std::shared_mutex`
-- `add(Contact)` — `std::unique_lock`
-- `get_all(query="")` — `std::shared_lock`, case-insensitive substring filter přes first_name+last_name+email+category, seřadit dle (last_name, first_name)
-- `get_by_id(id)` → `std::optional<Contact>`
-- `update(id, Contact)` → bool
-- `remove(id)` → bool
-
-**UUID generátor:** RFC 4122 v4 přes `std::mt19937` + `std::uniform_int_distribution<uint32_t>`, formát `xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx`
-
-**HTTP server:** `httplib::Server` s `ThreadPool(8)`
-
-**API endpointy:**
-```
-GET  /contacts?q=    → JSON array, sorted
-GET  /contacts/{id}  → JSON object nebo 404
-POST /contacts       → 201 + objekt, vygenerovat UUID, validovat first_name+last_name
-PUT  /contacts/{id}  → 200 nebo 404
-DEL  /contacts/{id}  → 204 nebo 404
-GET  /health         → {"status":"ok","service":"contacts-cpp","threads":8}
-GET  /stats          → {"requests":N,"errors":N,"uptime_s":N}
-```
-
-**Atomic čítače:** `std::atomic<uint64_t>` pro req_count a err_count
-
-**Notifikace search:** Po každém POST/PUT spustit `std::thread([...](){ httplib::Client cli(search_url); cli.Post("/index", contact_json, "application/json"); }).detach()`
-
-**Registrace u gateway při startu:**
-```cpp
-// background thread, 5 pokusů, delay 2s mezi pokusy
-POST GATEWAY_URL/services
-{"name":"contacts","url":"http://contacts-cpp:8080","health_path":"/health"}
-```
-
-**Seed data:** 4 kontakty (Jana Nováková, Petr Svoboda, Marie Horáková, Tomáš Dvořák)
-
-**Env:** `GATEWAY_URL=http://localhost:9000`, `SEARCH_URL=http://localhost:8081`
-
-**CMakeLists.txt:**
-- C++20, FetchContent pro httplib a nlohmann_json
-- Target `contacts_server` (main.cpp)
-- Target `test_contacts` (test_contacts.cpp) — linkuje pouze nlohmann_json + pthread
-
-**Dockerfile:** Ubuntu 24.04 builder (cmake, make, g++, git, libssl-dev), runtime stage s libssl3+curl
-
----
-
-## 2. search-rust (Rust/Axum, port 8081)
-
-**Cargo.toml závislosti:** axum, tokio (full), serde+serde_json, reqwest (json feature), tracing+tracing-subscriber
-
-**Dev závislosti:** tower, http-body-util
-
-**SearchIndex struct:**
-```rust
-pub struct SearchIndex {
-    pub contacts: HashMap<String, Contact>,
-    pub inverted_index: HashMap<String, Vec<(String, f32)>>,
+### ServiceEntry (gateway interní)
+```json
+{
+  "name": "contacts",
+  "url": "http://contacts-cpp:8080",
+  "health_path": "/health",
+  "status": "healthy",
+  "latency_ms": 0,
+  "last_checked": "2026-05-10T10:00:00Z",
+  "registered_at": "2026-05-10T09:59:43Z",
+  "request_count": 42,
+  "error_count": 0
 }
 ```
 
-**Tokenizace:** lowercase + split na non-alphanumeric + filter prázdné
+---
 
-**Váhy při indexování:**
+## Kontrakty jednotlivých služeb
+
+### contacts-cpp (:8080)
+
 ```
-last_name:  3.0
-first_name: 2.0
-email:      1.0
-phones:     1.0 (label i number)
-category:   1.0
+GET  /contacts          ?q=<substring>
+                        → 200 array, sorted dle (last_name ASC, first_name ASC)
+                        → filtr je case-insensitive substring přes first_name+last_name+email+category
+                        → bez q= vrátí vše
+
+GET  /contacts/{id}     → 200 object | 404 {"error":"contact {id} not found"}
+
+POST /contacts          body: Contact bez id
+                        → 201 object s vygenerovaným id
+                        → 400 pokud chybí first_name nebo last_name
+                        → side effect: async POST /index na search-rust
+
+PUT  /contacts/{id}     body: Contact bez id
+                        → 200 object (id zůstane zachováno z URL)
+                        → 404 | 400
+                        → side effect: async POST /index na search-rust
+
+DELETE /contacts/{id}   → 204 | 404
+
+GET  /health            → 200 {"status":"ok","service":"contacts-cpp","threads":8}
+GET  /stats             → 200 {"requests":N,"errors":N,"uptime_s":N}
 ```
 
-**Vyhledávání:**
-1. Exact token match → +weight
-2. Prefix match (`indexed.starts_with(query_token)`) → +weight * 0.5
-3. Agregovat skóre per contact_id, seřadit desc
+**Chování při chybě search notifikace:** ignoruje se — fire and forget, detached thread
 
-**AppState:** `Arc<RwLock<SearchIndex>>` + `Arc<AtomicU64>` pro requests/errors + `Instant` start_time
+### search-rust (:8081)
 
-**API:**
 ```
-POST /index       → body: {"contacts":[...]}, vrátí {"indexed":N}
-GET  /search?q=   → {"results":[...], "total":N, "took_ms":N}
-GET  /health      → {"status":"ok","service":"search-rust"}
-GET  /stats       → {"requests":N,"errors":N,"uptime_s":N}
+POST /index             body: {"contacts": [...]}
+                        → 200 {"indexed": N}
+                        → přeindexuje celý dataset (ne append)
+
+GET  /search            ?q=<dotaz>
+                        → 200 {"results":[...], "total":N, "took_ms":N}
+                        → bez q= nebo q="" → results:[], total:0
+                        → výsledky seřazeny dle skóre DESC
+
+GET  /health            → 200 {"status":"ok","service":"search-rust"}
+GET  /stats             → 200 {"requests":N,"errors":N,"uptime_s":N}
 ```
 
-**Startup (tokio::spawn background task):**
-1. Retry loop: GET CONTACTS_URL/contacts dokud neuspěje (sleep 2s mezi pokusy)
-2. POST na vlastní SELF_URL/index
-3. POST GATEWAY_URL/services s `{"name":"search-rust","url":SELF_URL,"health":SELF_URL+"/health"}`
+**Algoritmus relevance:**
+```
+tokenize(text) = lowercase(text).split(non-alphanumeric).filter(non-empty)
 
-**Env:** `GATEWAY_URL`, `CONTACTS_URL`, `SELF_URL=http://localhost:8081`
+váhy: last_name=3.0, first_name=2.0, email=1.0, phones=1.0, category=1.0
 
-**Dockerfile:** rust:1.87-slim builder s cache trick (dummy main.rs pro deps), debian:bookworm-slim runtime s curl
+pro každý query token:
+  exact match v indexu    → score += weight
+  prefix match v indexu   → score += weight * 0.5
+
+výsledky: sort desc dle score, vrátit Contact objekty (bez score)
+```
+
+### gateway-go (:9000)
+
+```
+POST   /services        body: {"name":str, "url":str, "health_path":str}
+                        → 201 {"status":"registered","name":str}
+                        → 400 pokud chybí name nebo url
+                        → side effect: přidá edge "gateway-go→name" do topologie
+
+GET    /services        → 200 array ServiceEntry (včetně request_count, error_count)
+
+DELETE /services/{name} → 200 | 404
+
+GET    /health          → 200 {"status":"ok","service":"gateway-go","uptime_s":N}
+
+GET    /stats           → 200 {service_name: {"request_count":N,"error_count":N}}
+
+GET    /topology        → 200 {"edges":[{"from":str,"to":str},...]}
+
+POST   /topology/edge   body: {"from":str, "to":str}
+                        → 201
+
+GET    /{service}/{path} → reverse proxy na registrovanou službu
+                        → strip /{service} prefix, forward /{path}
+                        → 404 pokud service není registrován
+                        → 5xx odpověď incrementuje error_count
+```
+
+**Health checker:** background goroutine, tick každých 10s, GET `url+health_path`, měří latenci
+
+### bff-python (:8989)
+
+```
+GET  /health            → 200 {"status":"ok","service":"bff-python"}
+
+GET  /api/contacts      ?q= → proxy → CONTACTS_URL/contacts?q=
+POST /api/contacts           → proxy → CONTACTS_URL/contacts
+PUT  /api/contacts/{id}      → proxy → CONTACTS_URL/contacts/{id}
+DELETE /api/contacts/{id}    → proxy → CONTACTS_URL/contacts/{id}
+
+GET  /api/search        ?q= → proxy → SEARCH_URL/search?q=
+
+GET  /api/services           → proxy → GATEWAY_URL/services
+GET  /api/topology           → proxy → GATEWAY_URL/topology
+
+GET  /api/stats              → parallel GET /stats na contacts-cpp, search-rust, gateway-go
+                               → vrátí array tří objektů, timeout 5s na každý
+                               → chyba = {"service":name,"error":str}
+
+GET  /                       → index.html (HTML tabulka)
+```
 
 ---
 
-## 3. gateway-go (Go, port 9000)
+## Meziservisní komunikace — přesné URL
 
-**Pouze stdlib** — žádné externí závislosti
+| Volající | Cíl | URL | Kdy |
+|---|---|---|---|
+| contacts-cpp | search-rust | `SEARCH_URL/index` | každý POST/PUT kontaktu |
+| contacts-cpp | gateway-go | `GATEWAY_URL/services` | startup, max 5 pokusů |
+| search-rust | contacts-cpp | `CONTACTS_URL/contacts` | startup, retry loop |
+| search-rust | gateway-go | `GATEWAY_URL/services` | startup, po indexaci |
+| bff-python | gateway-go | `GATEWAY_URL/services` | startup lifespan |
+| bff-python | contacts-cpp | `CONTACTS_URL/contacts[/{id}]` | každý /api/contacts request |
+| bff-python | search-rust | `SEARCH_URL/search` | každý /api/search request |
+| bff-python | gateway-go | `GATEWAY_URL/services\|topology` | /api/services, /api/topology |
+| bff-python | všichni | `{URL}/stats` | /api/stats, paralelně |
 
-**ServiceEntry struct:**
-```go
-type ServiceEntry struct {
-    Name, URL, HealthPath string
-    Routes       []string
-    Status       string  // "healthy"|"unhealthy"|"unknown"
-    LatencyMs    int64
-    LastChecked, RegisteredAt time.Time
-    RequestCount atomic.Int64  // json:"-"
-    ErrorCount   atomic.Int64  // json:"-"
-}
-```
-
-**TopologyEdge:** `{From, To string}`
-
-**Gateway struct:** `sync.RWMutex` + `map[string]*ServiceEntry` + `map[string]*httputil.ReverseProxy` + edges `[]TopologyEdge` s vlastním `sync.RWMutex`
-
-**API:**
-```
-POST   /services        → registrovat, vrátit 201, automaticky přidat edge gateway-go→service
-GET    /services        → list se stats (atomic counters převést na int64 pro JSON)
-DELETE /services/{name} → 200 nebo 404
-GET    /health          → {"status":"ok","service":"gateway-go","uptime_s":N}
-GET    /stats           → map service→{request_count, error_count}
-GET    /topology        → {"edges":[...]}
-POST   /topology/edge   → přidat {from,to}, vrátit 201
-/*                      → reverse proxy
-```
-
-**Proxy logika:**
-- Path `/{service}/rest` → strip `/{service}` → forward `/rest`
-- `statusRecorder` wrapper pro zachytávání HTTP status kódu
-- 5xx → `svc.ErrorCount.Add(1)`
-
-**Health checker:** goroutine s `time.NewTicker(10s)`, pro každou službu spustit goroutinu → GET health URL → měřit latenci → nastavit Status
-
-**HTTP server:** `ReadTimeout:30s, WriteTimeout:60s, IdleTimeout:120s`
-
-**Dockerfile:** golang:1.22-alpine builder, alpine:3.19 runtime s curl, vlastní HEALTHCHECK
+**Kritická poznámka:** URL při registraci musí být Docker hostname, ne localhost:
+- contacts-cpp registruje: `url: "http://contacts-cpp:8080"`
+- search-rust registruje: `url: "http://search-rust:8081"` (z env `SELF_URL`)
+- bff-python registruje: `url: "http://bff-python:8989"`
 
 ---
 
-## 4. bff-python (FastAPI, port 8989)
+## Konfigurace (env proměnné)
 
-**pyproject.toml závislosti:** fastapi>=0.111, uvicorn[standard]>=0.29, httpx>=0.27
-
-**Dev závislosti:** pytest>=8.0, pytest-asyncio>=0.23
-
-**Env proměnné:**
-```python
-GATEWAY_URL  = os.getenv("GATEWAY_URL",  "http://localhost:9000")
-CONTACTS_URL = os.getenv("CONTACTS_URL", "http://localhost:8080")
-SEARCH_URL   = os.getenv("SEARCH_URL",   "http://localhost:8081")
-```
-
-**httpx.AsyncClient** — vytvořit v lifespan, zavřít při ukončení
-
-**Proxy helper `_proxy(request, url, **kwargs)`:**
-- Přeposlat method, body, headers (bez host a content-length)
-- Vrátit `Response(content, status_code, media_type)`
-
-**API:**
-```
-GET  /health              → {"status":"ok","service":"bff-python"}
-GET  /api/contacts?q=     → proxy → CONTACTS_URL/contacts
-POST /api/contacts        → proxy → CONTACTS_URL/contacts
-PUT  /api/contacts/{id}   → proxy → CONTACTS_URL/contacts/{id}
-DEL  /api/contacts/{id}   → proxy → CONTACTS_URL/contacts/{id}
-GET  /api/search?q=       → proxy → SEARCH_URL/search
-GET  /api/services        → proxy → GATEWAY_URL/services
-GET  /api/topology        → proxy → GATEWAY_URL/topology
-GET  /api/stats           → parallel fan-out (viz níže)
-/                         → StaticFiles html=True
-```
-
-**`/api/stats` — parallel fan-out:**
-```python
-async def _fetch_stats(name, base_url):
-    try:
-        r = await _client.get(f"{base_url}/stats", timeout=5.0)
-        return {"service": name, **(r.json() if r.status_code==200 else {})}
-    except Exception as exc:
-        return {"service": name, "error": str(exc)}
-
-targets = [("contacts-cpp", CONTACTS_URL), ("search-rust", SEARCH_URL), ("gateway-go", GATEWAY_URL)]
-results = await asyncio.gather(*[_fetch_stats(n, u) for n, u in targets])
-```
-
-**Lifespan registrace:**
-```python
-await _client.post(f"{GATEWAY_URL}/services", json={
-    "name": "bff-python",
-    "url": "http://bff-python:8989",
-    "health_path": "/health"
-})
-```
-
-**Dockerfile:** python:3.12-slim + apt install curl + pip install uv + uv sync --no-dev, CMD uvicorn na portu 8989
+| Služba | Proměnná | Default | Popis |
+|---|---|---|---|
+| contacts-cpp | `GATEWAY_URL` | `http://localhost:9000` | |
+| contacts-cpp | `SEARCH_URL` | `http://localhost:8081` | |
+| search-rust | `GATEWAY_URL` | `http://localhost:9000` | |
+| search-rust | `CONTACTS_URL` | `http://localhost:8080` | |
+| search-rust | `SELF_URL` | `http://localhost:8081` | **musí být Docker hostname v prod** |
+| bff-python | `GATEWAY_URL` | `http://localhost:9000` | |
+| bff-python | `CONTACTS_URL` | `http://localhost:8080` | |
+| bff-python | `SEARCH_URL` | `http://localhost:8081` | |
+| gateway-go | `CONTACTS_URL` | `http://localhost:8080` | pro health check |
+| gateway-go | `SEARCH_URL` | `http://localhost:8081` | pro health check |
 
 ---
 
-## 5. docker-compose.yml
+## Docker Compose — pořadí startu a závislosti
 
-```yaml
-services:
-  gateway-go:
-    ports: ["9000:9000"]
-    healthcheck: curl -f http://localhost:9000/health
-
-  contacts-cpp:
-    ports: ["8080:8080"]
-    env: GATEWAY_URL, SEARCH_URL
-    depends_on: gateway-go (healthy)
-    healthcheck: curl -f http://localhost:8080/health
-
-  search-rust:
-    ports: ["8081:8081"]
-    env: GATEWAY_URL, CONTACTS_URL, SELF_URL=http://search-rust:8081
-    depends_on: contacts-cpp (healthy)
-    healthcheck: curl -f http://localhost:8081/health
-
-  bff-python:
-    ports: ["8989:8989"]
-    env: GATEWAY_URL, CONTACTS_URL, SEARCH_URL
-    depends_on: gateway-go (healthy)
-    healthcheck: curl -f http://localhost:8989/health
-
-networks:
-  contacts-net: bridge
+```
+gateway-go      → žádná závislost, startuje první
+contacts-cpp    → čeká na gateway-go healthy
+search-rust     → čeká na contacts-cpp healthy (potřebuje data pro indexaci)
+bff-python      → čeká na gateway-go healthy
 ```
 
-Všechny healthchecky: `interval:10s, timeout:5s, retries:5, start_period:10s`
+Health check všech: `curl -f http://localhost:{port}/health`, interval 10s, retries 5, start_period 10s
+
+**Pozorovaný startup čas:** ~20s od `docker compose up` do všech healthy
 
 ---
 
-## 6. start.sh
+## Výkonnostní charakteristiky
 
-Bash skript který:
-1. Zkontroluje: docker nainstalován, daemon běží, docker compose dostupný
-2. Zkontroluje volné porty 8989/9000/8080/8081 (ss nebo lsof)
-3. Zkontroluje diskové místo (varuje pod 2 GB)
-4. Zastaví existující kontejnery (docker compose down --remove-orphans)
-5. Spustí build a start (docker compose up --build -d)
-6. Počká na healthy stav všech 4 služeb (max 120s, poll každé 3s)
-7. Curl ping na každý /health endpoint
-8. Vypíše URLs
+Naměřeno: 1000 req, 20 concurrent, Docker na localhostu
 
-Barevný výstup (ANSI escape kódy: zelená ✔, žlutá ⚠, červená ✘, cyan pro nadpisy)
+| Služba | Endpoint | req/s | p50 | p99 | p99.9 |
+|---|---|---|---|---|---|
+| contacts-cpp | GET /contacts | 1 499 | 3.4 ms | 453 ms | 497 ms |
+| search-rust | GET /search | 4 193 | 4.3 ms | 8.9 ms | 11.3 ms |
+| gateway-go | GET /health | ~4 000 | 2.3 ms | 4.3 ms | 5.7 ms |
+| bff-python | GET /api/stats | 186 | 56 ms | 87 ms | 110 ms |
+
+**Interpretace:**
+- contacts-cpp má vysoké p99 — `shared_mutex` pod contention, každá notifikace search-rust otevírá nové TCP spojení (bez connection pool)
+- search-rust je nejkonzistentnější — Rust async, žádný GC, `RwLock` efektivní pro read-heavy workload
+- bff-python /api/stats = `max(latence tří služeb)` + Python overhead
 
 ---
 
-## 7. Testy
+## Technologický stack a verze
+
+| Služba | Jazyk | Framework | Klíčové závislosti |
+|---|---|---|---|
+| contacts-cpp | C++20 | cpp-httplib v0.14.3 | nlohmann/json v3.11.3 |
+| search-rust | Rust (edition 2021) | Axum | tokio (full), reqwest, serde |
+| gateway-go | Go 1.22 | stdlib only | žádné externí |
+| bff-python | Python 3.12 | FastAPI ≥0.111 | httpx ≥0.27, uvicorn |
+
+---
+
+## Testy — co a jak se testuje
+
+### contacts-cpp — vlastní runner bez externích deps
+Testuje interní logiku přímo (ne HTTP):
+- `ContactStore`: add/get_all/get_by_id/update/remove, sort, filter, thread safety (10 vláken × 100 přidání)
+- `generate_uuid()`: délka, pozice pomlček, verze bit, variant bit, unikátnost
+- JSON round-trip: `contact_from_json` → `contact_to_json` zachovává vše
+
+### search-rust — cargo test (#[cfg(test)])
+- Unit: tokenize, prázdný dotaz, exact match, prefix match, váhy, rebuild
+- Handler: přes `tower::ServiceExt::oneshot` (bez síťového volání)
+
+### gateway-go — go test (net/http/httptest)
+- Každý test vytvoří izolovaný gateway (`newTestGateway()`)
+- Proxy test: `httptest.NewServer` jako fake backend
 
 ### bff-python — pytest
-Mockovat httpx přes vlastní `_AsyncMockTransport`, testovat všechny API endpointy bez síťového volání.
-
-### gateway-go — go test
-`newTestGateway()` helper pro izolovaný gateway, `httptest.NewServer` jako fake backend pro proxy test.
-
-### search-rust — cargo test
-Unit testy `SearchIndex` (tokenize, exact/prefix match, váhy, rebuild). Handler testy přes `tower::ServiceExt::oneshot`.
-
-### contacts-cpp — vlastní runner
-Vlastní assert makra bez externích závislostí. Testovat ContactStore (CRUD, sort, filter, thread safety), UUID, JSON round-trip.
+- Mockuje `httpx.AsyncClient` přes vlastní `_AsyncMockTransport`
+- Testuje všechny proxy routes, stats fan-out, error handling
 
 ---
 
-## 8. .gitignore
+## Známé limitace a gotchas
 
-```
-.venv/, __pycache__/, uv.lock
-build/, *.o
-services/search-rust/target/
-services/gateway-go/gateway-go
-.claude/settings.local.json
-```
+1. **In-memory only** — restart kontejneru = ztráta dat (seed data se načtou znovu)
+2. **Search index není perzistentní** — při restartu search-rust se stáhnou data z contacts-cpp a přeindexují
+3. **Notifikace search je best-effort** — pokud search-rust není dostupný při zápisu, index zaostane
+4. **contacts-cpp p99 latence** — bez HTTP connection pool pro notifikace search
+5. **Žádná autentizace** — API je zcela otevřené
+6. **bff-python /api/stats latence = max(3 backendy)** — jedna pomalá služba zpomalí celý endpoint
 
 ---
 
-## Poznámky k implementaci
+## Soubory ke vzniku (kompletní seznam)
 
-- contacts-cpp notifikuje search přes detached thread — ignorovat chyby
-- search-rust registruje se s URL `http://search-rust:8081` (Docker hostname), ne localhost
-- bff-python registruje se s `http://bff-python:8989` (ne 8000)
-- gateway proxy: `GET /contacts/xyz` → service="contacts", forward path="/xyz"
-- BFF volá contacts-cpp a search-rust přímo (CONTACTS_URL/SEARCH_URL), ne přes gateway proxy
-- gateway přidá automaticky TopologyEdge `gateway-go→service` při každé registraci
+```
+.gitignore
+README.md
+ARCHITECTURE.md
+start.sh                              (bash, kontrola prerekvizit + spuštění)
+services/docker-compose.yml
+services/contacts-cpp/Dockerfile
+services/contacts-cpp/CMakeLists.txt
+services/contacts-cpp/src/main.cpp
+services/contacts-cpp/src/test_contacts.cpp
+services/search-rust/Dockerfile
+services/search-rust/Cargo.toml
+services/search-rust/src/main.rs     (testy inline v #[cfg(test)])
+services/gateway-go/Dockerfile
+services/gateway-go/go.mod
+services/gateway-go/main.go
+services/gateway-go/main_test.go
+services/bff-python/Dockerfile
+services/bff-python/pyproject.toml
+services/bff-python/app/main.py
+services/bff-python/app/static/index.html
+services/bff-python/tests/__init__.py
+services/bff-python/tests/test_main.py
+```
