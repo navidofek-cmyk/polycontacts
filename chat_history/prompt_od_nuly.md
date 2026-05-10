@@ -5,6 +5,49 @@
 
 ---
 
+## 0. Claude Code konfigurace pro tento projekt
+
+Před zahájením práce nastavit Claude Code pro autonomní a parallelní práci.
+
+### `.claude/settings.local.json` (projektová, negitovat)
+```json
+{
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  }
+}
+```
+`bypassPermissions` — Claude nečeká na potvrzení před každým příkazem. Nutné pro plynulou autonomní práci. Nastavuje se pouze lokálně (settings.local.json), ne globálně.
+
+### Globální `~/.claude/settings.json`
+```json
+{
+  "model": "sonnet",
+  "skipDangerousModePermissionPrompt": true
+}
+```
+
+### Jak zadat práci pro parallelní agenty
+Claude Code podporuje spuštění více agentů paralelně. Pro velké úkoly (např. testy pro 4 různé služby najednou) formulovat prompt takto:
+
+```
+Spusť 4 agenty paralelně — každý napíše testy pro jednu službu:
+- Agent 1: pytest testy pro bff-python (mock httpx)
+- Agent 2: go test pro gateway-go (httptest)
+- Agent 3: cargo test pro search-rust (tower::oneshot)
+- Agent 4: vlastní C++ runner pro contacts-cpp
+```
+
+Claude pak spustí všechny najednou přes `Agent()` tool a počká na výsledky.
+
+### Efektivní prompty pro tento projekt
+Místo: *"napiš testy"*
+Napsat: *"napiš pytest testy pro FastAPI BFF — mockuj httpx přes vlastní transport, testuj všechny /api/* endpointy, spusť `uv run pytest -v` a oprav chyby"*
+
+Klíčové: zahrnout **jak spustit** a **co opravit při chybě** — agent pak pracuje autonomně bez dotazů.
+
+---
+
 ## Pozorované chování systému (black box)
 
 ### Vstupní bod
