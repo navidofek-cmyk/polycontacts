@@ -526,6 +526,8 @@ const API = '';
 // ---------------------------------------------------------------------------
 // Tab switching
 // ---------------------------------------------------------------------------
+// Aktivuje vybraný panel a okamžitě načte jeho data, aby uživatel neviděl
+// prázdnou tabulku ani při prvním zobrazení záložky.
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach((b, i) => {
     const names = ['contacts','search','services','stats','topology','database','schema'];
@@ -545,16 +547,21 @@ function switchTab(name) {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+// Překládá interní enum hodnoty kategorie na česká popisky zobrazovaná v UI.
 function labelCat(c) {
   return { Friend: 'Přátelé', Work: 'Práce', Family: 'Rodina', Other: 'Ostatní' }[c] ?? c;
 }
 
+// Mapuje stav health-checku na CSS třídu, aby barva okamžitě signalizovala
+// problém bez nutnosti číst text.
 function statusBadge(s) {
   const cls = s === 'healthy' ? 'status-healthy' : s === 'unhealthy' ? 'status-unhealthy' : 'status-unknown';
   const label = s === 'healthy' ? 'healthy' : s === 'unhealthy' ? 'unhealthy' : 'unknown';
   return `<span class="status-badge ${cls}">${label}</span>`;
 }
 
+// Formátuje ISO timestamp do čitelného času; návrat surového řetězce zajistí,
+// že nestandardní formáty z různých backendů nezpůsobí prázdné políčko.
 function fmtTime(ts) {
   if (!ts) return '—';
   try { return new Date(ts).toLocaleTimeString('cs-CZ'); } catch { return ts; }
@@ -563,6 +570,7 @@ function fmtTime(ts) {
 // ---------------------------------------------------------------------------
 // Contacts
 // ---------------------------------------------------------------------------
+// Načte kontakty odpovídající aktuálnímu obsahu vyhledávacího pole a překreslí tabulku.
 async function loadContacts() {
   const q = document.getElementById('contacts-search').value;
   try {
@@ -583,6 +591,7 @@ async function loadContacts() {
   }
 }
 
+// Vyžádá potvrzení před smazáním, aby se předešlo nechtěnému odstranění záznamu.
 async function delContact(encodedName) {
   const name = decodeURIComponent(encodedName);
   if (!confirm(`Smazat "${name}"?`)) return;
@@ -593,8 +602,11 @@ async function delContact(encodedName) {
 function openModal()  { document.getElementById('modal').classList.add('open'); }
 function closeModal() { document.getElementById('modal').classList.remove('open'); }
 
+// Serializuje formulář do JSON a odešle POST na API; po uložení vyčistí pole
+// a znovu načte seznam, aby se nový záznam ihned objevil v tabulce.
 async function addContact() {
   const phone = document.getElementById('m-phone').value.trim();
+  // Rozdělení na první ':' umožňuje čísla jako „mobil:+420 601:111" beze ztráty dat.
   const phones = phone
     ? [{ label: phone.split(':')[0], number: phone.split(':').slice(1).join(':').trim() }]
     : [];
@@ -619,6 +631,7 @@ async function addContact() {
 // ---------------------------------------------------------------------------
 // Search
 // ---------------------------------------------------------------------------
+// Odešle dotaz do search-rust a normalizuje různé formáty odpovědí na jednotné pole.
 async function doSearch() {
   const q = document.getElementById('search-input').value;
   try {
@@ -648,6 +661,7 @@ document.getElementById('search-input').addEventListener('keydown', e => {
 // ---------------------------------------------------------------------------
 // Services
 // ---------------------------------------------------------------------------
+// Načte aktuální stav všech registrovaných služeb z gateway a zobrazí jejich health.
 async function loadServices() {
   try {
     const res = await fetch(`${API}/api/services`);
@@ -668,7 +682,11 @@ async function loadServices() {
   }
 }
 
-// Auto-refresh services every 10s when tab is active
+// Auto-refresh: polling každých 10 s zajistí, že uživatel vidí aktuální health
+// stav bez nutnosti manuálně obnovovat stránku — gateway sama provádí health
+// check každých 10 s, takže tato frekvence zachytí změnu prakticky okamžitě.
+// Refresh probíhá pouze pokud je záložka viditelná, aby zbytečně nezatěžoval
+// backend při práci v jiné záložce.
 let servicesTimer = null;
 function startServicesRefresh() {
   if (servicesTimer) return;
@@ -683,6 +701,8 @@ startServicesRefresh();
 // ---------------------------------------------------------------------------
 // Stats
 // ---------------------------------------------------------------------------
+// Zobrazí provozní statistiky ze všech backendů; BFF je sbírá paralelně,
+// takže latence odpovědi závisí na nejpomalejším backendu, ne na jejich součtu.
 async function loadStats() {
   try {
     const res = await fetch(`${API}/api/stats`);
@@ -702,6 +722,8 @@ async function loadStats() {
   }
 }
 
+// Převádí sekundy na čitelný formát; řetězcové hodnoty prochází beze změny,
+// protože různé backendy vrací uptime různými způsoby (číslo vs. "2h 5m").
 function fmtUptime(val) {
   if (val == null) return '—';
   if (typeof val === 'string') return val;
@@ -715,6 +737,7 @@ function fmtUptime(val) {
 // ---------------------------------------------------------------------------
 // Topology
 // ---------------------------------------------------------------------------
+// Načte hrany grafu závislostí z gateway a předá je jak tabulce, tak SVG diagramu.
 async function loadTopology() {
   try {
     const res = await fetch(`${API}/api/topology`);
@@ -743,6 +766,8 @@ async function loadTopology() {
   }
 }
 
+// Dynamicky generuje SVG graf topologie ze seznamu hran; uzly rozmístí rovnoměrně
+// do jedné horizontální řady — jednoduchý layout vhodný pro malý počet služeb.
 function renderTopoDiagram(edges) {
   const el = document.getElementById('topology-diagram');
   if (!edges.length) { el.textContent = ''; return; }
@@ -753,7 +778,8 @@ function renderTopoDiagram(edges) {
     e.to ?? e.target ?? e.dst ?? '?',
   ]))];
 
-  // Build SVG diagram
+  // viewBox "0 0 W H" odděluje vnitřní souřadnicový systém SVG od jeho CSS rozměrů,
+  // takže diagram zůstane čitelný i při různých velikostech obrazovky bez přepočtu pozic.
   const W = 600, H = 200;
   const cx = W / (nodes.length + 1);
   const cy = H / 2;
@@ -766,8 +792,11 @@ function renderTopoDiagram(edges) {
     const dst = e.to ?? e.target ?? e.dst ?? '?';
     const p1 = positions[src], p2 = positions[dst];
     if (!p1 || !p2) return '';
-    // Offset y slightly for curves
+    // Kubická kontrolní točka nad středem hrany vytváří oblouk, díky němuž
+    // jsou souběžné hrany vizuálně odlišitelné a nepřekrývají uzly.
     const mx = (p1.x + p2.x) / 2, my = cy - 40;
+    // marker-end odkazuje na <marker id="arrow"> definovaný v <defs>; šipka se
+    // automaticky otočí podle směru hrany díky orient="auto".
     return `<path d="M${p1.x},${p1.y} Q${mx},${my} ${p2.x},${p2.y}"
       fill="none" stroke="#7c3aed" stroke-width="2" marker-end="url(#arrow)"/>`;
   }).join('\n');
@@ -793,6 +822,8 @@ function renderTopoDiagram(edges) {
 // ---------------------------------------------------------------------------
 // Database tables
 // ---------------------------------------------------------------------------
+// Zobrazí raw obsah PostgreSQL tabulek pro rychlou diagnostiku bez nutnosti
+// přistupovat přímo k databázi.
 async function loadDb() {
   try {
     const res = await fetch(`${API}/api/db`);
@@ -829,29 +860,44 @@ async function loadDb() {
 // ---------------------------------------------------------------------------
 // Schema — zoom + pan
 // ---------------------------------------------------------------------------
+// Stav transformace diagramu je uložen v proměnných mimo DOM, protože
+// čtení zpět z CSS transform by vyžadovalo parsování matice — zbytečná složitost.
 let schemaScale = 1, schemaTx = 60, schemaTy = 60;
 let schemaDragging = false, schemaDragStart = null;
 
+// Aplikuje aktuální zoom a posun na canvas element pomocí CSS transform.
+// transform-origin:0 0 je klíčové: škálování probíhá od levého horního rohu,
+// takže schemaTx/schemaTy odpovídají pixelům v souřadnicovém systému viewportu
+// a není nutné přepočítávat střed pro každý zoom krok.
 function applySchemaTransform() {
   document.getElementById('schema-canvas').style.transform =
+    // Translate je dělen scale, protože CSS transform aplikuje operace zprava
+    // doleva (nejprve scale, pak translate) — dělení scale kompenzuje toto pořadí.
     `scale(${schemaScale}) translate(${schemaTx / schemaScale}px, ${schemaTy / schemaScale}px)`;
 }
 
+// Nastaví novou úroveň přiblížení s tvrdými limity, aby diagram zůstal použitelný.
 function schemaZoom(factor) {
   schemaScale = Math.min(3, Math.max(0.3, schemaScale * factor));
   applySchemaTransform();
 }
 
+// Vrátí diagram do výchozí polohy s mírným odsazením od krajů viewportu.
 function schemaReset() {
   schemaScale = 1; schemaTx = 60; schemaTy = 60;
   applySchemaTransform();
 }
 
+// Inicializuje ovládání zoom/pan jednou při prvním zobrazení záložky.
+// Flag _schemaInit brání opakované registraci event listenerů při přepínání záložek,
+// což by způsobovalo exponenciálně rostoucí počet handlerů na window.
 function initSchema() {
   const vp = document.getElementById('schema-viewport');
   if (vp._schemaInit) return;
   vp._schemaInit = true;
 
+  // passive:false je nutné, aby bylo možné volat e.preventDefault() a zabránit
+  // scrollování stránky při zoom gestu nad diagramem.
   vp.addEventListener('wheel', e => {
     e.preventDefault();
     schemaZoom(e.deltaY < 0 ? 1.1 : 0.9);
@@ -859,9 +905,13 @@ function initSchema() {
 
   vp.addEventListener('mousedown', e => {
     schemaDragging = true;
+    // Uložení offsetu od aktuální pozice umožňuje výpočet nové polohy canvas
+    // v každém mousemove bez akumulace numerické chyby.
     schemaDragStart = { x: e.clientX - schemaTx, y: e.clientY - schemaTy };
     vp.style.cursor = 'grabbing';
   });
+  // Listener na window (ne vp) zachytí pohyb myši i tehdy, když uživatel táhne
+  // rychleji než překreslování a kurzor dočasně opustí viewport.
   window.addEventListener('mousemove', e => {
     if (!schemaDragging) return;
     schemaTx = e.clientX - schemaDragStart.x;

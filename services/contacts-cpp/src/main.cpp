@@ -24,11 +24,18 @@ using json = nlohmann::json;
 // ---------------------------------------------------------------------------
 // UUID generator
 // ---------------------------------------------------------------------------
+
+// Generuje UUID verze 4 (náhodný) bez závislosti na OS nebo externích knihovnách.
+// RFC 4122 vyžaduje specifické bity: verze (4) v nibble 13, varianta (8-9-a-b) v nibble 17.
+// Mersenne Twister (mt19937) je dostatečně kvalitní PRNG pro identifikátory —
+// kryptografická bezpečnost zde není potřeba.
 static std::string generate_uuid() {
+    // static = sdílené přes všechna volání, inicializované jen jednou (thread-safe v C++11+)
     static std::random_device rd;
     static std::mt19937 gen(rd());
     static std::uniform_int_distribution<uint32_t> dist(0, 0xFFFFFFFF);
 
+    // Převádí náhodné 32bitové číslo na hex řetězec o `nibbles` znacích (nibble = 4 bity = 1 hex znak)
     auto hex = [&](int nibbles) {
         uint32_t val = dist(gen);
         std::string s;
@@ -40,8 +47,12 @@ static std::string generate_uuid() {
         return s;
     };
 
+    // Verze 4: horní nibble nastavíme na 0100 (= 0x4xxx)
     uint32_t v = (dist(gen) & 0x0FFF) | 0x4000;
+    // Varianta RFC 4122: dva horní bity nastavíme na 10 (= 0x8xxx–0xBxxx)
     uint32_t r = (dist(gen) & 0x3FFF) | 0x8000;
+
+    // Stejná hexkonverze jako `hex`, ale bez closure přes dist (používá hotovou hodnotu)
     auto h = [](uint32_t x, int n) {
         std::string s;
         for (int i = n - 1; i >= 0; --i) {
@@ -51,18 +62,24 @@ static std::string generate_uuid() {
         return s;
     };
 
+    // Formát UUID: 8-4-4-4-12 hexadecimálních znaků oddělených pomlčkami
     return hex(8) + "-" + hex(4) + "-" + h(v, 4) + "-" + h(r, 4) + "-" + hex(8) + hex(4);
 }
 
 // ---------------------------------------------------------------------------
 // Data model
 // ---------------------------------------------------------------------------
+
+// Telefonní číslo s popiskem (např. "mobil", "work")
 struct PhoneNumber { std::string label, number; };
+
+// Jeden kontakt; `phones` je 1:N vztah (více čísel na kontakt)
 struct Contact {
     std::string id, first_name, last_name, email, category;
     std::vector<PhoneNumber> phones;
 };
 
+// Serializuje kontakt do JSON objektu pro odpovědi API
 static json contact_to_json(const Contact& c) {
     json phones = json::array();
     for (const auto& p : c.phones)
@@ -71,6 +88,8 @@ static json contact_to_json(const Contact& c) {
             {"email", c.email}, {"phones", phones}, {"category", c.category}};
 }
 
+// Deserializuje kontakt z JSON; pokud `id` není předáno, vygeneruje nové UUID.
+// `j.value(key, default)` vrátí default místo výjimky, pokud klíč chybí.
 static Contact contact_from_json(const json& j, const std::string& id = "") {
     Contact c;
     c.id         = id.empty() ? j.value("id", generate_uuid()) : id;
@@ -87,13 +106,18 @@ static Contact contact_from_json(const json& j, const std::string& id = "") {
 // ---------------------------------------------------------------------------
 // PostgreSQL connection pool
 // ---------------------------------------------------------------------------
+
+// Sdílený pool připojení k databázi — otevírání nového spojení trvá desítky ms,
+// proto je výrazně rychlejší recyklovat existující připojení mezi požadavky.
 class ConnPool {
     std::string dsn_;
-    mutable std::mutex mtx_;
-    mutable std::condition_variable cv_;
+    mutable std::mutex mtx_;               // chrání přístup k `pool_` z více vláken
+    mutable std::condition_variable cv_;   // probouzí čekající vlákna když se připojení vrátí
     mutable std::queue<std::unique_ptr<pqxx::connection>> pool_;
 
 public:
+    // RAII guard: při zániku objektu automaticky vrátí připojení zpět do poolu.
+    // Díky tomu se na `release()` nemusí explicitně pamatovat ani v cestách s výjimkou.
     struct Guard {
         ConnPool* pool;
         std::unique_ptr<pqxx::connection> conn;
@@ -101,11 +125,14 @@ public:
         pqxx::connection& get() { return *conn; }
     };
 
+    // Vytvoří `n` připojení dopředu — typicky 8 odpovídá počtu HTTP worker vláken
     ConnPool(const std::string& dsn, size_t n = 8) : dsn_(dsn) {
         for (size_t i = 0; i < n; ++i)
             pool_.push(std::make_unique<pqxx::connection>(dsn));
     }
 
+    // Vyzvedne jedno volné připojení; pokud žádné není, zablokuje vlákno dokud se neuvolní.
+    // `unique_lock` + `cv_.wait` je standardní C++ vzor pro čekání na podmínku bez busy-loop.
     Guard acquire() const {
         std::unique_lock lk(mtx_);
         cv_.wait(lk, [this] { return !pool_.empty(); });
@@ -114,6 +141,8 @@ public:
         return Guard{const_cast<ConnPool*>(this), std::move(c)};
     }
 
+    // Vrátí připojení do poolu a probudí jedno čekající vlákno (notify_one = probudí jen jedno,
+    // což je efektivnější než notify_all, protože stejně může pokračovat jen jedno)
     void release(std::unique_ptr<pqxx::connection> c) const {
         std::unique_lock lk(mtx_);
         pool_.push(std::move(c));
@@ -124,19 +153,26 @@ public:
 // ---------------------------------------------------------------------------
 // ContactStore — PostgreSQL backed
 // ---------------------------------------------------------------------------
+
+// Datová vrstva aplikace: všechny operace s kontakty jdou přes tuto třídu.
+// Interně používá ConnPool, takže je bezpečná pro volání z více vláken zároveň.
 class ContactStore {
     ConnPool pool_;
 
+    // Převede jeden databázový řádek na struct Contact (bez telefonních čísel)
     static Contact row_to_contact(const pqxx::row& r) {
         Contact c;
         c.id         = r["id"].as<std::string>();
         c.first_name = r["first_name"].as<std::string>();
         c.last_name  = r["last_name"].as<std::string>();
+        // email může být NULL v DB — is_null() guard zabrání výjimce při konverzi
         c.email      = r["email"].is_null() ? "" : r["email"].as<std::string>();
         c.category   = r["category"].as<std::string>();
         return c;
     }
 
+    // Donačte telefonní čísla pro daný kontakt v rámci existující transakce.
+    // Separátní dotaz (místo JOIN) zjednodušuje mapování 1:N na straně C++.
     void load_phones(pqxx::work& tx, Contact& c) const {
         auto pr = tx.exec_params(
             "SELECT label, number FROM phone_numbers WHERE contact_id = $1 ORDER BY id",
@@ -145,6 +181,7 @@ class ContactStore {
             c.phones.push_back({r[0].as<std::string>(), r[1].as<std::string>()});
     }
 
+    // Vloží telefonní čísla pro kontakt; volá se uvnitř transakce přidání/aktualizace
     void insert_phones(pqxx::work& tx, const std::string& id,
                        const std::vector<PhoneNumber>& phones) {
         for (const auto& p : phones)
@@ -154,6 +191,8 @@ class ContactStore {
     }
 
 public:
+    // Připojí se k databázi, vytvoří tabulky pokud neexistují a načte seed data.
+    // Konstruktor blokuje dokud DB není připravena — záměrně, aplikace nemá smysl bez DB.
     explicit ContactStore(const std::string& dsn) : pool_(dsn) {
         auto g = pool_.acquire();
         pqxx::work tx(g.get());
@@ -174,7 +213,7 @@ public:
             CREATE INDEX IF NOT EXISTS idx_contacts_sort ON contacts(last_name, first_name);
         )SQL");
 
-        // seed pokud je prázdné
+        // Seed pokud je tabulka prázdná — zajistí že demo prostředí má s čím pracovat
         auto cnt = tx.exec1("SELECT COUNT(*) FROM contacts")[0].as<int>();
         if (cnt == 0) {
             auto seed = [&](const char* fn, const char* ln, const char* email,
@@ -200,6 +239,7 @@ public:
         tx.commit();
     }
 
+    // Přidá nový kontakt do DB (včetně telefonních čísel) v jedné transakci
     void add(const Contact& c) {
         auto g = pool_.acquire();
         pqxx::work tx(g.get());
@@ -210,6 +250,8 @@ public:
         tx.commit();
     }
 
+    // Vrátí všechny kontakty; pokud je `q` neprázdné, filtruje full-text LIKE přes více polí.
+    // Vyhledávání probíhá na straně DB (ne v C++), aby byl přenos dat minimální.
     std::vector<Contact> get_all(const std::string& q = "") const {
         auto g = pool_.acquire();
         pqxx::work tx(g.get());
@@ -219,6 +261,7 @@ public:
                 "SELECT id,first_name,last_name,email,category FROM contacts "
                 "ORDER BY last_name, first_name");
         } else {
+            // Konkatenace polí do jednoho řetězce před LIKE — hledá i přes hranice polí
             rows = tx.exec_params(
                 "SELECT id,first_name,last_name,email,category FROM contacts "
                 "WHERE lower(first_name||' '||last_name||' '||coalesce(email,'')||' '||category) "
@@ -235,6 +278,8 @@ public:
         return result;
     }
 
+    // Vrátí kontakt podle ID; `std::optional` vyjadřuje že kontakt nemusí existovat
+    // — čistší než výjimka nebo speciální "prázdný" Contact s id=""
     std::optional<Contact> get_by_id(const std::string& id) const {
         auto g = pool_.acquire();
         pqxx::work tx(g.get());
@@ -247,19 +292,21 @@ public:
         return c;
     }
 
+    // Aktualizuje kontakt; telefony se nejdřív smažou a vloží znovu — jednodušší než diff
     bool update(const std::string& id, const Contact& u) {
         auto g = pool_.acquire();
         pqxx::work tx(g.get());
         auto r = tx.exec_params(
             "UPDATE contacts SET first_name=$2,last_name=$3,email=$4,category=$5 WHERE id=$1",
             id, u.first_name, u.last_name, u.email, u.category);
-        if (r.affected_rows() == 0) return false;
+        if (r.affected_rows() == 0) return false;   // kontakt s tímto ID neexistuje
         tx.exec_params0("DELETE FROM phone_numbers WHERE contact_id=$1", id);
         insert_phones(tx, id, u.phones);
         tx.commit();
         return true;
     }
 
+    // Smaže kontakt; ON DELETE CASCADE v DB se postará o smazání telefonních čísel
     bool remove(const std::string& id) {
         auto g = pool_.acquire();
         pqxx::work tx(g.get());
@@ -269,18 +316,28 @@ public:
     }
 
     // ── Fuzzy dedup ───────────────────────────────────────────────────────
+
+    // Levenshteinova vzdálenost: minimální počet jednoznakových operací (vložení,
+    // smazání, nahrazení) pro převod řetězce `a` na `b`.
+    // Algoritmus používá dynamické programování — dp[i][j] = vzdálenost prefixů a[0..i] a b[0..j].
+    // Časová i paměťová složitost je O(m*n), kde m,n jsou délky řetězců.
     static int levenshtein(const std::string& a, const std::string& b) {
         size_t m = a.size(), n = b.size();
         std::vector<std::vector<int>> dp(m+1, std::vector<int>(n+1));
+        // Základní případ: převod na/z prázdného řetězce = počet znaků
         for (size_t i = 0; i <= m; ++i) dp[i][0] = i;
         for (size_t j = 0; j <= n; ++j) dp[0][j] = j;
         for (size_t i = 1; i <= m; ++i)
             for (size_t j = 1; j <= n; ++j)
+                // Pokud znaky jsou stejné, nepřidáváme žádnou operaci;
+                // jinak vezmeme minimum ze tří operací (smazání, vložení, nahrazení)
                 dp[i][j] = (a[i-1] == b[j-1]) ? dp[i-1][j-1]
                           : 1 + std::min({dp[i-1][j], dp[i][j-1], dp[i-1][j-1]});
         return dp[m][n];
     }
 
+    // Převede Levenshteinovu vzdálenost na podobnost v rozsahu [0.0, 1.0].
+    // Normalizuje délkou delšího jména, takže krátká i dlouhá jména jsou srovnatelná.
     static double name_similarity(const Contact& a, const Contact& b) {
         auto norm = [](std::string s) {
             std::transform(s.begin(), s.end(), s.begin(), ::tolower);
@@ -293,6 +350,9 @@ public:
         return maxlen == 0 ? 1.0 : 1.0 - (double)dist / maxlen;
     }
 
+    // Najde potenciální duplikáty — dvojice kontaktů jejichž podobnost jmen překračuje `threshold`.
+    // Porovnává každou dvojici jednou (j > i), tedy O(n²) — pro velké adresáře by bylo potřeba
+    // efektivnější přístup (např. blocking nebo LSH).
     json dedup(double threshold) const {
         auto contacts = get_all();
         std::vector<json> pairs;
@@ -303,10 +363,12 @@ public:
                     pairs.push_back({
                         {"contact_a",  contact_to_json(contacts[i])},
                         {"contact_b",  contact_to_json(contacts[j])},
+                        // round*1000/1000 zaokrouhlí na 3 desetinná místa bez závislosti na printf formátu
                         {"similarity", std::round(sim * 1000) / 1000},
                     });
             }
         }
+        // std::ranges::sort (C++20): přehlednější zápis než std::sort s iterátory
         std::ranges::sort(pairs, [](const json& a, const json& b) {
             return a["similarity"].get<double>() > b["similarity"].get<double>();
         });
@@ -314,6 +376,8 @@ public:
     }
 
     // ── Analytics ─────────────────────────────────────────────────────────
+
+    // Sestaví agregované statistiky adresáře v jednom průchodu přes kontakty
     json analytics() const {
         auto contacts = get_all();
 
@@ -326,13 +390,13 @@ public:
             } else {
                 auto at = c.email.find('@');
                 if (at != std::string::npos)
-                    domains[c.email.substr(at + 1)]++;
+                    domains[c.email.substr(at + 1)]++;   // část za @ = doména
             }
             for (const auto& p : c.phones)
                 phone_labels[p.label]++;
         }
 
-        // top domains sorted desc
+        // Top 10 domén sestupně — std::views::take (C++20 ranges) efektivně ořízne bez kopírování
         std::vector<std::pair<std::string,int>> dom_vec(domains.begin(), domains.end());
         std::ranges::sort(dom_vec, [](const auto& a, const auto& b){ return a.second > b.second; });
         json top_domains = json::array();
@@ -349,12 +413,16 @@ public:
     }
 
     // ── vCard export ──────────────────────────────────────────────────────
+
+    // Exportuje všechny kontakty ve formátu vCard 3.0 (RFC 2426).
+    // Oddělovač řádků je \r\n (CRLF) — vyžaduje to standard vCard.
     std::string export_vcard() const {
         auto contacts = get_all();
         std::ostringstream out;
         for (const auto& c : contacts) {
             out << "BEGIN:VCARD\r\nVERSION:3.0\r\n";
             out << "FN:" << c.first_name << " " << c.last_name << "\r\n";
+            // N: pole má formát Příjmení;Jméno;Prostřední;Titul;Suffix — prázdné části = ;;;
             out << "N:" << c.last_name << ";" << c.first_name << ";;;\r\n";
             if (!c.email.empty())
                 out << "EMAIL;TYPE=INTERNET:" << c.email << "\r\n";
@@ -369,6 +437,9 @@ public:
     }
 
     // ── vCard import ──────────────────────────────────────────────────────
+
+    // Parsuje vCard data (mohou obsahovat více karet) a uloží kontakty do DB.
+    // Jednoduchý stavový stroj: přepíná mezi stavem "uvnitř karty" a "mimo kartu".
     int import_vcard(const std::string& data) {
         int imported = 0;
         std::istringstream ss(data);
@@ -376,6 +447,7 @@ public:
         Contact current;
         bool in_card = false;
 
+        // Odstraní bílé znaky z obou konců řetězce — nutné kvůli \r na konci řádků a mezerám
         auto trim = [](std::string s) {
             s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char c){ return !std::isspace(c); }));
             s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char c){ return !std::isspace(c); }).base(), s.end());
@@ -383,7 +455,7 @@ public:
         };
 
         while (std::getline(ss, line)) {
-            if (!line.empty() && line.back() == '\r') line.pop_back();
+            if (!line.empty() && line.back() == '\r') line.pop_back();  // normalizace CRLF → LF
             line = trim(line);
             if (line == "BEGIN:VCARD") {
                 current = Contact{};
@@ -391,7 +463,9 @@ public:
                 current.category = "Other";
                 in_card = true;
             } else if (line == "END:VCARD" && in_card) {
+                // Kontakt je platný jen pokud má alespoň jedno jméno
                 if (!current.first_name.empty() || !current.last_name.empty()) {
+                    // Fallback: pokud chybí křestní jméno, použijeme příjmení jako celé jméno
                     if (current.first_name.empty()) current.first_name = current.last_name;
                     add(current);
                     imported++;
@@ -399,10 +473,11 @@ public:
                 in_card = false;
             } else if (in_card) {
                 auto colon = line.find(':');
-                if (colon == std::string::npos) continue;
+                if (colon == std::string::npos) continue;   // přeskočíme nerozpoznané řádky
                 std::string key = line.substr(0, colon);
                 std::string val = trim(line.substr(colon + 1));
                 if (key == "FN") {
+                    // FN = celé zobrazované jméno; rozdělíme na první slovo a zbytek
                     auto sp = val.find(' ');
                     if (sp != std::string::npos) {
                         current.first_name = val.substr(0, sp);
@@ -413,6 +488,7 @@ public:
                 } else if (key.starts_with("EMAIL")) {
                     current.email = val;
                 } else if (key.starts_with("TEL")) {
+                    // Popisek telefonu je zakódovaný v klíči, např. "TEL;TYPE=mobil"
                     std::string label = "tel";
                     auto type_pos = key.find("TYPE=");
                     if (type_pos != std::string::npos)
@@ -426,6 +502,7 @@ public:
         return imported;
     }
 
+    // Vrátí surová data obou tabulek (contacts + phone_numbers) — pro debugging a admin UI
     json raw_tables() const {
         auto g = pool_.acquire();
         pqxx::work tx(g.get());
@@ -457,21 +534,27 @@ public:
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+// Přečte proměnnou prostředí, nebo vrátí výchozí hodnotu — bez try/catch díky getenv API
 static std::string env_or(const char* name, const char* fallback) {
     const char* v = std::getenv(name);
     return v ? v : fallback;
 }
 
+// Nastaví HTTP status a tělo odpovědi jako JSON — centralizováno aby se Content-Type neopakoval
 static void json_response(httplib::Response& res, int status, const json& body) {
     res.status = status;
     res.set_content(body.dump(), "application/json");
 }
 
+// Asynchronně notifikuje search službu o novém/upraveném kontaktu.
+// Detached thread: nechceme blokovat HTTP odpověď kvůli pomalé síti; pokud notifikace selže,
+// ignorujeme to — search index je "best effort", ne kritická data.
 static void notify_search(const std::string& search_url, const Contact& c) {
     std::thread([search_url, c] {
         try {
             httplib::Client cli(search_url);
-            cli.set_connection_timeout(2);
+            cli.set_connection_timeout(2);   // krátký timeout: search je best-effort
             cli.set_read_timeout(2);
             auto body = contact_to_json(c).dump();
             cli.Post("/index", body, "application/json");
@@ -479,6 +562,7 @@ static void notify_search(const std::string& search_url, const Contact& c) {
     }).detach();
 }
 
+// Pokusí se zaregistrovat u API gateway s opakováním — gateway se může startovat souběžně
 static void register_with_gateway(const std::string& gateway_url) {
     json reg = {{"name", "contacts"}, {"url", "http://contacts-cpp:8080"}, {"health_path", "/health"}};
     for (int i = 1; i <= 5; ++i) {
@@ -512,27 +596,35 @@ int main() {
     ContactStore store(db_url);
     std::cout << "[contacts-cpp] database ready\n";
 
+    // std::atomic zajišťuje thread-safe čítání bez mutex zámku — vhodné pro čítače které
+    // se pouze inkrementují z více vláken
     std::atomic<uint64_t> req_count{0}, err_count{0};
     const auto start_time = std::chrono::steady_clock::now();
 
+    // Registrace probíhá v odděleném vlákně po 1s — dáme serveru čas spustit se dříve
+    // než gateway pošle health check. Detach = nepotřebujeme čekat na výsledek.
     std::thread([gateway_url] {
         std::this_thread::sleep_for(std::chrono::seconds(1));
         register_with_gateway(gateway_url);
     }).detach();
 
     httplib::Server svr;
+    // Thread pool s 8 vlákny = paralelní zpracování požadavků; odpovídá velikosti DB poolu
     svr.new_task_queue = [] { return new httplib::ThreadPool(8); };
 
+    // GET /health — pro health check gateway a orchestrátoru (Docker, k8s)
     svr.Get("/health", [](const httplib::Request&, httplib::Response& res) {
         json_response(res, 200, {{"status","ok"},{"service","contacts-cpp"},{"threads",8}});
     });
 
+    // GET /stats — operační metriky: počty požadavků a uptime
     svr.Get("/stats", [&](const httplib::Request&, httplib::Response& res) {
         auto uptime = std::chrono::duration_cast<std::chrono::seconds>(
             std::chrono::steady_clock::now() - start_time).count();
         json_response(res, 200, {{"requests",req_count.load()},{"errors",err_count.load()},{"uptime_s",uptime}});
     });
 
+    // GET /contacts?q=... — seznam kontaktů s volitelným fulltextovým filtrem
     svr.Get("/contacts", [&](const httplib::Request& req, httplib::Response& res) {
         ++req_count;
         std::string q = req.has_param("q") ? req.get_param_value("q") : "";
@@ -542,6 +634,7 @@ int main() {
         json_response(res, 200, arr);
     });
 
+    // GET /contacts/:id — regex v cestě zachytí ID kontaktu do req.matches[1]
     svr.Get(R"(/contacts/([^/]+))", [&](const httplib::Request& req, httplib::Response& res) {
         ++req_count;
         auto opt = store.get_by_id(req.matches[1]);
@@ -549,6 +642,7 @@ int main() {
         json_response(res, 200, contact_to_json(*opt));
     });
 
+    // POST /contacts — vytvoří nový kontakt; ID se vygeneruje server-side pro zajištění unikátnosti
     svr.Post("/contacts", [&](const httplib::Request& req, httplib::Response& res) {
         ++req_count;
         try {
@@ -568,6 +662,7 @@ int main() {
         }
     });
 
+    // PUT /contacts/:id — plná náhrada kontaktu (ID z URL přebíjí ID v těle)
     svr.Put(R"(/contacts/([^/]+))", [&](const httplib::Request& req, httplib::Response& res) {
         ++req_count;
         const std::string id = req.matches[1];
@@ -592,6 +687,7 @@ int main() {
         }
     });
 
+    // DELETE /contacts/:id — 204 No Content při úspěchu, 404 pokud kontakt neexistuje
     svr.Delete(R"(/contacts/([^/]+))", [&](const httplib::Request& req, httplib::Response& res) {
         ++req_count;
         if (!store.remove(req.matches[1])) {
@@ -602,10 +698,12 @@ int main() {
         json_response(res, 204, json(nullptr));
     });
 
+    // GET /db/tables — surová data DB pro ladění; v produkci by měl být chráněn autorizací
     svr.Get("/db/tables", [&](const httplib::Request&, httplib::Response& res) {
         json_response(res, 200, store.raw_tables());
     });
 
+    // GET /dedup?threshold=0.85 — hledá potenciální duplikáty; threshold je skóre podobnosti [0,1]
     svr.Get("/dedup", [&](const httplib::Request& req, httplib::Response& res) {
         ++req_count;
         double threshold = 0.85;
@@ -613,22 +711,27 @@ int main() {
             try { threshold = std::stod(req.get_param_value("threshold")); }
             catch (...) {}
         }
+        // std::clamp zajistí že threshold zůstane v platném rozsahu i při neplatném vstupu
         threshold = std::clamp(threshold, 0.0, 1.0);
         json_response(res, 200, store.dedup(threshold));
     });
 
+    // GET /analytics — agregované statistiky adresáře (kategorie, domény, popisky telefonů)
     svr.Get("/analytics", [&](const httplib::Request&, httplib::Response& res) {
         ++req_count;
         json_response(res, 200, store.analytics());
     });
 
+    // GET /export/vcard — stáhne všechny kontakty jako .vcf soubor (vCard 3.0)
     svr.Get("/export/vcard", [&](const httplib::Request&, httplib::Response& res) {
         ++req_count;
         res.status = 200;
+        // Content-Disposition: attachment způsobí stažení souboru místo zobrazení v prohlížeči
         res.set_header("Content-Disposition", "attachment; filename=\"contacts.vcf\"");
         res.set_content(store.export_vcard(), "text/vcard; charset=utf-8");
     });
 
+    // POST /import/vcard — přijme .vcf soubor v těle požadavku a importuje kontakty
     svr.Post("/import/vcard", [&](const httplib::Request& req, httplib::Response& res) {
         ++req_count;
         int n = store.import_vcard(req.body);
