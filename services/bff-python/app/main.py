@@ -114,6 +114,13 @@ async def search(request: Request, q: str = ""):
     return await _proxy(request, f"{SEARCH_URL}/search", params={"q": q})
 
 
+# Database tables ------------------------------------------------------------
+
+@app.get("/api/db")
+async def db_tables(request: Request):
+    return await _proxy(request, f"{CONTACTS_URL}/db/tables")
+
+
 # Services / topology --------------------------------------------------------
 
 @app.get("/api/services")

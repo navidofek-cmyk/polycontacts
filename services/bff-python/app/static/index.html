@@ -117,6 +117,7 @@
   <button class="tab-btn" onclick="switchTab('services')">Slu&#382;by</button>
   <button class="tab-btn" onclick="switchTab('stats')">Statistiky</button>
   <button class="tab-btn" onclick="switchTab('topology')">Topologie</button>
+  <button class="tab-btn" onclick="switchTab('database')">&#128451; Datab&#225;ze</button>
 </div>
 
 <!-- ===== KONTAKTY ===== -->
@@ -211,6 +212,45 @@
   <div id="topology-diagram" class="topo-diagram"></div>
 </div>
 
+<!-- ===== DATABÁZE ===== -->
+<div id="tab-database" class="tab-panel">
+  <div class="toolbar" style="margin-bottom:.75rem">
+    <button onclick="loadDb()">&#8635; Obnovit</button>
+    <span style="color:#4b5563;font-size:.8rem;align-self:center">PostgreSQL — raw tabulky</span>
+  </div>
+
+  <p style="color:#94a3b8;font-size:.85rem;margin-bottom:.75rem;font-family:monospace">
+    TABLE <span style="color:#a78bfa">contacts</span>
+  </p>
+  <table id="db-contacts-table">
+    <thead>
+      <tr>
+        <th>id</th>
+        <th>first_name</th>
+        <th>last_name</th>
+        <th>email</th>
+        <th>category</th>
+      </tr>
+    </thead>
+    <tbody id="db-contacts-tbody"></tbody>
+  </table>
+
+  <p style="color:#94a3b8;font-size:.85rem;margin:.75rem 0 .5rem;font-family:monospace">
+    TABLE <span style="color:#a78bfa">phone_numbers</span>
+  </p>
+  <table id="db-phones-table">
+    <thead>
+      <tr>
+        <th>id</th>
+        <th>contact_id</th>
+        <th>label</th>
+        <th>number</th>
+      </tr>
+    </thead>
+    <tbody id="db-phones-tbody"></tbody>
+  </table>
+</div>
+
 <!-- ===== MODAL ===== -->
 <div class="modal-bg" id="modal">
   <div class="modal">
@@ -255,7 +295,7 @@ const API = '';
 // ---------------------------------------------------------------------------
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach((b, i) => {
-    const names = ['contacts','search','services','stats','topology'];
+    const names = ['contacts','search','services','stats','topology','database'];
     b.classList.toggle('active', names[i] === name);
   });
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -265,6 +305,7 @@ function switchTab(name) {
   if (name === 'services')  loadServices();
   if (name === 'stats')     loadStats();
   if (name === 'topology')  loadTopology();
+  if (name === 'database')  loadDb();
 }
 
 // ---------------------------------------------------------------------------
@@ -513,6 +554,42 @@ function renderTopoDiagram(edges) {
     ${svgEdges}
     ${svgNodes}
   </svg>`;
+}
+
+// ---------------------------------------------------------------------------
+// Database tables
+// ---------------------------------------------------------------------------
+async function loadDb() {
+  try {
+    const res = await fetch(`${API}/api/db`);
+    const data = await res.json();
+
+    const contacts = data.contacts ?? [];
+    document.getElementById('db-contacts-tbody').innerHTML = contacts.length
+      ? contacts.map(r => `
+          <tr>
+            <td style="font-family:monospace;font-size:.75rem;color:#4b5563">${r.id}</td>
+            <td>${r.first_name}</td>
+            <td><strong>${r.last_name}</strong></td>
+            <td class="email">${r.email || '&mdash;'}</td>
+            <td><span class="badge badge-${r.category}">${r.category}</span></td>
+          </tr>`).join('')
+      : `<tr><td colspan="5" class="empty">Prázdná tabulka.</td></tr>`;
+
+    const phones = data.phone_numbers ?? [];
+    document.getElementById('db-phones-tbody').innerHTML = phones.length
+      ? phones.map(r => `
+          <tr>
+            <td style="color:#4b5563">${r.id}</td>
+            <td style="font-family:monospace;font-size:.75rem;color:#4b5563">${r.contact_id}</td>
+            <td>${r.label}</td>
+            <td style="color:#94a3b8">${r.number}</td>
+          </tr>`).join('')
+      : `<tr><td colspan="4" class="empty">Prázdná tabulka.</td></tr>`;
+  } catch (e) {
+    document.getElementById('db-contacts-tbody').innerHTML =
+      `<tr><td colspan="5" class="empty">Chyba: ${e.message}</td></tr>`;
+  }
 }
 
 // ---------------------------------------------------------------------------

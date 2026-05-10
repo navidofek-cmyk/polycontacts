@@ -265,6 +265,33 @@ public:
         tx.commit();
         return r.affected_rows() > 0;
     }
+
+    json raw_tables() const {
+        auto g = pool_.acquire();
+        pqxx::work tx(g.get());
+
+        auto cr = tx.exec(
+            "SELECT id, first_name, last_name, email, category FROM contacts ORDER BY last_name, first_name");
+        json contacts = json::array();
+        for (const auto& r : cr)
+            contacts.push_back({{"id", r[0].as<std::string>()},
+                                {"first_name", r[1].as<std::string>()},
+                                {"last_name", r[2].as<std::string>()},
+                                {"email", r[3].is_null() ? "" : r[3].as<std::string>()},
+                                {"category", r[4].as<std::string>()}});
+
+        auto pr = tx.exec(
+            "SELECT id, contact_id, label, number FROM phone_numbers ORDER BY contact_id, id");
+        json phones = json::array();
+        for (const auto& r : pr)
+            phones.push_back({{"id", r[0].as<long long>()},
+                              {"contact_id", r[1].as<std::string>()},
+                              {"label", r[2].as<std::string>()},
+                              {"number", r[3].as<std::string>()}});
+
+        tx.commit();
+        return {{"contacts", contacts}, {"phone_numbers", phones}};
+    }
 };
 
 // ---------------------------------------------------------------------------
@@ -413,6 +440,10 @@ int main() {
             return;
         }
         json_response(res, 204, json(nullptr));
+    });
+
+    svr.Get("/db/tables", [&](const httplib::Request&, httplib::Response& res) {
+        json_response(res, 200, store.raw_tables());
     });
 
     std::cout << "[contacts-cpp] listening on 0.0.0.0:8080\n";
