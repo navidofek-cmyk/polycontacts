@@ -1,0 +1,51 @@
+site_name: polycontacts
+site_description: Microservices adresář kontaktů — RE tutorial v C++, Rust, Go, Python
+site_url: https://navidofek-cmyk.github.io/polycontacts
+repo_url: https://github.com/navidofek-cmyk/polycontacts
+repo_name: navidofek-cmyk/polycontacts
+
+theme:
+  name: material
+  language: cs
+  palette:
+    - scheme: slate
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: material/brightness-4
+        name: Světlý režim
+    - scheme: default
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: material/brightness-7
+        name: Tmavý režim
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - content.code.annotate
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+
+nav:
+  - Úvod: index.md
+  - Architektura: architektura.md
+  - Služby:
+    - contacts-cpp (C++20): sluzby/cpp.md
+    - search-rust (Rust): sluzby/rust.md
+    - gateway-go (Go): sluzby/go.md
+    - bff-python (Python): sluzby/python.md
+  - Výkon & testy: vykon.md
+  - RE Spec: re-spec.md
