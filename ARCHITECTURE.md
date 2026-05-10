@@ -20,6 +20,7 @@ bff-python          ← jediný vstupní bod, slouží HTML + přeposílá API v
     └── /api/stats     →  všechny 3 najednou (asyncio.gather)
 
 contacts-cpp  →  search-rust  (notifikace při každé změně dat)
+contacts-cpp  →  postgres :5432  (persistentní úložiště)
 všechny služby → gateway-go   (registrace při startu)
 ```
 
@@ -46,9 +47,9 @@ Kategorie: `Friend`, `Work`, `Family`, `Other`, `Colleague`
 
 ### 3.1 contacts-cpp (C++20, port 8080)
 
-**Účel:** Autoritativní zdroj dat o kontaktech. CRUD operace, thread-safe in-memory store.
+**Účel:** Autoritativní zdroj dat o kontaktech. CRUD operace, thread-safe store s PostgreSQL persistencí.
 
-**Technologie:** cpp-httplib (HTTP server), nlohmann/json, C++20
+**Technologie:** cpp-httplib (HTTP server), nlohmann/json, libpqxx, C++20
 
 **API:**
 ```
@@ -63,22 +64,42 @@ GET  /stats          → {"requests":N,"errors":N,"uptime_s":N}
 ```
 
 **Implementační detaily:**
-- `ContactStore` třída s `std::vector<Contact>` a `mutable std::shared_mutex`
+- `ContactStore` třída s `mutable std::shared_mutex`
 - Čtení: `std::shared_lock` (více čtenářů zároveň)
 - Zápis: `std::unique_lock` (exkluzivní)
 - Thread pool: 8 vláken (`httplib::ThreadPool`)
 - UUID: vlastní RFC 4122 v4 generátor přes `std::mt19937`
 - Při každém POST/PUT spustí detached thread který POSTuje na `SEARCH_URL/index` (best-effort, ignoruje chybu)
 - Při startu: spustí background thread který se pokusí 5× zaregistrovat u gateway (`POST GATEWAY_URL/services`)
-- Seed data: 4 kontakty při inicializaci
+- Persistuje data do PostgreSQL přes libpqxx; schema se vytvoří automaticky při startu
+- Seed data: 4 kontakty se vloží automaticky pokud je tabulka prázdná
+
+**SQL schema (vytváří se automaticky při startu):**
+```sql
+CREATE TABLE IF NOT EXISTS contacts (
+    id TEXT PRIMARY KEY,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    email TEXT,
+    category TEXT NOT NULL DEFAULT 'Other'
+);
+CREATE TABLE IF NOT EXISTS phone_numbers (
+    id BIGSERIAL PRIMARY KEY,
+    contact_id TEXT NOT NULL REFERENCES contacts(id) ON DELETE CASCADE,
+    label TEXT NOT NULL,
+    number TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_contacts_sort ON contacts(last_name, first_name);
+```
 
 **Env proměnné:**
 ```
 GATEWAY_URL=http://gateway-go:9000
 SEARCH_URL=http://search-rust:8081
+DATABASE_URL=postgresql://contacts:contacts@postgres:5432/contacts
 ```
 
-**Build:** CMake 3.20+, C++20, FetchContent pro httplib a nlohmann/json
+**Build:** CMake 3.20+, C++20, FetchContent pro httplib a nlohmann/json, systémové balíčky `libpqxx-dev libpq-dev` (builder), `libpq5` (runtime)
 
 ---
 
@@ -229,17 +250,25 @@ SEARCH_URL=http://search-rust:8081
 
 **Závislosti a pořadí startu:**
 ```
-gateway-go          (žádná závislost, startuje první)
+postgres            (žádná závislost, startuje první)
     ↑ healthy
-contacts-cpp        (depends_on: gateway-go healthy)
+gateway-go          (žádná závislost na postgres, startuje paralelně)
+    ↑ healthy        ↑ healthy
+contacts-cpp        (depends_on: postgres healthy + gateway-go healthy)
     ↑ healthy
 search-rust         (depends_on: contacts-cpp healthy)
 bff-python          (depends_on: gateway-go healthy)
 ```
 
-**Síť:** `contacts-net` (bridge), služby se oslovují jménem (`contacts-cpp`, `search-rust`, atd.)
+**Síť:** `contacts-net` (bridge), služby se oslovují jménem (`contacts-cpp`, `search-rust`, `postgres`, atd.)
 
 **Health checks:** `curl -f http://localhost:{port}/health`, interval 10s, retries 5, start_period 10s
+PostgreSQL health check: `pg_isready -U contacts`
+
+**Volumes:**
+```
+postgres_data       ← persistentní data PostgreSQL (přežijí restart kontejnerů)
+```
 
 **Porty (host:container):**
 ```
@@ -247,7 +276,10 @@ bff-python          (depends_on: gateway-go healthy)
 9000:9000  gateway-go
 8080:8080  contacts-cpp
 8081:8081  search-rust
+5432:5432  postgres
 ```
+
+**Poznámka k persistenci:** Data přežijí restart jakéhokoliv kontejneru. Pouze `docker compose down -v` smaže volume a tím i data.
 
 ---
 
@@ -315,7 +347,7 @@ Testuje ContactStore, UUID generátor, JSON round-trip, thread safety.
 
 ## 8. Známé limitace
 
-- **In-memory storage** — data se ztratí při restartu kontejneru
 - **Žádná autentizace** — API je zcela otevřené
 - **Search index se nesynchronizuje při startu bff-python** — pouze contacts-cpp notifikuje search při změnách, ne při startu
 - **contacts-cpp p99 latence** — bez connection poolu pro HTTP klienty, každá notifikace search-rust otevírá nové spojení
+- **Ztráta dat pouze při `docker compose down -v`** — `docker compose down` bez `-v` data zachová (postgres_data volume zůstane)

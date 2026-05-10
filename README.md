@@ -16,6 +16,8 @@ bff-python (FastAPI) :8989        ← jediný vstupní bod
    │         └── /api/topology ──► gateway-go (Go) :9000
    │
    └── /api/stats (parallel fan-out na všechny služby)
+
+contacts-cpp ──► postgres :5432   ← persistentní úložiště kontaktů
 ```
 
 ## Služby
@@ -23,9 +25,10 @@ bff-python (FastAPI) :8989        ← jediný vstupní bod
 | Služba | Jazyk | Port | Popis |
 |---|---|---|---|
 | `bff-python` | Python / FastAPI | 8989 | Frontend + API proxy |
-| `contacts-cpp` | C++20 / httplib | 8080 | CRUD kontaktů, in-memory store |
+| `contacts-cpp` | C++20 / httplib | 8080 | CRUD kontaktů, PostgreSQL store |
 | `search-rust` | Rust / Axum | 8081 | Full-text search, invertovaný index |
 | `gateway-go` | Go | 9000 | Service registry, health check, topology |
+| `postgres` | PostgreSQL 16 | 5432 | Persistentní úložiště kontaktů |
 
 ## Struktura projektu
 
@@ -91,7 +94,8 @@ Skript provede:
 ```bash
 cd services
 docker compose up --build -d    # start
-docker compose down             # stop
+docker compose down             # stop (data zůstanou v postgres_data volume)
+docker compose down -v          # stop + smazání dat (smaže volume)
 docker compose logs -f          # logy
 ```
 
@@ -116,6 +120,8 @@ docker compose logs -f          # logy
 - UUID generátor (RFC 4122 variant)
 - Thread pool (8 vláken) via httplib
 - Notifikuje search-rust při každé změně
+- Persistuje data do PostgreSQL (libpqxx), schema se vytvoří automaticky při startu
+- Seed data se vloží automaticky pokud je tabulka prázdná
 
 ### search-rust (Rust)
 - Invertovaný index s váhami: příjmení (3×), jméno (2×), email (1×)

@@ -1,5 +1,25 @@
 services:
 
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=contacts
+      - POSTGRES_USER=contacts
+      - POSTGRES_PASSWORD=contacts
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - contacts-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U contacts"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
   gateway-go:
     build: ./gateway-go
     ports:
@@ -23,18 +43,22 @@ services:
       - "8080:8080"
     environment:
       - GATEWAY_URL=http://gateway-go:9000
+      - SEARCH_URL=http://search-rust:8081
+      - DATABASE_URL=postgresql://contacts:contacts@postgres:5432/contacts
     networks:
       - contacts-net
     restart: unless-stopped
     depends_on:
       gateway-go:
         condition: service_healthy
+      postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      start_period: 15s
 
   search-rust:
     build: ./search-rust
@@ -81,3 +105,6 @@ services:
 networks:
   contacts-net:
     driver: bridge
+
+volumes:
+  postgres_data:

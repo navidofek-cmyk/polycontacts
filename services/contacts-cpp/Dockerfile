@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libssl-dev \
         ca-certificates \
         curl \
+        libpqxx-dev \
+        libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /src
@@ -25,6 +27,7 @@ FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libssl3 \
+        libpq5 \
         curl \
         ca-certificates \
     && rm -rf /var/lib/apt/lists/*

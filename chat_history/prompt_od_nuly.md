@@ -60,11 +60,12 @@ Jediný veřejně přístupný port je **8989**. Ostatní porty (8080, 8081, 900
 - Topologie: gateway drží graf "kdo volá koho"
 
 ### Startup sekvence (pozorovatelná zvenku)
-1. gateway-go nastartuje první, otevře port 9000
-2. contacts-cpp nastartuje, zaregistruje se u gateway, port 8080
-3. search-rust nastartuje, stáhne kontakty z contacts-cpp, zaindexuje je, zaregistruje se u gateway, port 8081
-4. bff-python nastartuje, zaregistruje se u gateway, port 8989
-5. Systém je ready — `GET /health` na všech portech vrací 200
+1. postgres nastartuje první, otevře port 5432 (a gateway-go paralelně)
+2. gateway-go nastartuje, otevře port 9000
+3. contacts-cpp nastartuje (čeká na postgres healthy + gateway-go healthy), zaregistruje se u gateway, port 8080 — schema se vytvoří automaticky, seed data se vloží pokud je tabulka prázdná
+4. search-rust nastartuje, stáhne kontakty z contacts-cpp, zaindexuje je, zaregistruje se u gateway, port 8081
+5. bff-python nastartuje, zaregistruje se u gateway, port 8989
+6. Systém je ready — `GET /health` na všech portech vrací 200
 
 ---
 
@@ -77,10 +78,13 @@ Jediný veřejně přístupný port je **8989**. Ostatní porty (8080, 8081, 900
 [bff-python]  FastAPI/Python
     │
     ├──────────────────────────────► [contacts-cpp]  C++20  :8080
-    │   /api/contacts → /contacts                     CRUD, in-memory
+    │   /api/contacts → /contacts                     CRUD, PostgreSQL store
     │   /api/contacts/{id} → /contacts/{id}           shared_mutex, thread pool 8
-    │                                │
-    │                                │ POST /index (při každém zápisu)
+    │                                │                     │
+    │                                │ POST /index         │ libpqxx
+    │                                │ (při každém zápisu) ▼
+    │                                │             [postgres]  :5432
+    │                                │              postgres_data volume
     │                                ▼
     ├──────────────────────────────► [search-rust]  Rust/Axum  :8081
     │   /api/search?q= → /search?q=                   invertovaný index, weighted
@@ -273,6 +277,7 @@ GET  /                       → index.html (HTML tabulka)
 |---|---|---|---|
 | contacts-cpp | `GATEWAY_URL` | `http://localhost:9000` | |
 | contacts-cpp | `SEARCH_URL` | `http://localhost:8081` | |
+| contacts-cpp | `DATABASE_URL` | `postgresql://contacts:contacts@postgres:5432/contacts` | připojení k PostgreSQL |
 | search-rust | `GATEWAY_URL` | `http://localhost:9000` | |
 | search-rust | `CONTACTS_URL` | `http://localhost:8080` | |
 | search-rust | `SELF_URL` | `http://localhost:8081` | **musí být Docker hostname v prod** |
@@ -287,15 +292,19 @@ GET  /                       → index.html (HTML tabulka)
 ## Docker Compose — pořadí startu a závislosti
 
 ```
-gateway-go      → žádná závislost, startuje první
-contacts-cpp    → čeká na gateway-go healthy
+postgres        → žádná závislost, startuje první (spolu s gateway-go)
+gateway-go      → žádná závislost, startuje první (spolu s postgres)
+contacts-cpp    → čeká na postgres healthy + gateway-go healthy
 search-rust     → čeká na contacts-cpp healthy (potřebuje data pro indexaci)
 bff-python      → čeká na gateway-go healthy
 ```
 
-Health check všech: `curl -f http://localhost:{port}/health`, interval 10s, retries 5, start_period 10s
+Health check služeb: `curl -f http://localhost:{port}/health`, interval 10s, retries 5, start_period 10s
+Health check postgres: `pg_isready -U contacts`, interval 5s, retries 5, start_period 5s
 
-**Pozorovaný startup čas:** ~20s od `docker compose up` do všech healthy
+**Volumes:** `postgres_data` — data přežijí restart kontejnerů; smazána pouze pomocí `docker compose down -v`
+
+**Pozorovaný startup čas:** ~25s od `docker compose up` do všech healthy
 
 ---
 
@@ -321,7 +330,8 @@ Naměřeno: 1000 req, 20 concurrent, Docker na localhostu
 
 | Služba | Jazyk | Framework | Klíčové závislosti |
 |---|---|---|---|
-| contacts-cpp | C++20 | cpp-httplib v0.14.3 | nlohmann/json v3.11.3 |
+| contacts-cpp | C++20 | cpp-httplib v0.14.3 | nlohmann/json v3.11.3, libpqxx, libpq |
+| postgres | PostgreSQL 16 | postgres:16-alpine | — |
 | search-rust | Rust (edition 2021) | Axum | tokio (full), reqwest, serde |
 | gateway-go | Go 1.22 | stdlib only | žádné externí |
 | bff-python | Python 3.12 | FastAPI ≥0.111 | httpx ≥0.27, uvicorn |
@@ -352,8 +362,8 @@ Testuje interní logiku přímo (ne HTTP):
 
 ## Známé limitace a gotchas
 
-1. **In-memory only** — restart kontejneru = ztráta dat (seed data se načtou znovu)
-2. **Search index není perzistentní** — při restartu search-rust se stáhnou data z contacts-cpp a přeindexují
+1. **PostgreSQL persistence** — data přežijí restart contacts-cpp; smazána jsou pouze pomocí `docker compose down -v` (smaže `postgres_data` volume)
+2. **Search index není perzistentní** — při restartu search-rust se stáhnou data z contacts-cpp (z DB) a přeindexují
 3. **Notifikace search je best-effort** — pokud search-rust není dostupný při zápisu, index zaostane
 4. **contacts-cpp p99 latence** — bez HTTP connection pool pro notifikace search
 5. **Žádná autentizace** — API je zcela otevřené
@@ -368,10 +378,10 @@ Testuje interní logiku přímo (ne HTTP):
 README.md
 ARCHITECTURE.md
 start.sh                              (bash, kontrola prerekvizit + spuštění)
-services/docker-compose.yml
-services/contacts-cpp/Dockerfile
-services/contacts-cpp/CMakeLists.txt
-services/contacts-cpp/src/main.cpp
+services/docker-compose.yml           (postgres:16-alpine service + postgres_data volume)
+services/contacts-cpp/Dockerfile      (builder: libpqxx-dev libpq-dev; runtime: libpq5)
+services/contacts-cpp/CMakeLists.txt  (libpqxx + libpq závislosti)
+services/contacts-cpp/src/main.cpp    (PostgreSQL persistence přes libpqxx)
 services/contacts-cpp/src/test_contacts.cpp
 services/search-rust/Dockerfile
 services/search-rust/Cargo.toml
