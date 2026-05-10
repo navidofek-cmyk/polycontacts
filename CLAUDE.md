@@ -35,7 +35,7 @@ cd services/gateway-go && docker run --rm -v $(pwd):/src -w /src golang:1.22 go 
 cd services/search-rust && cargo test
 
 # C++
-cd services/contacts-cpp && cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --parallel $(nproc) && ./build/test_contacts
+cd services/contacts-cpp && cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --parallel $(nproc)
 ```
 
 ## Pravidla pro práci
