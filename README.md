@@ -1,4 +1,4 @@
-# Contacts — Microservices projekt
+# polycontacts — Microservices projekt
 
 Ukázkový projekt demonstrující microservices architekturu v několika jazycích.
 
