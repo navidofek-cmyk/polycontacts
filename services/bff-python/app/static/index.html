@@ -118,6 +118,7 @@
   <button class="tab-btn" onclick="switchTab('stats')">Statistiky</button>
   <button class="tab-btn" onclick="switchTab('topology')">Topologie</button>
   <button class="tab-btn" onclick="switchTab('database')">&#128451; Datab&#225;ze</button>
+  <button class="tab-btn" onclick="switchTab('schema')">&#128196; Sch&#233;ma</button>
 </div>
 
 <!-- ===== KONTAKTY ===== -->
@@ -251,6 +252,238 @@
   </table>
 </div>
 
+<!-- ===== SCHEMA ===== -->
+<div id="tab-schema" class="tab-panel">
+  <div class="toolbar" style="margin-bottom:1rem;align-items:center">
+    <button onclick="schemaZoom(1.2)">&#43; Zoom in</button>
+    <button onclick="schemaZoom(0.8)">&#8722; Zoom out</button>
+    <button onclick="schemaReset()" class="secondary">Reset</button>
+    <span style="color:#4b5563;font-size:.8rem;align-self:center;margin-left:.5rem">
+      Scroll nebo pinch pro zoom &nbsp;|&nbsp; Táhni pro posouvání
+    </span>
+  </div>
+  <div id="schema-viewport" style="
+    overflow:hidden; border:1px solid #2d3148; border-radius:8px;
+    background:#0d1020; height:520px; position:relative; cursor:grab;
+  ">
+    <div id="schema-canvas" style="position:absolute; transform-origin:0 0; transform:scale(1) translate(60px,60px);">
+      <svg id="schema-svg" width="1100" height="700" xmlns="http://www.w3.org/2000/svg"
+           style="overflow:visible; font-family:system-ui,monospace">
+        <defs>
+          <marker id="fk-arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L10,3 z" fill="#7c3aed"/>
+          </marker>
+        </defs>
+
+        <!-- ── TABLE: contacts ── -->
+        <g id="tbl-contacts" transform="translate(30,30)">
+          <!-- header -->
+          <rect width="260" height="34" rx="6" ry="6" fill="#7c3aed"/>
+          <text x="13" y="22" fill="white" font-size="13" font-weight="700">contacts</text>
+          <text x="210" y="22" fill="#c4b5fd" font-size="10">PostgreSQL</text>
+          <!-- body bg -->
+          <rect y="34" width="260" height="216" rx="0" ry="0" fill="#1a1d2e" stroke="#2d3148"/>
+          <!-- rows -->
+          <!-- id PK -->
+          <rect y="34" width="260" height="36" fill="#16192b"/>
+          <text x="13" y="57" fill="#fbbf24" font-size="11" font-weight="700">🔑 id</text>
+          <text x="130" y="57" fill="#60a5fa" font-size="11">TEXT</text>
+          <text x="205" y="57" fill="#4ade80" font-size="10">PRIMARY KEY</text>
+          <!-- first_name -->
+          <rect y="70" width="260" height="36" fill="#1a1d2e"/>
+          <text x="13" y="93" fill="#e2e8f0" font-size="11">first_name</text>
+          <text x="130" y="93" fill="#60a5fa" font-size="11">TEXT</text>
+          <text x="205" y="93" fill="#f87171" font-size="10">NOT NULL</text>
+          <!-- last_name -->
+          <rect y="106" width="260" height="36" fill="#16192b"/>
+          <text x="13" y="129" fill="#e2e8f0" font-size="11">last_name</text>
+          <text x="130" y="129" fill="#60a5fa" font-size="11">TEXT</text>
+          <text x="205" y="129" fill="#f87171" font-size="10">NOT NULL</text>
+          <!-- email -->
+          <rect y="142" width="260" height="36" fill="#1a1d2e"/>
+          <text x="13" y="165" fill="#e2e8f0" font-size="11">email</text>
+          <text x="130" y="165" fill="#60a5fa" font-size="11">TEXT</text>
+          <text x="205" y="165" fill="#4b5563" font-size="10">nullable</text>
+          <!-- category -->
+          <rect y="178" width="260" height="36" fill="#16192b"/>
+          <text x="13" y="201" fill="#e2e8f0" font-size="11">category</text>
+          <text x="130" y="201" fill="#60a5fa" font-size="11">TEXT</text>
+          <text x="205" y="201" fill="#94a3b8" font-size="10">DEFAULT 'Other'</text>
+          <!-- border bottom -->
+          <rect y="214" width="260" height="36" fill="#1a1d2e"/>
+          <text x="13" y="237" fill="#4b5563" font-size="10" font-style="italic">
+            INDEX (last_name, first_name)
+          </text>
+          <rect y="34" width="260" height="216" fill="none" stroke="#2d3148" stroke-width="1" rx="0"/>
+        </g>
+
+        <!-- ── TABLE: phone_numbers ── -->
+        <g id="tbl-phones" transform="translate(400,120)">
+          <!-- header -->
+          <rect width="260" height="34" rx="6" ry="6" fill="#0f766e"/>
+          <text x="13" y="22" fill="white" font-size="13" font-weight="700">phone_numbers</text>
+          <text x="210" y="22" fill="#99f6e4" font-size="10">PostgreSQL</text>
+          <!-- body bg -->
+          <rect y="34" width="260" height="180" rx="0" ry="0" fill="#1a1d2e" stroke="#2d3148"/>
+          <!-- id -->
+          <rect y="34" width="260" height="36" fill="#16192b"/>
+          <text x="13" y="57" fill="#fbbf24" font-size="11" font-weight="700">🔑 id</text>
+          <text x="130" y="57" fill="#60a5fa" font-size="11">BIGSERIAL</text>
+          <text x="205" y="57" fill="#4ade80" font-size="10">PK, auto</text>
+          <!-- contact_id FK -->
+          <rect y="70" width="260" height="36" fill="#1a1d2e"/>
+          <text x="13" y="93" fill="#c084fc" font-size="11" font-weight="600">🔗 contact_id</text>
+          <text x="130" y="93" fill="#60a5fa" font-size="11">TEXT</text>
+          <text x="205" y="93" fill="#f87171" font-size="10">NOT NULL</text>
+          <!-- label -->
+          <rect y="106" width="260" height="36" fill="#16192b"/>
+          <text x="13" y="129" fill="#e2e8f0" font-size="11">label</text>
+          <text x="130" y="129" fill="#60a5fa" font-size="11">TEXT</text>
+          <text x="205" y="129" fill="#f87171" font-size="10">NOT NULL</text>
+          <!-- number -->
+          <rect y="142" width="260" height="36" fill="#1a1d2e"/>
+          <text x="13" y="165" fill="#e2e8f0" font-size="11">number</text>
+          <text x="130" y="165" fill="#60a5fa" font-size="11">TEXT</text>
+          <text x="205" y="165" fill="#f87171" font-size="10">NOT NULL</text>
+          <!-- ON DELETE CASCADE note -->
+          <rect y="178" width="260" height="36" fill="#16192b"/>
+          <text x="13" y="201" fill="#4b5563" font-size="10" font-style="italic">
+            ON DELETE CASCADE → contacts.id
+          </text>
+          <rect y="34" width="260" height="180" fill="none" stroke="#2d3148" stroke-width="1"/>
+        </g>
+
+        <!-- ── FK RELATIONSHIP LINE ── -->
+        <!-- from contacts.id (right edge, row 1 center) to phone_numbers.contact_id (left edge, row 2 center) -->
+        <line x1="290" y1="157" x2="400" y2="213"
+              stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="6,3"
+              marker-end="url(#fk-arrow)"/>
+        <text x="320" y="178" fill="#7c3aed" font-size="10">1</text>
+        <text x="375" y="208" fill="#7c3aed" font-size="10">N</text>
+
+        <!-- ════════════════════════════════════════════════════════
+             SERVICES ARCHITECTURE (below SQL schema)
+        ═════════════════════════════════════════════════════════ -->
+
+        <!-- ── bff-python ── -->
+        <g transform="translate(30,420)">
+          <rect width="200" height="80" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
+          <rect width="200" height="28" rx="8" fill="#1d4ed8"/>
+          <rect y="20" width="200" height="8" fill="#1d4ed8"/>
+          <text x="12" y="19" fill="white" font-size="12" font-weight="700">bff-python</text>
+          <text x="145" y="19" fill="#93c5fd" font-size="9">:8989</text>
+          <text x="12" y="44" fill="#94a3b8" font-size="10">FastAPI · Python 3.12</text>
+          <text x="12" y="58" fill="#94a3b8" font-size="10">Frontend + API proxy</text>
+          <text x="12" y="72" fill="#60a5fa" font-size="10">asyncio.gather → /api/stats</text>
+        </g>
+
+        <!-- ── contacts-cpp (link to SQL) ── -->
+        <!-- contacts-cpp box already shown as SQL tables above, just add service label -->
+        <g transform="translate(30,360)">
+          <rect width="260" height="24" rx="4" fill="#292524" stroke="#d97706" stroke-width="1.5"/>
+          <text x="10" y="16" fill="#fbbf24" font-size="11" font-weight="700">contacts-cpp</text>
+          <text x="175" y="16" fill="#d97706" font-size="9">:8080 · C++20 · httplib</text>
+        </g>
+
+        <!-- ── search-rust ── -->
+        <g transform="translate(400,420)">
+          <rect width="200" height="80" rx="8" fill="#1e293b" stroke="#f97316" stroke-width="2"/>
+          <rect width="200" height="28" rx="8" fill="#c2410c"/>
+          <rect y="20" width="200" height="8" fill="#c2410c"/>
+          <text x="12" y="19" fill="white" font-size="12" font-weight="700">search-rust</text>
+          <text x="145" y="19" fill="#fed7aa" font-size="9">:8081</text>
+          <text x="12" y="44" fill="#94a3b8" font-size="10">Axum · Rust · Tokio</text>
+          <text x="12" y="58" fill="#94a3b8" font-size="10">Invertovaný index (weighted)</text>
+          <text x="12" y="72" fill="#fb923c" font-size="10">POST /index při každém zápisu</text>
+        </g>
+
+        <!-- ── gateway-go ── -->
+        <g transform="translate(700,420)">
+          <rect width="200" height="80" rx="8" fill="#1e293b" stroke="#22d3ee" stroke-width="2"/>
+          <rect width="200" height="28" rx="8" fill="#0e7490"/>
+          <rect y="20" width="200" height="8" fill="#0e7490"/>
+          <text x="12" y="19" fill="white" font-size="12" font-weight="700">gateway-go</text>
+          <text x="142" y="19" fill="#a5f3fc" font-size="9">:9000</text>
+          <text x="12" y="44" fill="#94a3b8" font-size="10">Go stdlib · net/http</text>
+          <text x="12" y="58" fill="#94a3b8" font-size="10">Service registry + health</text>
+          <text x="12" y="72" fill="#22d3ee" font-size="10">Health check každých 10s</text>
+        </g>
+
+        <!-- ── postgres ── -->
+        <g transform="translate(400,560)">
+          <rect width="200" height="60" rx="8" fill="#1e293b" stroke="#4ade80" stroke-width="2"/>
+          <rect width="200" height="28" rx="8" fill="#166534"/>
+          <rect y="20" width="200" height="8" fill="#166534"/>
+          <text x="12" y="19" fill="white" font-size="12" font-weight="700">postgres</text>
+          <text x="140" y="19" fill="#bbf7d0" font-size="9">:5432</text>
+          <text x="12" y="44" fill="#94a3b8" font-size="10">PostgreSQL 16 · volume persist</text>
+          <text x="12" y="56" fill="#4ade80" font-size="10">contacts + phone_numbers</text>
+        </g>
+
+        <!-- ── ARROWS ── -->
+        <defs>
+          <marker id="arr-blue" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#3b82f6"/></marker>
+          <marker id="arr-orange" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#f97316"/></marker>
+          <marker id="arr-cyan" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#22d3ee"/></marker>
+          <marker id="arr-green" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#4ade80"/></marker>
+          <marker id="arr-yellow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#fbbf24"/></marker>
+        </defs>
+
+        <!-- bff → contacts-cpp -->
+        <path d="M230,460 L290,280" fill="none" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+        <text x="235" y="390" fill="#3b82f6" font-size="9">/api/contacts</text>
+
+        <!-- bff → search-rust -->
+        <path d="M230,460 Q300,440 400,460" fill="none" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+        <text x="295" y="445" fill="#3b82f6" font-size="9">/api/search</text>
+
+        <!-- bff → gateway -->
+        <path d="M230,460 Q460,420 700,460" fill="none" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+        <text x="430" y="430" fill="#3b82f6" font-size="9">/api/services, /topology</text>
+
+        <!-- contacts-cpp → search-rust (notify) -->
+        <path d="M290,200 Q390,300 400,460" fill="none" stroke="#f97316" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr-orange)"/>
+        <text x="370" y="345" fill="#f97316" font-size="9">POST /index</text>
+
+        <!-- contacts-cpp → postgres -->
+        <path d="M160,384 Q300,500 400,580" fill="none" stroke="#4ade80" stroke-width="1.5" marker-end="url(#arr-green)"/>
+        <text x="230" y="510" fill="#4ade80" font-size="9">libpqxx</text>
+
+        <!-- all → gateway (register at startup) -->
+        <path d="M290,385 Q550,360 700,460" fill="none" stroke="#22d3ee" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr-cyan)"/>
+        <path d="M600,460 L700,460" fill="none" stroke="#22d3ee" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr-cyan)"/>
+        <text x="680" y="456" fill="#22d3ee" font-size="8">register</text>
+
+        <!-- ── LEGEND ── -->
+        <g transform="translate(30,650)">
+          <rect width="1040" height="38" rx="6" fill="#1a1d2e" stroke="#2d3148"/>
+          <text x="12" y="14" fill="#fbbf24" font-size="10" font-weight="700">🔑 PK</text>
+          <text x="45" y="14" fill="#94a3b8" font-size="10">Primary key</text>
+          <text x="130" y="14" fill="#c084fc" font-size="10">🔗 FK</text>
+          <text x="155" y="14" fill="#94a3b8" font-size="10">Foreign key (ON DELETE CASCADE)</text>
+          <text x="350" y="14" fill="#3b82f6" font-size="10">──</text>
+          <text x="368" y="14" fill="#94a3b8" font-size="10">HTTP volání (sync)</text>
+          <text x="480" y="14" fill="#f97316" font-size="10">- - -</text>
+          <text x="504" y="14" fill="#94a3b8" font-size="10">async notifikace</text>
+          <text x="620" y="14" fill="#22d3ee" font-size="10">····</text>
+          <text x="640" y="14" fill="#94a3b8" font-size="10">registrace při startu</text>
+
+          <text x="12" y="30" fill="#60a5fa" font-size="10">TEXT, BIGSERIAL</text>
+          <text x="100" y="30" fill="#4b5563" font-size="10">= PostgreSQL typy</text>
+          <text x="230" y="30" fill="#4ade80" font-size="10">contacts 1:N phone_numbers</text>
+          <text x="400" y="30" fill="#4b5563" font-size="10">data přežijí restart contacts-cpp, smažou se jen přes</text>
+          <text x="720" y="30" fill="#f87171" font-size="10">docker compose down -v</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</div>
+
 <!-- ===== MODAL ===== -->
 <div class="modal-bg" id="modal">
   <div class="modal">
@@ -295,7 +528,7 @@ const API = '';
 // ---------------------------------------------------------------------------
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach((b, i) => {
-    const names = ['contacts','search','services','stats','topology','database'];
+    const names = ['contacts','search','services','stats','topology','database','schema'];
     b.classList.toggle('active', names[i] === name);
   });
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -306,6 +539,7 @@ function switchTab(name) {
   if (name === 'stats')     loadStats();
   if (name === 'topology')  loadTopology();
   if (name === 'database')  loadDb();
+  if (name === 'schema')    initSchema();
 }
 
 // ---------------------------------------------------------------------------
@@ -590,6 +824,54 @@ async function loadDb() {
     document.getElementById('db-contacts-tbody').innerHTML =
       `<tr><td colspan="5" class="empty">Chyba: ${e.message}</td></tr>`;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Schema — zoom + pan
+// ---------------------------------------------------------------------------
+let schemaScale = 1, schemaTx = 60, schemaTy = 60;
+let schemaDragging = false, schemaDragStart = null;
+
+function applySchemaTransform() {
+  document.getElementById('schema-canvas').style.transform =
+    `scale(${schemaScale}) translate(${schemaTx / schemaScale}px, ${schemaTy / schemaScale}px)`;
+}
+
+function schemaZoom(factor) {
+  schemaScale = Math.min(3, Math.max(0.3, schemaScale * factor));
+  applySchemaTransform();
+}
+
+function schemaReset() {
+  schemaScale = 1; schemaTx = 60; schemaTy = 60;
+  applySchemaTransform();
+}
+
+function initSchema() {
+  const vp = document.getElementById('schema-viewport');
+  if (vp._schemaInit) return;
+  vp._schemaInit = true;
+
+  vp.addEventListener('wheel', e => {
+    e.preventDefault();
+    schemaZoom(e.deltaY < 0 ? 1.1 : 0.9);
+  }, { passive: false });
+
+  vp.addEventListener('mousedown', e => {
+    schemaDragging = true;
+    schemaDragStart = { x: e.clientX - schemaTx, y: e.clientY - schemaTy };
+    vp.style.cursor = 'grabbing';
+  });
+  window.addEventListener('mousemove', e => {
+    if (!schemaDragging) return;
+    schemaTx = e.clientX - schemaDragStart.x;
+    schemaTy = e.clientY - schemaDragStart.y;
+    applySchemaTransform();
+  });
+  window.addEventListener('mouseup', () => {
+    schemaDragging = false;
+    vp.style.cursor = 'grab';
+  });
 }
 
 // ---------------------------------------------------------------------------
