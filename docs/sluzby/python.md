@@ -461,3 +461,81 @@ curl -X POST http://localhost:8989/api/contacts \
 ```
 
 Vytvoří nový kontakt — BFF předá tělo beze změny do `contacts-cpp`.
+
+---
+
+## Klíčové prvky jazyka Python
+
+### `@asynccontextmanager` — dekorátor + generátor
+
+```python
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    _client = httpx.AsyncClient(timeout=10.0)
+    yield          # ← FastAPI spustí aplikaci zde
+    await _client.aclose()
+```
+
+`@asynccontextmanager` kombinuje dva koncepty:
+
+**Dekorátor** (`@`) — funkce která obalí jinou funkci. `asynccontextmanager` přemění generátorovou funkci na context manager použitelný s `async with`.
+
+**Generátor** — funkce s `yield`. Při prvním volání běží do `yield` (startup). Při ukončení (nebo výjimce) pokračuje za `yield` (shutdown). Stav mezi `yield` je zachován v closure.
+
+Výsledek: startup kód → `yield` → aplikace běží → shutdown kód. Přirozené a čitelné bez nutnosti psát třídu s `__aenter__` a `__aexit__`.
+
+### `async def` a `await` — coroutiny
+
+```python
+async def get_contacts(request: Request, q: str = "") -> Response:
+    return await _proxy(request, f"{CONTACTS_URL}/contacts", params={"q": q})
+```
+
+`async def` definuje **coroutinu** — funkci která může být pozastavena. `await` je bod pozastavení: předá řízení event loopu, který může obsluhovat jiné coroutiny, a obnoví tuto funkci až výsledek bude dostupný.
+
+Klíčový rozdíl od synchronního kódu: `await httpx.get(url)` nepozastaví **celé vlákno** (jako `requests.get(url)`), jen **tuto coroutinu**. Event loop mezitím obslouží stovky dalších requestů.
+
+### FastAPI dekorátory `@app.get` — routing jako metadata
+
+```python
+@app.get("/api/contacts")
+async def get_contacts(request: Request, q: str = "") -> Response:
+    ...
+```
+
+`@app.get("/api/contacts")` je dekorátor který **zaregistruje** funkci jako handler pro `GET /api/contacts`. FastAPI při startu projde všechny dekorované funkce a sestaví routing tabulku.
+
+Parametry funkce FastAPI automaticky mapuje:
+- `request: Request` → celý HTTP request objekt
+- `q: str = ""` → query parametr `?q=` s výchozí hodnotou `""`
+- `contact_id: str` v path `/{contact_id:path}` → část URL
+
+`:path` v `{contact_id:path}` říká FastAPI: tento segment může obsahovat lomítka (pro UUID je to sice zbytečné, ale robustní).
+
+### `asyncio.gather` — paralelní fan-out
+
+```python
+results = await asyncio.gather(
+    fetch_stats(CONTACTS_URL, "contacts"),
+    fetch_stats(SEARCH_URL, "search"),
+    fetch_stats(GATEWAY_URL, "gateway"),
+    return_exceptions=True,
+)
+```
+
+`gather` přijme N coroutin a spustí je **konkurentně** v jednom event loopu. Vrátí se až všechny skončí (nebo selžou).
+
+`return_exceptions=True` — kritická volba: bez toho by první výjimka zrušila celý gather a ostatní výsledky by se ztratily. S tímto parametrem se výjimka vrátí jako hodnota v poli výsledků — volající může ošetřit každý výsledek zvlášť.
+
+### Typové anotace a `str = ""`
+
+```python
+async def get_contacts(request: Request, q: str = "") -> Response:
+```
+
+Python typové anotace (`:str`, `-> Response`) jsou za běhu **informativní** — interpret je ignoruje. FastAPI je ale čte přes `inspect` modul a používá je pro:
+- automatické parsování a validaci parametrů
+- generování OpenAPI dokumentace (`/docs`)
+- srozumitelné chybové hlášky při špatném typu
+
+Výchozí hodnota `q: str = ""` říká: parametr je volitelný, pokud chybí, použij `""`. FastAPI nepošle `?q=` do backendu pokud je prázdné — params se filtrují.

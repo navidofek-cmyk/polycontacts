@@ -986,3 +986,66 @@ curl http://localhost:8080/db/tables
     | `GET` | `/db/tables` | Surová data obou tabulek (debug) | 200 |
     | `GET` | `/health` | Health check | 200 |
     | `GET` | `/stats` | Počty požadavků, chyb, uptime | 200 |
+
+---
+
+## Klíčové prvky jazyka C++20
+
+### `std::shared_mutex` — reader-writer lock
+
+```cpp
+mutable std::shared_mutex rw_;
+
+// Čtení — sdílený přístup, více vláken najednou
+std::shared_lock lock(rw_);
+
+// Zápis — exkluzivní přístup, blokuje všechna čtení
+std::unique_lock lock(rw_);
+```
+
+`shared_mutex` implementuje **reader-writer lock** přímo v hardware: na x86 využívá instrukci `LOCK CMPXCHG` pro atomické přepnutí stavu. Klíčové vlastnosti:
+- N čtenářů může držet `shared_lock` současně
+- Jeden zápis (`unique_lock`) čeká na dokončení **všech** aktivních čtení
+- Nová čtení čekají, dokud zápis neskončí (writer priority zabraňuje writer starvation)
+
+`mutable` umožňuje zamykání mutex i v `const` metodách — mutex sám o sobě není součástí logického stavu objektu.
+
+### `std::atomic<uint64_t>` — lock-free čítače
+
+```cpp
+std::atomic<uint64_t> req_count{0};
+req_count.fetch_add(1, std::memory_order_relaxed);
+```
+
+`atomic` operace jsou přeloženy na jedinou CPU instrukci (`LOCK ADD` na x86) — **bez mutex zámku**. `memory_order_relaxed` říká kompilátoru: tato operace nemusí být synchronizačním bodem s ostatními operacemi — jen samotný přírůstek musí být atomický. Pro čítače (kde nám nezáleží na pořadí relativně k jiným operacím) je to správná a nejrychlejší volba.
+
+### `std::optional<T>` — null safety
+
+```cpp
+std::optional<Contact> get_by_id(const std::string& id) const;
+
+// Volající musí explicitně ošetřit případ "nenalezeno"
+auto result = store.get_by_id(id);
+if (!result) { /* 404 */ return; }
+auto contact = *result;  // safe dereference
+```
+
+`optional<T>` je algebraický typ **Maybe** — buď obsahuje hodnotu (`some`), nebo je prázdný (`none`). Na rozdíl od `nullptr` nebo magic hodnot (`-1`, `""`) je nepřítomnost hodnoty **vyjádřena v typovém systému**. Kompilátor upozorní pokud se pokusíme použít optional bez kontroly.
+
+### `std::format` — typově bezpečné formátování (C++20)
+
+```cpp
+std::cout << std::format("[gateway] registered on attempt {}\n", i);
+```
+
+Před C++20: `printf("%s registered on attempt %d\n", name, i)` — typová bezpečnost je nulová, špatný formátovací string způsobí undefined behavior za běhu. `std::format` je kompilátorem ověřeno — nesprávné typy jsou chybou **při kompilaci**.
+
+### `std::ranges` a `std::views` — lazy evaluace (C++20)
+
+```cpp
+std::ranges::sort(contacts, comparator);
+
+for (auto& [k, v] : dom_vec | std::views::take(10))
+```
+
+`std::views::take(10)` je **lazy adapter** — nevytváří nový kontejner s 10 prvky, jen obalí iterátor logickým omezením. Data se kopírují až při iteraci. Řetězení views (`vec | take(10) | filter(...) | transform(...)`) sestaví pipeline bez mezilehlých alokací — podobně jako UNIX pipe.

@@ -863,3 +863,74 @@ Očekávaný výstup search:
   "took_ms": 0
 }
 ```
+
+---
+
+## Klíčové prvky jazyka Rust
+
+### `Arc<RwLock<T>>` — sdílené vlastnictví + vnitřní mutabilita
+
+```rust
+pub index: Arc<RwLock<SearchIndex>>,
+```
+
+Dvě ortogonální problémy, dvě obálky:
+
+**`Arc`** (Atomic Reference Counting) řeší sdílené vlastnictví. Rust jinak dovoluje pouze jednoho vlastníka — `Arc` umožňuje sdílet hodnotu mezi vlákny přes čítač referencí. Klonování `Arc` je levné (jen atomický přírůstek čítače), nezní se žádná data.
+
+**`RwLock`** řeší přístup k datům. Rust jinak dovoluje buď N sdílených referencí `&T` nebo jednu exkluzivní `&mut T` — nikdy obojí. `RwLock` tyto kontroly přesune z compile time do runtime: `read()` vrátí sdílenou referenci (mohou běžet paralelně), `write()` vrátí exkluzivní referenci (blokuje všechna čtení).
+
+`tokio::sync::RwLock` místo `std::sync::RwLock` — asynchronní varianta. Nečeká blokováním OS vlákna, ale pozastavením async tasku.
+
+### `#[derive(...)]` — procedurální makra
+
+```rust
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Contact { ... }
+```
+
+`#[derive]` je **procedurální makro** — generátor kódu spuštěný při kompilaci. Kompilátor předá AST (abstract syntax tree) struktury makru, makro vygeneruje implementaci traitu a vloží ji do zdrojového kódu.
+
+| Trait | Co vygeneruje |
+|---|---|
+| `Debug` | `impl fmt::Debug` — výpis `{:?}` pro debugging |
+| `Clone` | `impl Clone` — metoda `.clone()` pro kopírování |
+| `Serialize` | `impl serde::Serialize` — konverze do JSON/YAML/... |
+| `Deserialize` | `impl serde::Deserialize` — konverze z JSON/YAML/... |
+
+Alternativa by bylo napsat implementaci ručně — desítky řádků boilerplate pro každou strukturu.
+
+### `Option<T>` a `Result<T, E>` — algebraické typy
+
+```rust
+pub q: Option<String>,   // query parametr může chybět
+
+async fn handle() -> Result<Json<Value>, (StatusCode, Json<Value>)>
+```
+
+**`Option<T>`** — buď `Some(hodnota)` nebo `None`. Nahrazuje `null` z jiných jazyků, ale bezpečně — kompilátor vynucuje ošetření obou variant.
+
+**`Result<T, E>`** — buď `Ok(hodnota)` nebo `Err(chyba)`. Nahrazuje výjimky — chyba je součástí typového podpisu funkce, volající ji musí explicitně ošetřit.
+
+Operátor `?` je syntaktický cukr:
+```rust
+let data = some_operation()?;
+// ekvivalentní:
+let data = match some_operation() {
+    Ok(v) => v,
+    Err(e) => return Err(e.into()),
+};
+```
+
+### `impl Trait` — trait systém
+
+```rust
+impl SearchIndex {
+    pub fn rebuild(&mut self, contacts: &[Contact]) { ... }
+    pub fn search(&self, query: &str) -> Vec<Contact> { ... }
+}
+```
+
+**Trait** je podobný interface v Go nebo abstract class v C++ — definuje sadu metod. `impl SearchIndex` implementuje metody přímo na strukturu (ne trait). `&self` = sdílená reference (čtení), `&mut self` = exkluzivní reference (zápis).
+
+Rust nemá dědičnost — místo ní composition a traity. Chování se sdílí přes traity, ne přes třídy.

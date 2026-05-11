@@ -671,3 +671,77 @@ func main() {
 | `IdleTimeout` | 120s | Čas na přijetí dalšího požadavku na keep-alive spojení. Uvolní goroutinu po nečinném spojení — zabrání hromadění idle klientů. |
 
 `WriteTimeout` je záměrně 2× delší než `ReadTimeout` — při proxying může backend generovat velké odpovědi (export vCard, DB dump) a klient je stahuje pomalu. Příliš krátký `WriteTimeout` by tyto legitimní požadavky přerušil.
+
+---
+
+## Klíčové prvky jazyka Go
+
+### `interface` — strukturální typování (duck typing)
+
+```go
+type http.Handler interface {
+    ServeHTTP(ResponseWriter, *Request)
+}
+```
+
+Go nepoužívá nominální typování (`implements Handler`) ale **strukturální** — typ automaticky implementuje interface pokud má správné metody. `*Gateway` implementuje `http.Handler` protože má metodu `ServeHTTP` — bez explicitního deklarování.
+
+Výhoda: nižší coupling. Kód přijímající `http.Handler` neví nic o konkrétním typu, jen o metodách. To umožňuje snadné testování — `httptest.NewRecorder()` implementuje `http.ResponseWriter` a lze ho předat přímo.
+
+### `defer` — odložené volání
+
+```go
+g.mu.Lock()
+defer g.mu.Unlock()
+```
+
+`defer` přidá funkci na zásobník odložených volání — zavolá se těsně před návratem z aktuální funkce, **bez ohledu na to kudy funkce vrátí** (normálně, přes `return`, nebo přes `panic`).
+
+Klíčový vzor: zamknout mutex → ihned `defer Unlock()`. I když funkce vrátí chybou uprostřed, mutex se vždy odemkne. Bez `defer` by každá cesta kódem musela volat `Unlock()` ručně — snadný zdroj deadlocků.
+
+### `atomic.Int64` — lock-free čítače
+
+```go
+RequestCount atomic.Int64 `json:"-"`
+
+// inkrementace bez mutex zámku:
+entry.RequestCount.Add(1)
+
+// čtení:
+count := entry.RequestCount.Load()
+```
+
+`atomic.Int64` používá CPU instrukci **Compare-And-Swap (CAS)** — atomicky přečte hodnotu, zkontroluje ji a zapíše novou, vše v jedné nerozdělitelné operaci. Žádný mutex, žádný context switch, žádné čekání.
+
+`json:"-"` struct tag říká JSON enkodéru: toto pole přeskoč. `atomic.Int64` není plain `int64` — nelze ho bezpečně číst bez `.Load()`. Přímá serializace by způsobila data race.
+
+### `sync.RWMutex` — oddělení čtenářů a pisatelů
+
+```go
+var mu sync.RWMutex
+
+// Čtení — může běžet paralelně
+mu.RLock()
+defer mu.RUnlock()
+
+// Zápis — exkluzivní
+mu.Lock()
+defer mu.Unlock()
+```
+
+Go runtime implementuje fair RWMutex — pokud čeká pisatel, nová čtení se zablokují (writer priority). Zabraňuje **writer starvation**: situaci kdy read-heavy workload nikdy nedá šanci zápisu.
+
+### Goroutina jako background task
+
+```go
+go func() {
+    for {
+        time.Sleep(10 * time.Second)
+        checkAllServices(registry)
+    }
+}()
+```
+
+`go func()` spustí anonymní funkci jako novou goroutinu — nový "vlákno" v Go runtime, ne OS vlákno. Vrátí se okamžitě, health checker běží paralelně se zbytkem aplikace. Goroutina žije dokud funkce neskončí (nebo dokud program neskončí).
+
+Komunikace s goroutinou přes sdílenou paměť + mutex (jako zde) nebo přes **kanály** (`chan`) — Go idiom pro synchronizaci bez sdílené paměti.
