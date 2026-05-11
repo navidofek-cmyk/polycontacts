@@ -1,0 +1,2437 @@
+
+<!doctype html>
+<html lang="cs" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Microservices adresář kontaktů — RE tutorial v C++, Rust, Go, Python">
+      
+      
+      
+        <link rel="canonical" href="https://navidofek-cmyk.github.io/polycontacts/sluzby/go/">
+      
+      
+        <link rel="prev" href="../rust/">
+      
+      
+        <link rel="next" href="../python/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>gateway-go (Go) - polycontacts</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#gateway-go-pruvodce-kodem" class="md-skip">
+          Přeskočit obsah
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Záhlaví">
+    <a href="../.." title="polycontacts" class="md-header__button md-logo" aria-label="polycontacts" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            polycontacts
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              gateway-go (Go)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Světlý režim"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Světlý režim" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Tmavý režim"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Tmavý režim" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Hledat" placeholder="Hledat" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Vyhledávání">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Vyčistit" aria-label="Vyčistit" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializace vyhledávání
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/navidofek-cmyk/polycontacts" title="Přejít do repozitáře" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    navidofek-cmyk/polycontacts
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Karty" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Úvod
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../architektura/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architektura
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../cpp/" class="md-tabs__link">
+          
+  
+  
+  Služby
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../vykon/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Výkon & testy
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../technologie/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Technologický stack
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../re-spec/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  RE Spec
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigace" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="polycontacts" class="md-nav__button md-logo" aria-label="polycontacts" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    polycontacts
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/navidofek-cmyk/polycontacts" title="Přejít do repozitáře" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    navidofek-cmyk/polycontacts
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Úvod
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architektura/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architektura
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Služby
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Služby
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cpp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    contacts-cpp (C++20)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rust/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    search-rust (Rust)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    gateway-go (Go)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    gateway-go (Go)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Obsah">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Obsah
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#teorie-goroutiny-a-csp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Teorie: Goroutiny a CSP
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#teorie-mutex-vs-rwmutex" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Teorie: Mutex vs RWMutex
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#teorie-reverse-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Teorie: Reverse Proxy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prehled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Přehled
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gomod-a-proc-stdlib-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        go.mod a proč stdlib only
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#serviceentry-struct" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ServiceEntry struct
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ServiceEntry struct">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#atomicint64-proc-ne-int64-s-mutexem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        atomic.Int64 — proč ne int64 s mutexem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#json-tag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        json:"-" tag
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#proc-registeredat-a-lastchecked-zvlast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proč RegisteredAt a LastChecked zvlášť
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gateway-struct" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gateway struct
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Gateway struct">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#proc-dva-oddelene-rwmutex" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proč dva oddělené RWMutex
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mapstringserviceentry-pointer-ne-value" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        map[string]*ServiceEntry — pointer, ne value
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mapstringhttputilreverseproxy-proc-cachovat-proxy-objekt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        map[string]*httputil.ReverseProxy — proč cachovat proxy objekt
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#register-a-reverseproxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        register() a ReverseProxy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="register() a ReverseProxy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#httputilnewsinglehostreverseproxy-co-dela" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        httputil.NewSingleHostReverseProxy — co dělá
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#proc-override-director-nastavit-reqhost" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proč override Director: nastavit req.Host
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#proc-pridat-topologyedge-pri-registraci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proč přidat TopologyEdge při registraci
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#http-handlery-projdi-kazdy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HTTP handlery — projdi každý
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="HTTP handlery — projdi každý">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#handleregister" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        handleRegister
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handlelistservices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        handleListServices
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handlederegister" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        handleDeregister
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handlestats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        handleStats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handletopology-a-handleaddedge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        handleTopology a handleAddEdge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handleproxy-detailne" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        handleProxy — detailně
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#statusrecorder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        statusRecorder
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#runhealthchecker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        runHealthChecker
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="runHealthChecker">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#timenewticker-vs-timesleep-proc-ticker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        time.NewTicker vs time.Sleep — proč ticker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#goroutina-per-service-proc-ne-sekvencne" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Goroutina per service — proč ne sekvenčně
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#proc-lock-pri-update-ackoli-atomicint64-nepotrebuje-lock" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proč lock při update, ačkoli atomic.Int64 nepotřebuje lock
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#buildmux-a-main" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        buildMux a main()
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="buildMux a main()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#proc-specificke-routes-pred-catch-all" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proč specifické routes před catch-all /
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#timeouty-co-kazdy-chrani" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Timeouty — co každý chrání
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#klicove-prvky-jazyka-go" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Klíčové prvky jazyka Go
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Klíčové prvky jazyka Go">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#interface-strukturalni-typovani-duck-typing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        interface — strukturální typování (duck typing)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#defer-odlozene-volani" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        defer — odložené volání
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#atomicint64-lock-free-citace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        atomic.Int64 — lock-free čítače
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#syncrwmutex-oddeleni-ctenaru-a-pisatelu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sync.RWMutex — oddělení čtenářů a pisatelů
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#goroutina-jako-background-task" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Goroutina jako background task
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    bff-python (Python)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../vykon/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Výkon & testy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../technologie/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technologický stack
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../re-spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RE Spec
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Obsah">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Obsah
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#teorie-goroutiny-a-csp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Teorie: Goroutiny a CSP
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#teorie-mutex-vs-rwmutex" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Teorie: Mutex vs RWMutex
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#teorie-reverse-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Teorie: Reverse Proxy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prehled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Přehled
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gomod-a-proc-stdlib-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        go.mod a proč stdlib only
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#serviceentry-struct" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ServiceEntry struct
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ServiceEntry struct">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#atomicint64-proc-ne-int64-s-mutexem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        atomic.Int64 — proč ne int64 s mutexem
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#json-tag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        json:"-" tag
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#proc-registeredat-a-lastchecked-zvlast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proč RegisteredAt a LastChecked zvlášť
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gateway-struct" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gateway struct
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Gateway struct">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#proc-dva-oddelene-rwmutex" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proč dva oddělené RWMutex
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mapstringserviceentry-pointer-ne-value" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        map[string]*ServiceEntry — pointer, ne value
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mapstringhttputilreverseproxy-proc-cachovat-proxy-objekt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        map[string]*httputil.ReverseProxy — proč cachovat proxy objekt
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#register-a-reverseproxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        register() a ReverseProxy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="register() a ReverseProxy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#httputilnewsinglehostreverseproxy-co-dela" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        httputil.NewSingleHostReverseProxy — co dělá
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#proc-override-director-nastavit-reqhost" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proč override Director: nastavit req.Host
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#proc-pridat-topologyedge-pri-registraci" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proč přidat TopologyEdge při registraci
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#http-handlery-projdi-kazdy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HTTP handlery — projdi každý
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="HTTP handlery — projdi každý">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#handleregister" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        handleRegister
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handlelistservices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        handleListServices
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handlederegister" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        handleDeregister
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handlestats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        handleStats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handletopology-a-handleaddedge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        handleTopology a handleAddEdge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handleproxy-detailne" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        handleProxy — detailně
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#statusrecorder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        statusRecorder
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#runhealthchecker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        runHealthChecker
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="runHealthChecker">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#timenewticker-vs-timesleep-proc-ticker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        time.NewTicker vs time.Sleep — proč ticker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#goroutina-per-service-proc-ne-sekvencne" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Goroutina per service — proč ne sekvenčně
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#proc-lock-pri-update-ackoli-atomicint64-nepotrebuje-lock" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proč lock při update, ačkoli atomic.Int64 nepotřebuje lock
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#buildmux-a-main" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        buildMux a main()
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="buildMux a main()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#proc-specificke-routes-pred-catch-all" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proč specifické routes před catch-all /
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#timeouty-co-kazdy-chrani" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Timeouty — co každý chrání
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#klicove-prvky-jazyka-go" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Klíčové prvky jazyka Go
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Klíčové prvky jazyka Go">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#interface-strukturalni-typovani-duck-typing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        interface — strukturální typování (duck typing)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#defer-odlozene-volani" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        defer — odložené volání
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#atomicint64-lock-free-citace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        atomic.Int64 — lock-free čítače
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#syncrwmutex-oddeleni-ctenaru-a-pisatelu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sync.RWMutex — oddělení čtenářů a pisatelů
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#goroutina-jako-background-task" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Goroutina jako background task
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="gateway-go-pruvodce-kodem">gateway-go — Průvodce kódem</h1>
+<h2 id="teorie-goroutiny-a-csp">Teorie: Goroutiny a CSP</h2>
+<p>Go je postaveno na teorii <strong>CSP</strong> (Communicating Sequential Processes, Tony Hoare, 1978) — souběžné procesy komunikují přes kanály, ne přes sdílenou paměť.</p>
+<p><strong>Goroutina</strong> je lehké zelené vlákno spravované Go runtime, ne OS:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>OS vlákno</th>
+<th>Goroutina</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Paměť zásobníku</td>
+<td>~1 MB (fixní)</td>
+<td>~2 KB (roste dynamicky)</td>
+</tr>
+<tr>
+<td>Vytvoření</td>
+<td>~100 µs</td>
+<td>~1 µs</td>
+</tr>
+<tr>
+<td>Context switch</td>
+<td>kernel → uživatelský prostor</td>
+<td>čistě uživatelský prostor</td>
+</tr>
+<tr>
+<td>Maximální počet</td>
+<td>tisíce</td>
+<td>miliony</td>
+</tr>
+</tbody>
+</table>
+<p>Go runtime implementuje <strong>M:N threading</strong> — M goroutiny běží na N OS vláknech (typicky N = počet CPU jader). Scheduler je součástí Go runtime a rozhoduje kdy která goroutina běží.</p>
+<p>V gateway-go goroutiny používáme pro:
+- Každý příchozí HTTP request → obsloužen v nové goroutině
+- Background health checker → běží jako <code>go healthChecker()</code>
+- Paralelní health checky všech služeb najednou</p>
+<h2 id="teorie-mutex-vs-rwmutex">Teorie: Mutex vs RWMutex</h2>
+<p>Gateway drží registry služeb v mapě <code>map[string]*ServiceEntry</code>. Čtení (GET /services) i zápis (POST /services) přistupují ke stejné mapě → race condition bez synchronizace.</p>
+<p><strong><code>sync.Mutex</code></strong> — exkluzivní zámek. Jeden přistupuje, všichni ostatní čekají. Jednoduché, ale zbytečně pomalé pro read-heavy workload.</p>
+<p><strong><code>sync.RWMutex</code></strong> — čtecí/zápisový zámek:
+- <code>RLock()</code> — sdílená reference. Více goroutiny může číst zároveň.
+- <code>Lock()</code> — exkluzivní. Zápis čeká na dokončení všech čtení, pak blokuje nová čtení.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Goroutiny čtou:   [R1]─────────┐
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                  [R2]──────┐  │
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                  [R3]───┐  │  │
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>Goroutina píše:            [W]──────   (čeká na R1, R2, R3, pak blokuje nová čtení)
+</code></pre></div>
+<p>Pro registry služeb je čtení (health check dotazy, UI) výrazně častější než zápis (registrace při startu). <code>RWMutex</code> proto dává vyšší propustnost než plain <code>Mutex</code>.</p>
+<h2 id="teorie-reverse-proxy">Teorie: Reverse Proxy</h2>
+<p><code>httputil.ReverseProxy</code> ze stdlib implementuje <strong>transparentní proxy</strong> — přijme request, upraví hlavičky a přepošle ho na backend, odpověď přepošle zpět.</p>
+<p>Klíčové kroky:
+1. Parsuj URL prefix (<code>/contacts-cpp/contacts</code>) → najdi backend v registry
+2. Uprav <code>req.URL.Host</code> a <code>req.URL.Scheme</code> na backend adresu
+3. Odstraň prefix ze <code>req.URL.Path</code> (<code>/contacts-cpp/contacts</code> → <code>/contacts</code>)
+4. Přidej <code>X-Forwarded-For</code> hlavičku s IP klienta
+5. Přepošli request na backend a streamuj odpověď zpět</p>
+<p><code>statusRecorder</code> wrappuje <code>http.ResponseWriter</code> pro zachycení status kódu — stdlib <code>ResponseWriter</code> neumožňuje po odeslání zjistit jaký kód byl použit.</p>
+<h2 id="prehled">Přehled</h2>
+<p><code>gateway-go</code> je centrální API gateway celého systému. Plní tři role najednou:</p>
+<ol>
+<li><strong>Service registry</strong> — udržuje živý seznam backendových služeb s jejich zdravotním stavem.</li>
+<li><strong>Reverse proxy</strong> — přeposílá příchozí požadavky na správný backend podle URL prefixu.</li>
+<li><strong>Topology tracker</strong> — zaznamenává, kdo volá koho, pro vizualizaci závislostí v UI.</li>
+</ol>
+<p>Celý gateway je napsán v čistém Go bez jediné externí závislosti — jen stdlib.</p>
+<hr />
+<h2 id="gomod-a-proc-stdlib-only">go.mod a proč stdlib only</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>module gateway-go
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>go 1.22
+</code></pre></div>
+<p><code>go.mod</code> je záměrně prázdný — žádná sekce <code>require</code>. Veškerá funkcionalita pochází ze standardní knihovny Go.</p>
+<p>Proč? Každá přidaná závislost přináší:</p>
+<ul>
+<li><strong>Diamond dependency problem</strong> — dva balíčky závisejí na různých verzích stejného modulu a <code>go.sum</code> to musí nějak vyřešit.</li>
+<li><strong>Bezpečnostní audit</strong> — transitivní závislosti jsou zdrojem CVE, které musíš sledovat i když je sám nepoužíváš.</li>
+<li><strong>Buildovací cache</strong> — při každé změně závislosti se invalidují vrstvy Docker cache.</li>
+</ul>
+<p>Pro komponentu, která dělá HTTP routing, JSON serializaci a reverse proxy, je přínos frameworku mizivý. Klíčový balíček <code>net/http/httputil</code> je production-ready součástí Go stdlib — Google ho používá ve vlastní infrastruktuře. Gateway se kompiluje do jediného statického bináru, který nepotřebuje žádné runtime prostředí.</p>
+<hr />
+<h2 id="serviceentry-struct">ServiceEntry struct</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">ServiceEntry</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="nx">Name</span><span class="w">         </span><span class="kt">string</span><span class="w">    </span><span class="s">`json:&quot;name&quot;`</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nx">URL</span><span class="w">          </span><span class="kt">string</span><span class="w">    </span><span class="s">`json:&quot;url&quot;`</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nx">HealthPath</span><span class="w">   </span><span class="kt">string</span><span class="w">    </span><span class="s">`json:&quot;health_path&quot;`</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="nx">Routes</span><span class="w">       </span><span class="p">[]</span><span class="kt">string</span><span class="w">  </span><span class="s">`json:&quot;routes&quot;`</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="nx">Status</span><span class="w">       </span><span class="kt">string</span><span class="w">    </span><span class="s">`json:&quot;status&quot;`</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="nx">LatencyMs</span><span class="w">    </span><span class="kt">int64</span><span class="w">     </span><span class="s">`json:&quot;latency_ms&quot;`</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="nx">LastChecked</span><span class="w">  </span><span class="nx">time</span><span class="p">.</span><span class="nx">Time</span><span class="w"> </span><span class="s">`json:&quot;last_checked&quot;`</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="nx">RegisteredAt</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Time</span><span class="w"> </span><span class="s">`json:&quot;registered_at&quot;`</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="nx">RequestCount</span><span class="w"> </span><span class="nx">atomic</span><span class="p">.</span><span class="nx">Int64</span><span class="w"> </span><span class="s">`json:&quot;-&quot;`</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span><span class="nx">ErrorCount</span><span class="w">   </span><span class="nx">atomic</span><span class="p">.</span><span class="nx">Int64</span><span class="w"> </span><span class="s">`json:&quot;-&quot;`</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="p">}</span>
+</code></pre></div>
+<p>Každé pole má svůj důvod:</p>
+<table>
+<thead>
+<tr>
+<th>Pole</th>
+<th>Typ</th>
+<th>Proč</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Name</code></td>
+<td><code>string</code></td>
+<td>Primární klíč — identifikátor v mapě <code>services</code> i v URL prefixu</td>
+</tr>
+<tr>
+<td><code>URL</code></td>
+<td><code>string</code></td>
+<td>Interní adresa backendu v Docker síti, např. <code>http://contacts-cpp:8080</code></td>
+</tr>
+<tr>
+<td><code>HealthPath</code></td>
+<td><code>string</code></td>
+<td>Cesta health endpointu; výchozí <code>/health</code> pokud není uvedena</td>
+</tr>
+<tr>
+<td><code>Routes</code></td>
+<td><code>[]string</code></td>
+<td>Informativní seznam cest, které backend obsluhuje (pro UI, ne pro routing)</td>
+</tr>
+<tr>
+<td><code>Status</code></td>
+<td><code>string</code></td>
+<td><code>"healthy"</code> / <code>"unhealthy"</code> / <code>"unknown"</code> — výsledek posledního health checku</td>
+</tr>
+<tr>
+<td><code>LatencyMs</code></td>
+<td><code>int64</code></td>
+<td>Latence posledního health checku v milisekundách</td>
+</tr>
+<tr>
+<td><code>LastChecked</code></td>
+<td><code>time.Time</code></td>
+<td>Kdy byl proveden poslední health check</td>
+</tr>
+<tr>
+<td><code>RegisteredAt</code></td>
+<td><code>time.Time</code></td>
+<td>Kdy byla služba zaregistrována — pro audit a debugging</td>
+</tr>
+<tr>
+<td><code>RequestCount</code></td>
+<td><code>atomic.Int64</code></td>
+<td>Počet přeposlaných požadavků — atomický čítač</td>
+</tr>
+<tr>
+<td><code>ErrorCount</code></td>
+<td><code>atomic.Int64</code></td>
+<td>Počet odpovědí se statusem 5xx — atomický čítač</td>
+</tr>
+</tbody>
+</table>
+<h3 id="atomicint64-proc-ne-int64-s-mutexem"><code>atomic.Int64</code> — proč ne <code>int64</code> s mutexem</h3>
+<p><code>RequestCount</code> a <code>ErrorCount</code> se inkrementují z každé goroutiny obsluhy HTTP požadavku — potenciálně stovky souběžných goroutin zároveň. Klasický <code>int64</code> s mutexem by fungoval, ale zbytečně:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1">// S mutexem — drahé</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nx">mu</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nx">entry</span><span class="p">.</span><span class="nx">RequestCount</span><span class="o">++</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="c1">// Atomic — levné, lock-free</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="nx">entry</span><span class="p">.</span><span class="nx">RequestCount</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+<p><code>atomic.Int64</code> používá hardware instrukci <code>LOCK XADD</code> (na x86) nebo ekvivalentní instrukci na ARM. Tato instrukce garantuje atomicitu na úrovni CPU — žádné zamykání, žádný context switch. Interně jde o <strong>Compare-And-Swap (CAS)</strong>: CPU přečte hodnotu, přičte k ní delta, zapíše zpět — a celá tato sekvence je nedělitelná. Pokud dvě jádra zkusí zapsat zároveň, jedno uspěje a druhé se automaticky opakuje. Výsledkem je konzistentní hodnota bez jediného mutexu.</p>
+<h3 id="json-tag"><code>json:"-"</code> tag</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nx">RequestCount</span><span class="w"> </span><span class="nx">atomic</span><span class="p">.</span><span class="nx">Int64</span><span class="w"> </span><span class="s">`json:&quot;-&quot;`</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nx">ErrorCount</span><span class="w">   </span><span class="nx">atomic</span><span class="p">.</span><span class="nx">Int64</span><span class="w"> </span><span class="s">`json:&quot;-&quot;`</span>
+</code></pre></div>
+<p>Tag <code>json:"-"</code> říká standardnímu JSON encoderu: <strong>toto pole přeskoc</strong>. Důvody jsou dva:</p>
+<ol>
+<li><code>atomic.Int64</code> není plain hodnota — jde o struct s interním stavem, který <code>encoding/json</code> nedokáže bezpečně serializovat (přistupuje k poli přímo, nikoli přes metodu <code>.Load()</code>).</li>
+<li>I kdyby to technicky šlo, hodnoty se exponují zvlášť přes <code>/stats</code> endpoint pomocí <code>.Load()</code>, který zajistí správné atomické čtení.</li>
+</ol>
+<h3 id="proc-registeredat-a-lastchecked-zvlast">Proč <code>RegisteredAt</code> a <code>LastChecked</code> zvlášť</h3>
+<p><code>RegisteredAt</code> se nastaví jednou při registraci a nikdy se nemění — slouží k auditu ("tato služba je zaregistrovaná od X"). <code>LastChecked</code> se aktualizuje při každém health checku — říká "naposledy jsem viděl službu nahoře v Y". Jsou to dvě různé věci: jedna je identita záznamu, druhá je živý stav.</p>
+<hr />
+<h2 id="gateway-struct">Gateway struct</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Gateway</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="nx">mu</span><span class="w">       </span><span class="nx">sync</span><span class="p">.</span><span class="nx">RWMutex</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="nx">services</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="o">*</span><span class="nx">ServiceEntry</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="nx">proxies</span><span class="w">  </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="o">*</span><span class="nx">httputil</span><span class="p">.</span><span class="nx">ReverseProxy</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span><span class="nx">edgeMu</span><span class="w"> </span><span class="nx">sync</span><span class="p">.</span><span class="nx">RWMutex</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">    </span><span class="nx">edges</span><span class="w">  </span><span class="p">[]</span><span class="nx">TopologyEdge</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">    </span><span class="nx">startTime</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Time</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="proc-dva-oddelene-rwmutex">Proč dva oddělené <code>RWMutex</code></h3>
+<p><code>mu</code> chrání <code>services</code> a <code>proxies</code> — tato dvě pole se vždy mění společně (při registraci vznikne zároveň ServiceEntry i ReverseProxy, při odregistraci zaniknou oba). Proto sdílejí jeden mutex.</p>
+<p><code>edgeMu</code> chrání <code>edges</code> — topologie se mění nezávisle na registraci služeb. Hrana může být přidána kdykoli, bez jakékoli změny v <code>services</code>. Kdyby <code>edges</code> sdílely <code>mu</code> se <code>services</code>, čtení topologie by blokovalo registrace a naopak — zcela zbytečně.</p>
+<p><code>sync.RWMutex</code> navíc umožňuje <strong>souběžné čtení</strong>: metoda <code>RLock()</code> neblokuje ostatní čtenáře, pouze zapisovatele. Oddělené mutexy tedy maximalizují paralelismus — více goroutin může číst services i edges zároveň.</p>
+<h3 id="mapstringserviceentry-pointer-ne-value"><code>map[string]*ServiceEntry</code> — pointer, ne value</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nx">services</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="o">*</span><span class="nx">ServiceEntry</span><span class="w">  </span><span class="c1">// správně: pointer</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="c1">// services map[string]ServiceEntry  // špatně: kopie</span>
+</code></pre></div>
+<p>Mapa uchovává <strong>ukazatele</strong> na ServiceEntry, nikoli jejich kopie. To je zásadní ze dvou důvodů:</p>
+<ol>
+<li><code>atomic.Int64</code> uvnitř ServiceEntry se musí sdílet mezi handlerem (který inkrementuje čítač) a health checkerem (který čte stav). Kopie by měla vlastní čítač a sdílení by bylo iluzorní.</li>
+<li>Update health stavu (<code>s.Status = "healthy"</code>) musí být viditelný pro všechny goroutiny, které drží ukazatel. Kopie by změnu izolovala.</li>
+</ol>
+<h3 id="mapstringhttputilreverseproxy-proc-cachovat-proxy-objekt"><code>map[string]*httputil.ReverseProxy</code> — proč cachovat proxy objekt</h3>
+<p><code>httputil.ReverseProxy</code> není levný k vytvoření — inicializuje transport, nastaví Director funkci a alokuje interní struktury. Zároveň je navržen pro opakované použití a je goroutine-safe. Cachujeme ho v mapě při registraci a při každém příchozím požadavku ho jen vyhledáme — žádná alokace na hot path.</p>
+<hr />
+<h2 id="register-a-reverseproxy">register() a ReverseProxy</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">g</span><span class="w"> </span><span class="o">*</span><span class="nx">Gateway</span><span class="p">)</span><span class="w"> </span><span class="nx">register</span><span class="p">(</span><span class="nx">entry</span><span class="w"> </span><span class="o">*</span><span class="nx">ServiceEntry</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="nx">target</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">url</span><span class="p">.</span><span class="nx">Parse</span><span class="p">(</span><span class="nx">entry</span><span class="p">.</span><span class="nx">URL</span><span class="p">)</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Errorf</span><span class="p">(</span><span class="s">&quot;invalid URL %q: %w&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">URL</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span><span class="nx">proxy</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">httputil</span><span class="p">.</span><span class="nx">NewSingleHostReverseProxy</span><span class="p">(</span><span class="nx">target</span><span class="p">)</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="nx">origDirector</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">proxy</span><span class="p">.</span><span class="nx">Director</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span><span class="nx">proxy</span><span class="p">.</span><span class="nx">Director</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">req</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">        </span><span class="nx">origDirector</span><span class="p">(</span><span class="nx">req</span><span class="p">)</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">        </span><span class="nx">req</span><span class="p">.</span><span class="nx">Host</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">target</span><span class="p">.</span><span class="nx">Host</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">services</span><span class="p">[</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Name</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">entry</span>
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">proxies</span><span class="p">[</span><span class="nx">entry</span><span class="p">.</span><span class="nx">Name</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">proxy</span>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">edgeMu</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">edges</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">g</span><span class="p">.</span><span class="nx">edges</span><span class="p">,</span><span class="w"> </span><span class="nx">TopologyEdge</span><span class="p">{</span><span class="nx">From</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;gateway-go&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">To</span><span class="p">:</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Name</span><span class="p">})</span>
+<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a><span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">edgeMu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a>
+<a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span>
+<a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="httputilnewsinglehostreverseproxy-co-dela"><code>httputil.NewSingleHostReverseProxy</code> — co dělá</h3>
+<p>Vytvoří <code>http.Handler</code>, který:</p>
+<ol>
+<li>Přepíše <code>Scheme</code> a <code>Host</code> v URL požadavku na cílový backend.</li>
+<li>Přepošle požadavek (včetně těla a hlaviček) na backend.</li>
+<li>Zkopíruje odpověď backendu zpět ke klientovi.</li>
+</ol>
+<p>Veškerá logika HTTP tunelování — chunked encoding, WebSocket upgrade, error handling — je hotová a otestovaná.</p>
+<h3 id="proc-override-director-nastavit-reqhost">Proč override Director: nastavit <code>req.Host</code></h3>
+<p>Výchozí Director z <code>NewSingleHostReverseProxy</code> přepíše <code>req.URL.Scheme</code> a <code>req.URL.Host</code>, ale ponechá <code>req.Host</code> header z původního požadavku klienta (např. <code>localhost:9000</code>). Některé backendové frameworky (Django, FastAPI, Rails) validují <code>Host</code> header a odmítnou požadavek, pokud se neshoduje s jejich konfigurovanou doménou.</p>
+<p>Override Director proto nejprve zavolá původní logiku a pak přepíše <code>req.Host</code> na skutečný hostname backendu:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nx">origDirector</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">proxy</span><span class="p">.</span><span class="nx">Director</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nx">proxy</span><span class="p">.</span><span class="nx">Director</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">req</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="nx">origDirector</span><span class="p">(</span><span class="nx">req</span><span class="p">)</span><span class="w">          </span><span class="c1">// přepíše Scheme, Host v URL</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="nx">req</span><span class="p">.</span><span class="nx">Host</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">target</span><span class="p">.</span><span class="nx">Host</span><span class="w">     </span><span class="c1">// přepíše Host header na backend hostname</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="p">}</span>
+</code></pre></div>
+<p>Proč zachováme <code>origDirector</code>? Abychom nepřepsali jeho logiku — přepisuje <code>req.URL</code>, nastavuje <code>X-Forwarded-For</code> a další hlavičky. Chceme tu logiku, jen k ní přidáme jeden řádek.</p>
+<h3 id="proc-pridat-topologyedge-pri-registraci">Proč přidat TopologyEdge při registraci</h3>
+<p>Každá registrace automaticky přidá hranu <code>gateway-go → &lt;service&gt;</code>. Topologie tak vždy odráží fakt, že gateway je přímým volajícím každé registrované služby — bez nutnosti ručně tyto hrany přidávat.</p>
+<div class="admonition note">
+<p class="admonition-title">Parsování a alokace před zámkem</p>
+<p><code>url.Parse</code> a sestavení proxy objektu probíhají <strong>před</strong> zamčením <code>g.mu</code>. Zámek drží gateway co nejkratší dobu — pouze samotné zápisy do map — aby ostatní goroutiny (zejména proxy handlery) nebyly zbytečně blokovány.</p>
+</div>
+<hr />
+<h2 id="http-handlery-projdi-kazdy">HTTP handlery — projdi každý</h2>
+<h3 id="handleregister"><code>handleRegister</code></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">g</span><span class="w"> </span><span class="o">*</span><span class="nx">Gateway</span><span class="p">)</span><span class="w"> </span><span class="nx">handleRegister</span><span class="p">(</span><span class="nx">w</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Method</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">MethodPost</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">        </span><span class="nx">http</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;method not allowed&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusMethodNotAllowed</span><span class="p">)</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">        </span><span class="k">return</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">entry</span><span class="w"> </span><span class="nx">ServiceEntry</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">NewDecoder</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">Body</span><span class="p">).</span><span class="nx">Decode</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">entry</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">        </span><span class="nx">http</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;invalid JSON: &quot;</span><span class="o">+</span><span class="nx">err</span><span class="p">.</span><span class="nx">Error</span><span class="p">(),</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusBadRequest</span><span class="p">)</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">        </span><span class="k">return</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Name</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">URL</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">        </span><span class="nx">http</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;name and url are required&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusBadRequest</span><span class="p">)</span>
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">        </span><span class="k">return</span>
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">HealthPath</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="w">        </span><span class="nx">entry</span><span class="p">.</span><span class="nx">HealthPath</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;/health&quot;</span>
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a><span class="w">    </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Status</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;unknown&quot;</span>
+<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a><span class="w">    </span><span class="nx">entry</span><span class="p">.</span><span class="nx">RegisteredAt</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Now</span><span class="p">()</span>
+<a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a>
+<a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">register</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">entry</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a><span class="w">        </span><span class="nx">http</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">.</span><span class="nx">Error</span><span class="p">(),</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusBadRequest</span><span class="p">)</span>
+<a id="__codelineno-9-25" name="__codelineno-9-25" href="#__codelineno-9-25"></a><span class="w">        </span><span class="k">return</span>
+<a id="__codelineno-9-26" name="__codelineno-9-26" href="#__codelineno-9-26"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-9-27" name="__codelineno-9-27" href="#__codelineno-9-27"></a>
+<a id="__codelineno-9-28" name="__codelineno-9-28" href="#__codelineno-9-28"></a><span class="w">    </span><span class="nx">w</span><span class="p">.</span><span class="nx">Header</span><span class="p">().</span><span class="nx">Set</span><span class="p">(</span><span class="s">&quot;Content-Type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;application/json&quot;</span><span class="p">)</span>
+<a id="__codelineno-9-29" name="__codelineno-9-29" href="#__codelineno-9-29"></a><span class="w">    </span><span class="nx">w</span><span class="p">.</span><span class="nx">WriteHeader</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusCreated</span><span class="p">)</span>
+<a id="__codelineno-9-30" name="__codelineno-9-30" href="#__codelineno-9-30"></a><span class="w">    </span><span class="nx">json</span><span class="p">.</span><span class="nx">NewEncoder</span><span class="p">(</span><span class="nx">w</span><span class="p">).</span><span class="nx">Encode</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span><span class="s">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;registered&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">Name</span><span class="p">})</span>
+<a id="__codelineno-9-31" name="__codelineno-9-31" href="#__codelineno-9-31"></a><span class="p">}</span>
+</code></pre></div>
+<p>Postup: ověření metody → JSON decode → validace povinných polí → nastavení výchozích hodnot → volání <code>register()</code> → odpověď <code>201 Created</code>.</p>
+<p>Status se nastavuje na <code>"unknown"</code> protože health checker ještě neprovedl první kontrolu. <code>RegisteredAt</code> se nastaví zde, nikoli v <code>register()</code>, protože <code>register()</code> může být voláno i z jiných míst v budoucnu.</p>
+<hr />
+<h3 id="handlelistservices"><code>handleListServices</code></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">g</span><span class="w"> </span><span class="o">*</span><span class="nx">Gateway</span><span class="p">)</span><span class="w"> </span><span class="nx">handleListServices</span><span class="p">(</span><span class="nx">w</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">RLock</span><span class="p">()</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">    </span><span class="nx">list</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="o">*</span><span class="nx">ServiceEntry</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">g</span><span class="p">.</span><span class="nx">services</span><span class="p">))</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">svc</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">services</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">        </span><span class="nx">list</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">list</span><span class="p">,</span><span class="w"> </span><span class="nx">svc</span><span class="p">)</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">RUnlock</span><span class="p">()</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">    </span><span class="kd">type</span><span class="w"> </span><span class="nx">serviceView</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">        </span><span class="nx">Name</span><span class="w">         </span><span class="kt">string</span><span class="w">    </span><span class="s">`json:&quot;name&quot;`</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="w">        </span><span class="nx">URL</span><span class="w">          </span><span class="kt">string</span><span class="w">    </span><span class="s">`json:&quot;url&quot;`</span>
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="w">        </span><span class="nx">HealthPath</span><span class="w">   </span><span class="kt">string</span><span class="w">    </span><span class="s">`json:&quot;health_path&quot;`</span>
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="w">        </span><span class="nx">Routes</span><span class="w">       </span><span class="p">[]</span><span class="kt">string</span><span class="w">  </span><span class="s">`json:&quot;routes&quot;`</span>
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="w">        </span><span class="nx">Status</span><span class="w">       </span><span class="kt">string</span><span class="w">    </span><span class="s">`json:&quot;status&quot;`</span>
+<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a><span class="w">        </span><span class="nx">LatencyMs</span><span class="w">    </span><span class="kt">int64</span><span class="w">     </span><span class="s">`json:&quot;latency_ms&quot;`</span>
+<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a><span class="w">        </span><span class="nx">LastChecked</span><span class="w">  </span><span class="nx">time</span><span class="p">.</span><span class="nx">Time</span><span class="w"> </span><span class="s">`json:&quot;last_checked&quot;`</span>
+<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a><span class="w">        </span><span class="nx">RegisteredAt</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Time</span><span class="w"> </span><span class="s">`json:&quot;registered_at&quot;`</span>
+<a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a><span class="w">        </span><span class="nx">RequestCount</span><span class="w"> </span><span class="kt">int64</span><span class="w">     </span><span class="s">`json:&quot;request_count&quot;`</span>
+<a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a><span class="w">        </span><span class="nx">ErrorCount</span><span class="w">   </span><span class="kt">int64</span><span class="w">     </span><span class="s">`json:&quot;error_count&quot;`</span>
+<a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a>
+<a id="__codelineno-10-22" name="__codelineno-10-22" href="#__codelineno-10-22"></a><span class="w">    </span><span class="nx">views</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="nx">serviceView</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">list</span><span class="p">))</span>
+<a id="__codelineno-10-23" name="__codelineno-10-23" href="#__codelineno-10-23"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">svc</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">list</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-24" name="__codelineno-10-24" href="#__codelineno-10-24"></a><span class="w">        </span><span class="nx">views</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">views</span><span class="p">,</span><span class="w"> </span><span class="nx">serviceView</span><span class="p">{</span>
+<a id="__codelineno-10-25" name="__codelineno-10-25" href="#__codelineno-10-25"></a><span class="w">            </span><span class="c1">// ...</span>
+<a id="__codelineno-10-26" name="__codelineno-10-26" href="#__codelineno-10-26"></a><span class="w">            </span><span class="nx">RequestCount</span><span class="p">:</span><span class="w"> </span><span class="nx">svc</span><span class="p">.</span><span class="nx">RequestCount</span><span class="p">.</span><span class="nx">Load</span><span class="p">(),</span>
+<a id="__codelineno-10-27" name="__codelineno-10-27" href="#__codelineno-10-27"></a><span class="w">            </span><span class="nx">ErrorCount</span><span class="p">:</span><span class="w">   </span><span class="nx">svc</span><span class="p">.</span><span class="nx">ErrorCount</span><span class="p">.</span><span class="nx">Load</span><span class="p">(),</span>
+<a id="__codelineno-10-28" name="__codelineno-10-28" href="#__codelineno-10-28"></a><span class="w">        </span><span class="p">})</span>
+<a id="__codelineno-10-29" name="__codelineno-10-29" href="#__codelineno-10-29"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-10-30" name="__codelineno-10-30" href="#__codelineno-10-30"></a>
+<a id="__codelineno-10-31" name="__codelineno-10-31" href="#__codelineno-10-31"></a><span class="w">    </span><span class="nx">w</span><span class="p">.</span><span class="nx">Header</span><span class="p">().</span><span class="nx">Set</span><span class="p">(</span><span class="s">&quot;Content-Type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;application/json&quot;</span><span class="p">)</span>
+<a id="__codelineno-10-32" name="__codelineno-10-32" href="#__codelineno-10-32"></a><span class="w">    </span><span class="nx">json</span><span class="p">.</span><span class="nx">NewEncoder</span><span class="p">(</span><span class="nx">w</span><span class="p">).</span><span class="nx">Encode</span><span class="p">(</span><span class="nx">views</span><span class="p">)</span>
+<a id="__codelineno-10-33" name="__codelineno-10-33" href="#__codelineno-10-33"></a><span class="p">}</span>
+</code></pre></div>
+<p><strong>Proč <code>serviceView</code> struct místo přímé serializace <code>ServiceEntry</code>?</strong></p>
+<p><code>ServiceEntry</code> obsahuje <code>atomic.Int64</code>, která nemá JSON tag (má <code>json:"-"</code>). Přímá serializace by tato pole vynechala. Lokální <code>serviceView</code> struct slouží jako <strong>DTO (Data Transfer Object)</strong> — má plain <code>int64</code> pro <code>RequestCount</code> a <code>ErrorCount</code>, které se naplní voláním <code>.Load()</code>. Zároveň umožňuje naplnit snapshot atomických hodnot <strong>po</strong> uvolnění RLock, bez rizika race condition.</p>
+<hr />
+<h3 id="handlederegister"><code>handleDeregister</code></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">g</span><span class="w"> </span><span class="o">*</span><span class="nx">Gateway</span><span class="p">)</span><span class="w"> </span><span class="nx">handleDeregister</span><span class="p">(</span><span class="nx">w</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">    </span><span class="nx">name</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">TrimPrefix</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">URL</span><span class="p">.</span><span class="nx">Path</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;/services/&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span><span class="nx">name</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">Trim</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;/&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">        </span><span class="nx">http</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;service name required&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusBadRequest</span><span class="p">)</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">        </span><span class="k">return</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">!</span><span class="nx">g</span><span class="p">.</span><span class="nx">deregister</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="w">        </span><span class="nx">http</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;service not found&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusNotFound</span><span class="p">)</span>
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a><span class="w">        </span><span class="k">return</span>
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="w">    </span><span class="nx">w</span><span class="p">.</span><span class="nx">Header</span><span class="p">().</span><span class="nx">Set</span><span class="p">(</span><span class="s">&quot;Content-Type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;application/json&quot;</span><span class="p">)</span>
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a><span class="w">    </span><span class="nx">json</span><span class="p">.</span><span class="nx">NewEncoder</span><span class="p">(</span><span class="nx">w</span><span class="p">).</span><span class="nx">Encode</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span><span class="s">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;deregistered&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="nx">name</span><span class="p">})</span>
+<a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a><span class="p">}</span>
+</code></pre></div>
+<p><code>strings.TrimPrefix</code> odstraní <code>/services/</code> ze začátku cesty a vrátí název služby. Druhý <code>strings.Trim</code> odstraní případné trailing lomítko — <code>DELETE /services/contacts/</code> a <code>DELETE /services/contacts</code> jsou ekvivalentní. Pokud <code>deregister()</code> vrátí <code>false</code>, služba neexistovala → odpověď <code>404</code>.</p>
+<hr />
+<h3 id="handlestats"><code>handleStats</code></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">g</span><span class="w"> </span><span class="o">*</span><span class="nx">Gateway</span><span class="p">)</span><span class="w"> </span><span class="nx">handleStats</span><span class="p">(</span><span class="nx">w</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">RLock</span><span class="p">()</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">    </span><span class="nx">stats</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">int64</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">g</span><span class="p">.</span><span class="nx">services</span><span class="p">))</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="nx">svc</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">services</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">        </span><span class="nx">stats</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">int64</span><span class="p">{</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">            </span><span class="s">&quot;request_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="nx">svc</span><span class="p">.</span><span class="nx">RequestCount</span><span class="p">.</span><span class="nx">Load</span><span class="p">(),</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">            </span><span class="s">&quot;error_count&quot;</span><span class="p">:</span><span class="w">   </span><span class="nx">svc</span><span class="p">.</span><span class="nx">ErrorCount</span><span class="p">.</span><span class="nx">Load</span><span class="p">(),</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">RUnlock</span><span class="p">()</span>
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="w">    </span><span class="nx">w</span><span class="p">.</span><span class="nx">Header</span><span class="p">().</span><span class="nx">Set</span><span class="p">(</span><span class="s">&quot;Content-Type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;application/json&quot;</span><span class="p">)</span>
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="w">    </span><span class="nx">json</span><span class="p">.</span><span class="nx">NewEncoder</span><span class="p">(</span><span class="nx">w</span><span class="p">).</span><span class="nx">Encode</span><span class="p">(</span><span class="nx">stats</span><span class="p">)</span>
+<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="p">}</span>
+</code></pre></div>
+<p>Handler čte pod <code>RLock</code> — ostatní čtenáři mohou číst zároveň. <code>.Load()</code> je atomické a bezpečné i pod RLock, protože atomic operace nepotřebují vlastní mutex. Výsledkem je mapa <code>{ "contacts-cpp": { "request_count": 42, "error_count": 1 }, ... }</code>.</p>
+<hr />
+<h3 id="handletopology-a-handleaddedge"><code>handleTopology</code> a <code>handleAddEdge</code></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">g</span><span class="w"> </span><span class="o">*</span><span class="nx">Gateway</span><span class="p">)</span><span class="w"> </span><span class="nx">handleTopology</span><span class="p">(</span><span class="nx">w</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">edgeMu</span><span class="p">.</span><span class="nx">RLock</span><span class="p">()</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">    </span><span class="nx">edges</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="nx">TopologyEdge</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">g</span><span class="p">.</span><span class="nx">edges</span><span class="p">))</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">    </span><span class="nb">copy</span><span class="p">(</span><span class="nx">edges</span><span class="p">,</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">edges</span><span class="p">)</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">edgeMu</span><span class="p">.</span><span class="nx">RUnlock</span><span class="p">()</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="w">    </span><span class="nx">w</span><span class="p">.</span><span class="nx">Header</span><span class="p">().</span><span class="nx">Set</span><span class="p">(</span><span class="s">&quot;Content-Type&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;application/json&quot;</span><span class="p">)</span>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="w">    </span><span class="nx">json</span><span class="p">.</span><span class="nx">NewEncoder</span><span class="p">(</span><span class="nx">w</span><span class="p">).</span><span class="nx">Encode</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">any</span><span class="p">{</span><span class="s">&quot;edges&quot;</span><span class="p">:</span><span class="w"> </span><span class="nx">edges</span><span class="p">})</span>
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">g</span><span class="w"> </span><span class="o">*</span><span class="nx">Gateway</span><span class="p">)</span><span class="w"> </span><span class="nx">handleAddEdge</span><span class="p">(</span><span class="nx">w</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">edge</span><span class="w"> </span><span class="nx">TopologyEdge</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">json</span><span class="p">.</span><span class="nx">NewDecoder</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">Body</span><span class="p">).</span><span class="nx">Decode</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">edge</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="w">        </span><span class="nx">http</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;invalid JSON: &quot;</span><span class="o">+</span><span class="nx">err</span><span class="p">.</span><span class="nx">Error</span><span class="p">(),</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusBadRequest</span><span class="p">)</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">        </span><span class="k">return</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">edge</span><span class="p">.</span><span class="nx">From</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">edge</span><span class="p">.</span><span class="nx">To</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="w">        </span><span class="nx">http</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;from and to are required&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusBadRequest</span><span class="p">)</span>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="w">        </span><span class="k">return</span>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">edgeMu</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">edges</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">g</span><span class="p">.</span><span class="nx">edges</span><span class="p">,</span><span class="w"> </span><span class="nx">edge</span><span class="p">)</span>
+<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a><span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">edgeMu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+<a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a>
+<a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a><span class="w">    </span><span class="nx">w</span><span class="p">.</span><span class="nx">WriteHeader</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusCreated</span><span class="p">)</span>
+<a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a><span class="w">    </span><span class="nx">json</span><span class="p">.</span><span class="nx">NewEncoder</span><span class="p">(</span><span class="nx">w</span><span class="p">).</span><span class="nx">Encode</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span><span class="s">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ok&quot;</span><span class="p">})</span>
+<a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a><span class="p">}</span>
+</code></pre></div>
+<p><code>handleTopology</code> zkopíruje slice pod zámkem (<code>copy</code>) — serializace pak probíhá bez zámku, bez rizika race condition při souběžném přidávání hran. <code>handleAddEdge</code> umožňuje službám registrovat vlastní hrany (např. <code>bff-python → contacts-cpp</code>), čímž se topologie stává kompletním grafem závislostí.</p>
+<hr />
+<h3 id="handleproxy-detailne"><code>handleProxy</code> — detailně</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">g</span><span class="w"> </span><span class="o">*</span><span class="nx">Gateway</span><span class="p">)</span><span class="w"> </span><span class="nx">handleProxy</span><span class="p">(</span><span class="nx">w</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">    </span><span class="nx">parts</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">SplitN</span><span class="p">(</span><span class="nx">strings</span><span class="p">.</span><span class="nx">TrimPrefix</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">URL</span><span class="p">.</span><span class="nx">Path</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;/&quot;</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;/&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">    </span><span class="nx">serviceName</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">serviceName</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">        </span><span class="nx">http</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;missing service name in path&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusNotFound</span><span class="p">)</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">        </span><span class="k">return</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">RLock</span><span class="p">()</span>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="w">    </span><span class="nx">svc</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">services</span><span class="p">[</span><span class="nx">serviceName</span><span class="p">]</span>
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="w">    </span><span class="nx">proxy</span><span class="p">,</span><span class="w"> </span><span class="nx">pok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">proxies</span><span class="p">[</span><span class="nx">serviceName</span><span class="p">]</span>
+<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a><span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">RUnlock</span><span class="p">()</span>
+<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a>
+<a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">!</span><span class="nx">ok</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">!</span><span class="nx">pok</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-15" name="__codelineno-15-15" href="#__codelineno-15-15"></a><span class="w">        </span><span class="nx">http</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">&quot;service %q not registered&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">serviceName</span><span class="p">),</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusNotFound</span><span class="p">)</span>
+<a id="__codelineno-15-16" name="__codelineno-15-16" href="#__codelineno-15-16"></a><span class="w">        </span><span class="k">return</span>
+<a id="__codelineno-15-17" name="__codelineno-15-17" href="#__codelineno-15-17"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-15-18" name="__codelineno-15-18" href="#__codelineno-15-18"></a>
+<a id="__codelineno-15-19" name="__codelineno-15-19" href="#__codelineno-15-19"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">parts</span><span class="p">)</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-20" name="__codelineno-15-20" href="#__codelineno-15-20"></a><span class="w">        </span><span class="nx">r</span><span class="p">.</span><span class="nx">URL</span><span class="p">.</span><span class="nx">Path</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;/&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<a id="__codelineno-15-21" name="__codelineno-15-21" href="#__codelineno-15-21"></a><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-22" name="__codelineno-15-22" href="#__codelineno-15-22"></a><span class="w">        </span><span class="nx">r</span><span class="p">.</span><span class="nx">URL</span><span class="p">.</span><span class="nx">Path</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;/&quot;</span>
+<a id="__codelineno-15-23" name="__codelineno-15-23" href="#__codelineno-15-23"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-15-24" name="__codelineno-15-24" href="#__codelineno-15-24"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">URL</span><span class="p">.</span><span class="nx">RawPath</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-25" name="__codelineno-15-25" href="#__codelineno-15-25"></a><span class="w">        </span><span class="nx">rawParts</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">strings</span><span class="p">.</span><span class="nx">SplitN</span><span class="p">(</span><span class="nx">strings</span><span class="p">.</span><span class="nx">TrimPrefix</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">URL</span><span class="p">.</span><span class="nx">RawPath</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;/&quot;</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;/&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span>
+<a id="__codelineno-15-26" name="__codelineno-15-26" href="#__codelineno-15-26"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">rawParts</span><span class="p">)</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-27" name="__codelineno-15-27" href="#__codelineno-15-27"></a><span class="w">            </span><span class="nx">r</span><span class="p">.</span><span class="nx">URL</span><span class="p">.</span><span class="nx">RawPath</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;/&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">rawParts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<a id="__codelineno-15-28" name="__codelineno-15-28" href="#__codelineno-15-28"></a><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-29" name="__codelineno-15-29" href="#__codelineno-15-29"></a><span class="w">            </span><span class="nx">r</span><span class="p">.</span><span class="nx">URL</span><span class="p">.</span><span class="nx">RawPath</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;/&quot;</span>
+<a id="__codelineno-15-30" name="__codelineno-15-30" href="#__codelineno-15-30"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-15-31" name="__codelineno-15-31" href="#__codelineno-15-31"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-15-32" name="__codelineno-15-32" href="#__codelineno-15-32"></a>
+<a id="__codelineno-15-33" name="__codelineno-15-33" href="#__codelineno-15-33"></a><span class="w">    </span><span class="nx">svc</span><span class="p">.</span><span class="nx">RequestCount</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<a id="__codelineno-15-34" name="__codelineno-15-34" href="#__codelineno-15-34"></a>
+<a id="__codelineno-15-35" name="__codelineno-15-35" href="#__codelineno-15-35"></a><span class="w">    </span><span class="nx">rw</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">statusRecorder</span><span class="p">{</span><span class="nx">ResponseWriter</span><span class="p">:</span><span class="w"> </span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="nx">code</span><span class="p">:</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">}</span>
+<a id="__codelineno-15-36" name="__codelineno-15-36" href="#__codelineno-15-36"></a><span class="w">    </span><span class="nx">proxy</span><span class="p">.</span><span class="nx">ServeHTTP</span><span class="p">(</span><span class="nx">rw</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="p">)</span>
+<a id="__codelineno-15-37" name="__codelineno-15-37" href="#__codelineno-15-37"></a>
+<a id="__codelineno-15-38" name="__codelineno-15-38" href="#__codelineno-15-38"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">rw</span><span class="p">.</span><span class="nx">code</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">500</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-39" name="__codelineno-15-39" href="#__codelineno-15-39"></a><span class="w">        </span><span class="nx">svc</span><span class="p">.</span><span class="nx">ErrorCount</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<a id="__codelineno-15-40" name="__codelineno-15-40" href="#__codelineno-15-40"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-15-41" name="__codelineno-15-41" href="#__codelineno-15-41"></a><span class="p">}</span>
+</code></pre></div>
+<p><strong><code>strings.SplitN</code> s limitem 2:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>Vstup: &quot;/contacts-cpp/api/users/123&quot;
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>TrimPrefix: &quot;contacts-cpp/api/users/123&quot;
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>SplitN(..., 2): [&quot;contacts-cpp&quot;, &quot;api/users/123&quot;]
+</code></pre></div>
+<p>Limit <code>2</code> zajistí, že zbytek cesty za prvním lomítkem zůstane celý v <code>parts[1]</code> — nevznikají zbytečné alokace pro dlouhé cesty a backend dostane cestu přesně tak, jak ji klient poslal.</p>
+<p><strong>Path stripping:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>Klient volá:   GET /contacts-cpp/api/users/123
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>Gateway předá: GET /api/users/123  →  http://contacts-cpp:8080
+</code></pre></div>
+<p><strong><code>RawPath</code> edge case:</strong></p>
+<p><code>r.URL.Path</code> je dekódovaná verze cesty (např. <code>/files/my file.txt</code>). <code>r.URL.RawPath</code> je percent-encoded verze (<code>/files/my%20file.txt</code>) a nastaví se pouze pokud se liší od <code>Path</code>. <code>httputil.ReverseProxy</code> preferuje <code>RawPath</code> pokud je nastaveno — proto musíme stripovat prefix i tam. Kdybychom to neudělali, backend by viděl <code>/contacts-cpp/files/my%20file.txt</code> místo <code>/files/my%20file.txt</code>.</p>
+<p><strong><code>statusRecorder</code>:</strong></p>
+<p><code>httputil.ReverseProxy</code> volá <code>WriteHeader</code> interně — bez wrapperu bychom nikdy nezjistili status kód odpovědi backendu. <code>statusRecorder</code> ho zachytí a umožní nám inkrementovat <code>ErrorCount</code> při 5xx.</p>
+<p><strong>Proč jen 5xx, ne 4xx?</strong></p>
+<p>5xx jsou chyby backendu — backend selhal při zpracování. 4xx jsou chyby klienta (špatný požadavek, chybějící autorizace) — backend funguje správně, jen klient poslal neplatný požadavek. Počítáme problémy služby, ne problémy klientů.</p>
+<hr />
+<h2 id="statusrecorder">statusRecorder</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">statusRecorder</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">    </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">    </span><span class="nx">code</span><span class="w">    </span><span class="kt">int</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="w">    </span><span class="nx">written</span><span class="w"> </span><span class="kt">bool</span>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="p">}</span>
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">sr</span><span class="w"> </span><span class="o">*</span><span class="nx">statusRecorder</span><span class="p">)</span><span class="w"> </span><span class="nx">WriteHeader</span><span class="p">(</span><span class="nx">code</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">!</span><span class="nx">sr</span><span class="p">.</span><span class="nx">written</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="w">        </span><span class="nx">sr</span><span class="p">.</span><span class="nx">code</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">code</span>
+<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="w">        </span><span class="nx">sr</span><span class="p">.</span><span class="nx">written</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a><span class="w">    </span><span class="nx">sr</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">.</span><span class="nx">WriteHeader</span><span class="p">(</span><span class="nx">code</span><span class="p">)</span>
+<a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a><span class="p">}</span>
+</code></pre></div>
+<p><code>statusRecorder</code> embedduje <code>http.ResponseWriter</code> — jde o <strong>struct embedding rozhraní</strong>. To znamená, že všechny metody <code>ResponseWriter</code> (<code>Write</code>, <code>Header</code>, atd.) jsou automaticky delegovány na vložené rozhraní. Nepíšeme forwarding metody ručně — Go to udělá za nás. Přepišujeme pouze <code>WriteHeader</code>.</p>
+<p><strong><code>written bool</code> guard:</strong></p>
+<p>HTTP protokol neumožňuje po odeslání hlaviček změnit status kód. <code>httputil.ReverseProxy</code> může za určitých okolností volat <code>WriteHeader</code> vícekrát (např. při přepisu chybové odpovědi backendu). Guard <code>written</code> zajistí, že zachytíme pouze první volání — to, které skutečně určí status kód odpovědi.</p>
+<div class="admonition warning">
+<p class="admonition-title">Embedding interface vs embedding struct</p>
+<p>Pokud by <code>statusRecorder</code> embeddoval konkrétní typ (ne rozhraní), museli bychom ho přebírat jako pointer na konkrétní implementaci ResponseWriter. Embedding rozhraní umožňuje zabalit libovolnou implementaci ResponseWriter — gateway tak funguje s jakýmkoli HTTP serverem, nejen se standardním.</p>
+</div>
+<hr />
+<h2 id="runhealthchecker">runHealthChecker</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">g</span><span class="w"> </span><span class="o">*</span><span class="nx">Gateway</span><span class="p">)</span><span class="w"> </span><span class="nx">runHealthChecker</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="w">    </span><span class="nx">ticker</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">NewTicker</span><span class="p">(</span><span class="mi">10</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">    </span><span class="k">defer</span><span class="w"> </span><span class="nx">ticker</span><span class="p">.</span><span class="nx">Stop</span><span class="p">()</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="w">    </span><span class="nx">client</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">http</span><span class="p">.</span><span class="nx">Client</span><span class="p">{</span><span class="nx">Timeout</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">}</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">ticker</span><span class="p">.</span><span class="nx">C</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="w">        </span><span class="nx">g</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">RLock</span><span class="p">()</span>
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="w">        </span><span class="nx">names</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">g</span><span class="p">.</span><span class="nx">services</span><span class="p">))</span>
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">services</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="w">            </span><span class="nx">names</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">names</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="p">)</span>
+<a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a><span class="w">        </span><span class="nx">g</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">RUnlock</span><span class="p">()</span>
+<a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a>
+<a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">names</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a><span class="w">            </span><span class="k">go</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">checkHealth</span><span class="p">(</span><span class="nx">client</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="p">)</span>
+<a id="__codelineno-19-17" name="__codelineno-19-17" href="#__codelineno-19-17"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-19-18" name="__codelineno-19-18" href="#__codelineno-19-18"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-19-19" name="__codelineno-19-19" href="#__codelineno-19-19"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="timenewticker-vs-timesleep-proc-ticker"><code>time.NewTicker</code> vs <code>time.Sleep</code> — proč ticker</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="c1">// time.Sleep — driftuje</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="k">for</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="w">    </span><span class="nx">checkAll</span><span class="p">()</span>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="w">    </span><span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">10</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span><span class="w">  </span><span class="c1">// interval = 10s + doba trvání checkAll()</span>
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="p">}</span>
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="c1">// time.NewTicker — drift-free</span>
+<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="nx">ticker</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">NewTicker</span><span class="p">(</span><span class="mi">10</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
+<a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a><span class="k">for</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">ticker</span><span class="p">.</span><span class="nx">C</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a><span class="w">    </span><span class="k">go</span><span class="w"> </span><span class="nx">checkAll</span><span class="p">()</span><span class="w">  </span><span class="c1">// ticker tik každých přesně 10s, bez ohledu na dobu trvání</span>
+<a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a><span class="p">}</span>
+</code></pre></div>
+<p><code>time.Sleep</code> přidá prodlevu <strong>za</strong> provedenou prací — reálný interval je <code>10s + doba trvání health checků</code>. U pěti pomalých backendů s timeoutem 5s by interval byl <code>10s + 5s = 15s</code>. <code>time.NewTicker</code> tick každých přesně 10 sekund od posledního tiku, nezávisle na době zpracování. Výsledkem je přibližně konstantní interval i při proměnlivé latenci backendů.</p>
+<h3 id="goroutina-per-service-proc-ne-sekvencne">Goroutina per service — proč ne sekvenčně</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">names</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="w">    </span><span class="k">go</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">checkHealth</span><span class="p">(</span><span class="nx">client</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="p">)</span><span class="w">  </span><span class="c1">// paralelně</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="p">}</span>
+</code></pre></div>
+<p>Bez <code>go</code> by N nedostupných služeb s timeoutem 5s znamenalo <code>N × 5s</code> čekání — 10 služeb = 50s na jeden cyklus, přičemž cyklus se opakuje každých 10s. Se samostatnou goroutinou na každou službu probíhají všechny health checky paralelně a celý cyklus trvá maximálně 5s (timeout jednoho checku).</p>
+<h3 id="proc-lock-pri-update-ackoli-atomicint64-nepotrebuje-lock">Proč lock při update, ačkoli <code>atomic.Int64</code> nepotřebuje lock</h3>
+<p>V <code>checkHealth</code> se pod write lockem aktualizují tři pole najednou:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="nx">g</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="k">if</span><span class="w"> </span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="nx">exists</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">services</span><span class="p">[</span><span class="nx">name</span><span class="p">];</span><span class="w"> </span><span class="nx">exists</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a><span class="w">    </span><span class="nx">s</span><span class="p">.</span><span class="nx">Status</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">status</span>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="w">    </span><span class="nx">s</span><span class="p">.</span><span class="nx">LatencyMs</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">latency</span>
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="w">    </span><span class="nx">s</span><span class="p">.</span><span class="nx">LastChecked</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Now</span><span class="p">()</span>
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="p">}</span>
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="nx">g</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+</code></pre></div>
+<p><code>Status</code>, <code>LatencyMs</code> a <code>LastChecked</code> jsou plain <code>string</code>, <code>int64</code> a <code>time.Time</code> — nejsou atomic. Čtenář (např. <code>handleListServices</code>) musí vidět konzistentní trojici — nikdy ne nové <code>LatencyMs</code> se starým <code>Status</code>. Write lock garantuje, že čtenáři vždy vidí atomický update všech tří polí najednou.</p>
+<hr />
+<h2 id="buildmux-a-main">buildMux a main()</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">g</span><span class="w"> </span><span class="o">*</span><span class="nx">Gateway</span><span class="p">)</span><span class="w"> </span><span class="nx">buildMux</span><span class="p">()</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">Handler</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="w">    </span><span class="nx">mux</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">NewServeMux</span><span class="p">()</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="w">    </span><span class="nx">mux</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">&quot;/health&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">handleHealth</span><span class="p">)</span>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="w">    </span><span class="nx">mux</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">&quot;/stats&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">handleStats</span><span class="p">)</span>
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="w">    </span><span class="nx">mux</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">&quot;/topology/edge&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">handleAddEdge</span><span class="p">)</span>
+<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="w">    </span><span class="nx">mux</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">&quot;/topology&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">handleTopology</span><span class="p">)</span>
+<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a><span class="w">    </span><span class="nx">mux</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">&quot;/services&quot;</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">w</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a><span class="w">        </span><span class="k">switch</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">Method</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-23-10" name="__codelineno-23-10" href="#__codelineno-23-10"></a><span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">MethodPost</span><span class="p">:</span>
+<a id="__codelineno-23-11" name="__codelineno-23-11" href="#__codelineno-23-11"></a><span class="w">            </span><span class="nx">g</span><span class="p">.</span><span class="nx">handleRegister</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="p">)</span>
+<a id="__codelineno-23-12" name="__codelineno-23-12" href="#__codelineno-23-12"></a><span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">MethodGet</span><span class="p">:</span>
+<a id="__codelineno-23-13" name="__codelineno-23-13" href="#__codelineno-23-13"></a><span class="w">            </span><span class="nx">g</span><span class="p">.</span><span class="nx">handleListServices</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="nx">r</span><span class="p">)</span>
+<a id="__codelineno-23-14" name="__codelineno-23-14" href="#__codelineno-23-14"></a><span class="w">        </span><span class="k">default</span><span class="p">:</span>
+<a id="__codelineno-23-15" name="__codelineno-23-15" href="#__codelineno-23-15"></a><span class="w">            </span><span class="nx">http</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;method not allowed&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusMethodNotAllowed</span><span class="p">)</span>
+<a id="__codelineno-23-16" name="__codelineno-23-16" href="#__codelineno-23-16"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-23-17" name="__codelineno-23-17" href="#__codelineno-23-17"></a><span class="w">    </span><span class="p">})</span>
+<a id="__codelineno-23-18" name="__codelineno-23-18" href="#__codelineno-23-18"></a><span class="w">    </span><span class="nx">mux</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">&quot;/services/&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">handleDeregister</span><span class="p">)</span>
+<a id="__codelineno-23-19" name="__codelineno-23-19" href="#__codelineno-23-19"></a>
+<a id="__codelineno-23-20" name="__codelineno-23-20" href="#__codelineno-23-20"></a><span class="w">    </span><span class="nx">mux</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">&quot;/&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">handleProxy</span><span class="p">)</span>
+<a id="__codelineno-23-21" name="__codelineno-23-21" href="#__codelineno-23-21"></a>
+<a id="__codelineno-23-22" name="__codelineno-23-22" href="#__codelineno-23-22"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">mux</span>
+<a id="__codelineno-23-23" name="__codelineno-23-23" href="#__codelineno-23-23"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="proc-specificke-routes-pred-catch-all">Proč specifické routes před catch-all <code>/</code></h3>
+<p><code>http.ServeMux</code> používá <strong>longest-prefix matching</strong> — delší (specifičtější) prefix má vždy přednost před kratším. Registrování <code>/health</code> zajistí, že <code>GET /health</code> nikdy nedorazí do <code>handleProxy</code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Trailing slash v ServeMux</p>
+<p><code>/services</code> (bez lomítka) matchuje pouze přesně <code>/services</code>. <code>/services/</code> (s lomítkem) matchuje <code>/services/</code> i jakékoli <code>/services/cokoliv</code>. Proto jsou potřeba oba — <code>/services</code> pro <code>POST</code>/<code>GET</code> a <code>/services/</code> pro <code>DELETE /services/{name}</code>.</p>
+</div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a><span class="w">    </span><span class="nx">gw</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">newGateway</span><span class="p">()</span>
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a><span class="w">    </span><span class="k">go</span><span class="w"> </span><span class="nx">gw</span><span class="p">.</span><span class="nx">runHealthChecker</span><span class="p">()</span>
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a><span class="w">    </span><span class="nx">srv</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">http</span><span class="p">.</span><span class="nx">Server</span><span class="p">{</span>
+<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a><span class="w">        </span><span class="nx">Addr</span><span class="p">:</span><span class="w">         </span><span class="s">&quot;0.0.0.0:9000&quot;</span><span class="p">,</span>
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a><span class="w">        </span><span class="nx">Handler</span><span class="p">:</span><span class="w">      </span><span class="nx">gw</span><span class="p">.</span><span class="nx">buildMux</span><span class="p">(),</span>
+<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a><span class="w">        </span><span class="nx">ReadTimeout</span><span class="p">:</span><span class="w">  </span><span class="mi">30</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">,</span>
+<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a><span class="w">        </span><span class="nx">WriteTimeout</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">,</span>
+<a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a><span class="w">        </span><span class="nx">IdleTimeout</span><span class="p">:</span><span class="w">  </span><span class="mi">120</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">,</span>
+<a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-24-12" name="__codelineno-24-12" href="#__codelineno-24-12"></a>
+<a id="__codelineno-24-13" name="__codelineno-24-13" href="#__codelineno-24-13"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">srv</span><span class="p">.</span><span class="nx">ListenAndServe</span><span class="p">();</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-24-14" name="__codelineno-24-14" href="#__codelineno-24-14"></a><span class="w">        </span><span class="nx">log</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">&quot;server error: %v&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span>
+<a id="__codelineno-24-15" name="__codelineno-24-15" href="#__codelineno-24-15"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-24-16" name="__codelineno-24-16" href="#__codelineno-24-16"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="timeouty-co-kazdy-chrani">Timeouty — co každý chrání</h3>
+<table>
+<thead>
+<tr>
+<th>Timeout</th>
+<th>Hodnota</th>
+<th>Co chrání</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ReadTimeout</code></td>
+<td>30s</td>
+<td>Čas na přečtení celého požadavku (hlavičky + tělo). Chrání před <strong>slowloris</strong> — útočník posílá data velmi pomalu a blokuje goroutinu navždy.</td>
+</tr>
+<tr>
+<td><code>WriteTimeout</code></td>
+<td>60s</td>
+<td>Čas na odeslání celé odpovědi. Delší než ReadTimeout, protože proxy odpovědi mohou být objemné a backend potřebuje čas na sestavení.</td>
+</tr>
+<tr>
+<td><code>IdleTimeout</code></td>
+<td>120s</td>
+<td>Čas na přijetí dalšího požadavku na keep-alive spojení. Uvolní goroutinu po nečinném spojení — zabrání hromadění idle klientů.</td>
+</tr>
+</tbody>
+</table>
+<p><code>WriteTimeout</code> je záměrně 2× delší než <code>ReadTimeout</code> — při proxying může backend generovat velké odpovědi (export vCard, DB dump) a klient je stahuje pomalu. Příliš krátký <code>WriteTimeout</code> by tyto legitimní požadavky přerušil.</p>
+<hr />
+<h2 id="klicove-prvky-jazyka-go">Klíčové prvky jazyka Go</h2>
+<h3 id="interface-strukturalni-typovani-duck-typing"><code>interface</code> — strukturální typování (duck typing)</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">Handler</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="w">    </span><span class="nx">ServeHTTP</span><span class="p">(</span><span class="nx">ResponseWriter</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="nx">Request</span><span class="p">)</span>
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="p">}</span>
+</code></pre></div>
+<p>Go nepoužívá nominální typování (<code>implements Handler</code>) ale <strong>strukturální</strong> — typ automaticky implementuje interface pokud má správné metody. <code>*Gateway</code> implementuje <code>http.Handler</code> protože má metodu <code>ServeHTTP</code> — bez explicitního deklarování.</p>
+<p>Výhoda: nižší coupling. Kód přijímající <code>http.Handler</code> neví nic o konkrétním typu, jen o metodách. To umožňuje snadné testování — <code>httptest.NewRecorder()</code> implementuje <code>http.ResponseWriter</code> a lze ho předat přímo.</p>
+<h3 id="defer-odlozene-volani"><code>defer</code> — odložené volání</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="nx">g</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a><span class="k">defer</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+</code></pre></div>
+<p><code>defer</code> přidá funkci na zásobník odložených volání — zavolá se těsně před návratem z aktuální funkce, <strong>bez ohledu na to kudy funkce vrátí</strong> (normálně, přes <code>return</code>, nebo přes <code>panic</code>).</p>
+<p>Klíčový vzor: zamknout mutex → ihned <code>defer Unlock()</code>. I když funkce vrátí chybou uprostřed, mutex se vždy odemkne. Bez <code>defer</code> by každá cesta kódem musela volat <code>Unlock()</code> ručně — snadný zdroj deadlocků.</p>
+<h3 id="atomicint64-lock-free-citace"><code>atomic.Int64</code> — lock-free čítače</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="nx">RequestCount</span><span class="w"> </span><span class="nx">atomic</span><span class="p">.</span><span class="nx">Int64</span><span class="w"> </span><span class="s">`json:&quot;-&quot;`</span>
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a><span class="c1">// inkrementace bez mutex zámku:</span>
+<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a><span class="nx">entry</span><span class="p">.</span><span class="nx">RequestCount</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a>
+<a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a><span class="c1">// čtení:</span>
+<a id="__codelineno-27-7" name="__codelineno-27-7" href="#__codelineno-27-7"></a><span class="nx">count</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">RequestCount</span><span class="p">.</span><span class="nx">Load</span><span class="p">()</span>
+</code></pre></div>
+<p><code>atomic.Int64</code> používá CPU instrukci <strong>Compare-And-Swap (CAS)</strong> — atomicky přečte hodnotu, zkontroluje ji a zapíše novou, vše v jedné nerozdělitelné operaci. Žádný mutex, žádný context switch, žádné čekání.</p>
+<p><code>json:"-"</code> struct tag říká JSON enkodéru: toto pole přeskoč. <code>atomic.Int64</code> není plain <code>int64</code> — nelze ho bezpečně číst bez <code>.Load()</code>. Přímá serializace by způsobila data race.</p>
+<h3 id="syncrwmutex-oddeleni-ctenaru-a-pisatelu"><code>sync.RWMutex</code> — oddělení čtenářů a pisatelů</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="kd">var</span><span class="w"> </span><span class="nx">mu</span><span class="w"> </span><span class="nx">sync</span><span class="p">.</span><span class="nx">RWMutex</span>
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a><span class="c1">// Čtení — může běžet paralelně</span>
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="nx">mu</span><span class="p">.</span><span class="nx">RLock</span><span class="p">()</span>
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a><span class="k">defer</span><span class="w"> </span><span class="nx">mu</span><span class="p">.</span><span class="nx">RUnlock</span><span class="p">()</span>
+<a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a>
+<a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a><span class="c1">// Zápis — exkluzivní</span>
+<a id="__codelineno-28-8" name="__codelineno-28-8" href="#__codelineno-28-8"></a><span class="nx">mu</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+<a id="__codelineno-28-9" name="__codelineno-28-9" href="#__codelineno-28-9"></a><span class="k">defer</span><span class="w"> </span><span class="nx">mu</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+</code></pre></div>
+<p>Go runtime implementuje fair RWMutex — pokud čeká pisatel, nová čtení se zablokují (writer priority). Zabraňuje <strong>writer starvation</strong>: situaci kdy read-heavy workload nikdy nedá šanci zápisu.</p>
+<h3 id="goroutina-jako-background-task">Goroutina jako background task</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="k">go</span><span class="w"> </span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="w">        </span><span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">10</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
+<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a><span class="w">        </span><span class="nx">checkAllServices</span><span class="p">(</span><span class="nx">registry</span><span class="p">)</span>
+<a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a><span class="p">}()</span>
+</code></pre></div>
+<p><code>go func()</code> spustí anonymní funkci jako novou goroutinu — nový "vlákno" v Go runtime, ne OS vlákno. Vrátí se okamžitě, health checker běží paralelně se zbytkem aplikace. Goroutina žije dokud funkce neskončí (nebo dokud program neskončí).</p>
+<p>Komunikace s goroutinou přes sdílenou paměť + mutex (jako zde) nebo přes <strong>kanály</strong> (<code>chan</code>) — Go idiom pro synchronizaci bez sdílené paměti.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Zpět na začátek
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Zkop\u00edrov\u00e1no do schr\u00e1nky", "clipboard.copy": "Kop\u00edrovat do schr\u00e1nky", "search.result.more.one": "1 dal\u0161\u00ed na t\u00e9to str\u00e1nce", "search.result.more.other": "# v\u00edce na t\u00e9to str\u00e1nce", "search.result.none": "Nenalezeny \u017e\u00e1dn\u00e9 dokumenty", "search.result.one": "Nalezen\u00fd dokument: 1", "search.result.other": "Nalezen\u00e9 dokumenty: #", "search.result.placeholder": "Pi\u0161te co se m\u00e1 vyhledat", "search.result.term.missing": "Chyb\u011bj\u00edc\u00ed", "select.version": "Vyberte verzi"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

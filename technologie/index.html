@@ -1,0 +1,2210 @@
+
+<!doctype html>
+<html lang="cs" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Microservices adresář kontaktů — RE tutorial v C++, Rust, Go, Python">
+      
+      
+      
+        <link rel="canonical" href="https://navidofek-cmyk.github.io/polycontacts/technologie/">
+      
+      
+        <link rel="prev" href="../vykon/">
+      
+      
+        <link rel="next" href="../re-spec/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Technologický stack - polycontacts</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#technologicky-stack" class="md-skip">
+          Přeskočit obsah
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Záhlaví">
+    <a href=".." title="polycontacts" class="md-header__button md-logo" aria-label="polycontacts" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            polycontacts
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Technologický stack
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Světlý režim"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Světlý režim" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Tmavý režim"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Tmavý režim" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Hledat" placeholder="Hledat" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Vyhledávání">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Vyčistit" aria-label="Vyčistit" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializace vyhledávání
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/navidofek-cmyk/polycontacts" title="Přejít do repozitáře" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    navidofek-cmyk/polycontacts
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Karty" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Úvod
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../architektura/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architektura
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../sluzby/cpp/" class="md-tabs__link">
+          
+  
+  
+  Služby
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../vykon/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Výkon & testy
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Technologický stack
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../re-spec/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  RE Spec
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigace" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="polycontacts" class="md-nav__button md-logo" aria-label="polycontacts" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    polycontacts
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/navidofek-cmyk/polycontacts" title="Přejít do repozitáře" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    navidofek-cmyk/polycontacts
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Úvod
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architektura/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architektura
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Služby
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Služby
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sluzby/cpp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    contacts-cpp (C++20)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sluzby/rust/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    search-rust (Rust)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sluzby/go/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    gateway-go (Go)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sluzby/python/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    bff-python (Python)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vykon/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Výkon & testy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technologický stack
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technologický stack
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Obsah">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Obsah
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#c-contacts-cpp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C++ — contacts-cpp
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="C++ — contacts-cpp">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filozofie-c" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filozofie C++
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cpp-httplib" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cpp-httplib
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nlohmannjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        nlohmann/json
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#libpqxx-libpq" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        libpqxx + libpq
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cmake" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CMake
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rust-search-rust" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rust — search-rust
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Rust — search-rust">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filozofie-rustu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filozofie Rustu
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#axum" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Axum
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tokio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tokio
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#serde" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Serde
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reqwest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reqwest
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cargo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cargo
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#go-gateway-go" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Go — gateway-go
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Go — gateway-go">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filozofie-go" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filozofie Go
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stdlib-only-nethttp-nethttphttputil-sync-encodingjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stdlib only (net/http, net/http/httputil, sync, encoding/json)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go-modules-gomod" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Go modules (go.mod)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-bff-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python — bff-python
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Python — bff-python">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filozofie-pythonu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filozofie Pythonu
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fastapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FastAPI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#httpx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        httpx
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uvicorn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        uvicorn
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        uv
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#infrastruktura" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Infrastruktura
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Infrastruktura">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker-docker-compose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker + Docker Compose
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#postgresql-16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PostgreSQL 16
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#github-actions-mkdocs-material" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitHub Actions + MkDocs Material
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prehledova-tabulka" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Přehledová tabulka
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#oop-objektove-orientovane-programovani-v-projektu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OOP — objektově orientované programování v projektu
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OOP — objektově orientované programování v projektu">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#c-tridy-s-explicitni-kontrolou-pristupu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C++ — třídy s explicitní kontrolou přístupu
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rust-struct-impl-bez-dedicnosti" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rust — struct + impl (bez dědičnosti)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go-struct-metody-zadne-tridy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Go — struct + metody (žádné třídy)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-dynamicke-tridy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python — dynamické třídy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sql-schema-a-dotazy-v-projektu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SQL — schéma a dotazy v projektu
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SQL — schéma a dotazy v projektu">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#schema-databaze" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schéma databáze
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parametrizovane-dotazy-sql-injection-ochrana" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parametrizované dotazy (SQL injection ochrana)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#join-a-n1-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JOIN a N+1 problém
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transakce-a-acid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transakce a ACID
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../re-spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RE Spec
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Obsah">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Obsah
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#c-contacts-cpp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C++ — contacts-cpp
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="C++ — contacts-cpp">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filozofie-c" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filozofie C++
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cpp-httplib" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        cpp-httplib
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nlohmannjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        nlohmann/json
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#libpqxx-libpq" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        libpqxx + libpq
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cmake" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CMake
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rust-search-rust" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rust — search-rust
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Rust — search-rust">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filozofie-rustu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filozofie Rustu
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#axum" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Axum
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tokio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tokio
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#serde" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Serde
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reqwest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reqwest
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cargo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cargo
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#go-gateway-go" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Go — gateway-go
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Go — gateway-go">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filozofie-go" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filozofie Go
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stdlib-only-nethttp-nethttphttputil-sync-encodingjson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        stdlib only (net/http, net/http/httputil, sync, encoding/json)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go-modules-gomod" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Go modules (go.mod)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-bff-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python — bff-python
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Python — bff-python">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filozofie-pythonu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filozofie Pythonu
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fastapi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FastAPI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#httpx" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        httpx
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uvicorn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        uvicorn
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        uv
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#infrastruktura" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Infrastruktura
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Infrastruktura">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker-docker-compose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker + Docker Compose
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#postgresql-16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PostgreSQL 16
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#github-actions-mkdocs-material" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitHub Actions + MkDocs Material
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prehledova-tabulka" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Přehledová tabulka
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#oop-objektove-orientovane-programovani-v-projektu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OOP — objektově orientované programování v projektu
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="OOP — objektově orientované programování v projektu">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#c-tridy-s-explicitni-kontrolou-pristupu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C++ — třídy s explicitní kontrolou přístupu
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rust-struct-impl-bez-dedicnosti" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rust — struct + impl (bez dědičnosti)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#go-struct-metody-zadne-tridy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Go — struct + metody (žádné třídy)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-dynamicke-tridy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python — dynamické třídy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sql-schema-a-dotazy-v-projektu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SQL — schéma a dotazy v projektu
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SQL — schéma a dotazy v projektu">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#schema-databaze" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schéma databáze
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parametrizovane-dotazy-sql-injection-ochrana" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parametrizované dotazy (SQL injection ochrana)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#join-a-n1-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JOIN a N+1 problém
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transakce-a-acid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transakce a ACID
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="technologicky-stack">Technologický stack</h1>
+<p>Přehled všeho co bylo použito v projektu — každá knihovna, framework, nástroj — s vysvětlením proč právě ona a co by bylo alternativou.</p>
+<hr />
+<h2 id="c-contacts-cpp">C++ — contacts-cpp</h2>
+<h3 id="filozofie-c">Filozofie C++</h3>
+<p>C++ vznikl v 80. letech (Bjarne Stroustrup) jako "C s třídami" — rozšíření C o OOP. Dnes je to jeden z nejkomplexnějších jazyků vůbec: C++20 má přes 1800 stran standardu.</p>
+<p><strong>Klíčový princip: Zero-cost abstractions.</strong>
+Abstrakce v C++ nesmí stát výkon. <code>std::vector</code> je stejně rychlý jako ruční alokace pole. <code>std::optional</code> nekompiluje na nullptr check s overhead — je to union s bool. Pokud nevyužiješ feature, nezaplatíš za ni nic v runtime.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">// std::ranges::sort kompiluje na stejný strojový kód jako ručně psaný quicksort</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">std</span><span class="o">::</span><span class="n">ranges</span><span class="o">::</span><span class="n">sort</span><span class="p">(</span><span class="n">contacts</span><span class="p">,</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">a</span><span class="p">.</span><span class="n">last_name</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">last_name</span><span class="p">;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">});</span>
+</code></pre></div>
+<p><strong>Tři generace C++:</strong>
+- <strong>C++98/03</strong> — základy OOP, STL (vector, map, algorithm)
+- <strong>C++11/14/17</strong> — moderní C++: move semantics, lambda, <code>auto</code>, smart pointery, <code>constexpr</code>
+- <strong>C++20</strong> — ranges, coroutines, concepts, <code>std::format</code>, modules</p>
+<p>Contacts-cpp používá C++20 — <code>std::format</code>, <code>std::ranges</code>, <code>std::views</code>. Na starším kompilátoru by to nezkompiloval.</p>
+<p><strong>Proč C++ pro contacts-cpp:</strong>
+CRUD nad databází potřebuje přímou kontrolu nad vlákny (thread pool, connection pool) a nízkou latenci. C++ dává plnou kontrolu nad pamětí a vlákny bez garbage collectoru. libpqxx je kvalitní C++ knihovna pro PostgreSQL. Alternativa v Go nebo Javě by přidala GC overhead a méně přímou kontrolu nad connection poolem.</p>
+<p><strong>Cena komplexity:</strong>
+C++ je nejtěžší jazyk v projektu — undefined behavior (přístup za hranici pole, use-after-free) kompilátor nezachytí, runtime nesignalizuje, program jen "funguje divně". Proto Rust existuje — stejný výkon, ale bez undefined behavior.</p>
+<hr />
+<h3 id="cpp-httplib">cpp-httplib</h3>
+<p><strong>Co je:</strong> Header-only HTTP/1.1 server a klient. Celý kód je v jediném souboru <code>httplib.h</code> — žádné linkování, stačí <code>#include</code>.</p>
+<p><strong>Proč:</strong> Nulová konfigurační overhead. Alternativy jako Boost.Beast nebo Poco jsou výkonné ale vyžadují složité buildovací nastavení. cpp-httplib funguje out-of-box s CMake za 3 řádky.</p>
+<p><strong>Co umí:</strong> Thread pool (výchozí 8 vláken), regex routes (<code>svr.Get("/contacts/(.*)", handler)</code>), chunked responses, HTTPS přes OpenSSL.</p>
+<p><strong>Alternativy:</strong> Boost.Beast (nízkoúrovňové, velmi výkonné), Crow (podobný Flask), Drogon (async, velmi rychlý).</p>
+<hr />
+<h3 id="nlohmannjson">nlohmann/json</h3>
+<p><strong>Co je:</strong> Header-only JSON knihovna pro C++. Umožňuje přirozený zápis:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">json</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{{</span><span class="s">&quot;id&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;123&quot;</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="s">&quot;name&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Jana&quot;</span><span class="p">}};</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">j</span><span class="p">.</span><span class="n">dump</span><span class="p">();</span>
+</code></pre></div></p>
+<p><strong>Proč:</strong> Nejpoužívanější C++ JSON knihovna. Intuitivní API, dobrá chybová hlášení, single-header (jako httplib — bez linkování). Výkon není její silnou stránkou (simdjson je 10× rychlejší), ale pro tento projekt je dostatečná.</p>
+<p><strong>Alternativy:</strong> simdjson (SIMD instrukce, extrémně rychlý parse), RapidJSON (rychlý, ale méně přívětivé API), Boost.JSON.</p>
+<hr />
+<h3 id="libpqxx-libpq">libpqxx + libpq</h3>
+<p><strong>Co je:</strong> <code>libpq</code> je oficiální C klientská knihovna pro PostgreSQL. <code>libpqxx</code> je C++ wrapper nad ní — přidává RAII transakce, výjimky a typově bezpečné čtení sloupců.</p>
+<p><strong>Proč:</strong> Jediná oficiálně podporovaná C++ knihovna pro PostgreSQL. RAII transakce zabrání resource leakům — <code>pqxx::work</code> automaticky provede ROLLBACK pokud destruktor zavolá před <code>commit()</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">pqxx</span><span class="o">::</span><span class="n">work</span><span class="w"> </span><span class="nf">txn</span><span class="p">(</span><span class="n">conn</span><span class="p">);</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">txn</span><span class="p">.</span><span class="n">exec_params</span><span class="p">(</span><span class="s">&quot;INSERT INTO contacts VALUES ($1, $2)&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">);</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">txn</span><span class="p">.</span><span class="n">commit</span><span class="p">();</span><span class="w">  </span><span class="c1">// bez commit() → automatický ROLLBACK v destruktoru</span>
+</code></pre></div>
+<p><strong>Alternativy:</strong> Přímé <code>libpq</code> (C API, verbose), SOCI, ODB (ORM — zbytečná komplexita pro tento projekt).</p>
+<hr />
+<h3 id="cmake">CMake</h3>
+<p><strong>Co je:</strong> Build systém generátor — nepřekládá kód přímo, ale generuje Makefile nebo Ninja soubory pro konkrétní platformu.</p>
+<p><strong>Proč:</strong> Standard v C++ ekosystému. Správa závislostí přes <code>FetchContent</code> stáhne <code>nlohmann/json</code> a <code>cpp-httplib</code> při prvním buildu automaticky — žádný manuální download.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">FetchContent_Declare</span><span class="p">(</span><span class="s">json</span><span class="w"> </span><span class="s">URL</span><span class="w"> </span><span class="s">https://github.com/.../json.hpp</span><span class="p">)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nb">FetchContent_MakeAvailable</span><span class="p">(</span><span class="s">json</span><span class="p">)</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nb">target_link_libraries</span><span class="p">(</span><span class="s">contacts</span><span class="w"> </span><span class="s">nlohmann_json</span><span class="w"> </span><span class="s">pqxx</span><span class="w"> </span><span class="s">pq</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Alternativy:</strong> Meson (modernější, rychlejší), Bazel (Google, pro monorepa), xmake.</p>
+<hr />
+<h2 id="rust-search-rust">Rust — search-rust</h2>
+<h3 id="filozofie-rustu">Filozofie Rustu</h3>
+<p>Rust vznikl v Mozille v roce 2010 (Graydon Hoare) s jedním cílem: <strong>systems programming bez memory safety bugů</strong>. 70 % bezpečnostních zranitelností v C/C++ kódu pochází z memory safety chyb (CVE databáze Microsoftu, Chromium). Rust tyto chyby eliminuje na úrovni kompilátoru.</p>
+<p><strong>Ownership systém — tři pravidla:</strong>
+1. Každá hodnota má právě jednoho vlastníka
+2. Může existovat buď N sdílených referencí <code>&amp;T</code>, nebo jedna exkluzivní <code>&amp;mut T</code> — nikdy obojí
+3. Reference nesmí přežít hodnotu na kterou ukazuje</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">let</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">String</span><span class="p">::</span><span class="n">from</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">);</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kd">let</span><span class="w"> </span><span class="n">r1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">s</span><span class="p">;</span><span class="w">   </span><span class="c1">// sdílená reference — ok</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="kd">let</span><span class="w"> </span><span class="n">r2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">s</span><span class="p">;</span><span class="w">   </span><span class="c1">// druhá sdílená reference — ok</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1">// let r3 = &amp;mut s;  // ← CHYBA: nelze mít &amp;mut zároveň s &amp;</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;{} {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">r1</span><span class="p">,</span><span class="w"> </span><span class="n">r2</span><span class="p">);</span>
+</code></pre></div>
+<p>Borrow checker ověří tato pravidla při kompilaci. Data race = dvě vlákna přistupují ke stejné paměti, aspoň jedno zapisuje → undefined behavior v C++. V Rustu je data race <strong>compile error</strong>.</p>
+<p><strong>Zero-cost async:</strong>
+<code>async fn</code> v Rustu generuje stavový automat — žádný runtime overhead oproti ručně psanému kódu. Coroutiny jsou v Rustu knihovní feature (Tokio), ne součást jazyka — jazyk jen poskytuje syntaxi.</p>
+<p><strong>Proč Rust pro search-rust:</strong>
+Invertovaný index v paměti = kritická sekce přistupovaná z tisíců souběžných requestů. Rust garantuje, že <code>RwLock</code> je použit správně — zapomenout na <code>read()</code>/<code>write()</code> je compile error. V C++ by stejný kód mohl tiše způsobit data race. Bez GC je latence konzistentní — žádné GC pauzy, p99 je 2× p50 (ne 100×).</p>
+<hr />
+<h3 id="axum">Axum</h3>
+<p><strong>Co je:</strong> Webový framework postavený nad <code>tokio</code> a <code>hyper</code>. Routing, extrakce parametrů, middleware přes <code>tower</code>.</p>
+<p><strong>Proč:</strong> Nejpřirozenější integrace s <code>tokio</code> ekosystémem. Typově bezpečná extrakce parametrů — pokud handler očekává <code>Json&lt;Contact&gt;</code> a tělo requestu není validní JSON, Axum vrátí 422 automaticky bez jediného řádku validačního kódu.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">async</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">handle_search</span><span class="p">(</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="n">State</span><span class="p">(</span><span class="n">state</span><span class="p">):</span><span class="w"> </span><span class="nc">State</span><span class="o">&lt;</span><span class="n">AppState</span><span class="o">&gt;</span><span class="p">,</span><span class="w">    </span><span class="c1">// dependency injection</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="n">Query</span><span class="p">(</span><span class="n">params</span><span class="p">):</span><span class="w"> </span><span class="nc">Query</span><span class="o">&lt;</span><span class="n">SearchParams</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="c1">// query string → struct</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Result</span><span class="o">&lt;</span><span class="n">Json</span><span class="o">&lt;</span><span class="n">Value</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">StatusCode</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">..</span><span class="p">.</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p><strong>Alternativy:</strong> Actix-web (nejrychlejší v benchmarcích, ale složitější lifetime constraints), Warp (funkcionální styl), Rocket (ergonomické, ale pomalejší start kompilace).</p>
+<hr />
+<h3 id="tokio">Tokio</h3>
+<p><strong>Co je:</strong> Asynchronní runtime pro Rust. Poskytuje executor (spouštěč tasků), async I/O (síť, soubory), synchronizační primitiva (<code>RwLock</code>, <code>Mutex</code>, <code>channel</code>), časovače.</p>
+<p><strong>Proč:</strong> De-facto standard async runtime v Rustu. <code>async fn</code> v Rustu je jen syntaxe — bez runtimeu by coroutiny neměly kdo je spouštět. Tokio implementuje work-stealing scheduler: pokud je jedno vlákno přetížené, ukradne tasky z jiných vláken.</p>
+<p><strong>Alternativy:</strong> async-std (jednodušší API, menší ekosystém), smol (minimalistický), monoio (io_uring na Linuxu, extrémní výkon).</p>
+<hr />
+<h3 id="serde">Serde</h3>
+<p><strong>Co je:</strong> Framework pro serializaci a deserializaci. Definuje traity <code>Serialize</code> a <code>Deserialize</code> — konkrétní formát (JSON, YAML, TOML, Bincode...) je záměnný.</p>
+<p><strong>Proč:</strong> Universální a nulový runtime overhead. <code>#[derive(Serialize, Deserialize)]</code> generuje optimální kód při kompilaci — žádná reflexe za běhu jako v Java nebo Python. Výsledný strojový kód je ekvivalentní ručně psanému parseru.</p>
+<p><strong>Alternativy:</strong> Přímo <code>serde_json::from_str()</code> bez derive (nutno psát ručně), <code>simd-json</code> (SIMD parsing, 2× rychlejší).</p>
+<hr />
+<h3 id="reqwest">Reqwest</h3>
+<p><strong>Co je:</strong> HTTP klient pro Rust. Async, s connection poolem, automatická (de)serializace JSON.</p>
+<p><strong>Proč:</strong> Nejpoužívanější HTTP klient v Rust ekosystému. Feature <code>json</code> přidá metody <code>.json::&lt;T&gt;()</code> pro přímou deserializaci odpovědi do Rust struktury.</p>
+<p><strong>Alternativy:</strong> <code>hyper</code> (nízkoúrovňové, na čem reqwest staví), <code>ureq</code> (synchronní, bez async overhead pro jednoduché případy).</p>
+<hr />
+<h3 id="cargo">Cargo</h3>
+<p><strong>Co je:</strong> Build tool, správce závislostí a test runner pro Rust. <code>Cargo.toml</code> definuje závislosti, <code>Cargo.lock</code> zamkne přesné verze.</p>
+<p><strong>Proč:</strong> Součástí Rustu — žádná instalace, žádná konfigurace. <code>cargo build --release</code> stáhne závislosti, zkompiluje s optimalizacemi, výsledek je statický binár bez runtime závislostí.</p>
+<p><strong>Cargo.lock vs bez:</strong> <code>Cargo.lock</code> commitujeme — zajistí reprodukovatelné buildy. Bez něj by <code>cargo build</code> mohl stáhnout jinou (možná breaking) verzi závislosti.</p>
+<hr />
+<h2 id="go-gateway-go">Go — gateway-go</h2>
+<h3 id="filozofie-go">Filozofie Go</h3>
+<p>Go vznikl v Googlu v roce 2009 (Rob Pike, Ken Thompson, Robert Griesemer) jako reakce na problémy s C++ v rozsáhlých kódových základnách — dlouhé kompilace, komplexní dependency management, těžká čitelnost.</p>
+<p><strong>Tři pilíře Go:</strong></p>
+<p><strong>1. Jednoduchost nad expresivností.</strong>
+Go má záměrně méně features než C++, Java nebo Rust. Žádná dědičnost, žádné generické typy (až Go 1.18), žádné výjimky, žádné přetěžování operátorů. Výsledek: kód napsaný jedním programátorem vypadá skoro stejně jako kód jiného — Go kód je předvídatelný.</p>
+<p><strong>2. Kompilace v sekundách.</strong>
+C++ projekt může kompilovat minuty. Go kompiluje staticky zalinkovaný binár v sekundách — gateway-go (<code>docker build</code>) trvá ~3s. Rychlá kompilace mění vývojový cyklus: edit → compile → test je okamžitý.</p>
+<p><strong>3. Souběžnost jako první třída.</strong>
+Goroutiny a kanály jsou jazykové primitiva, ne knihovna. <code>go func()</code> spustí novou "vlákno" v jednom klíčovém slově. Žádný <code>Thread</code>, žádný <code>ExecutorService</code>, žádný <code>asyncio.create_task</code>.</p>
+<p><strong>Proč Go pro gateway:</strong>
+Gateway je infrastrukturní komponenta — síťový kód, souběžnost, jednoduchost. Přesně tam kde Go exceluje. Kdyby byl gateway v C++, měl by 3× více kódu pro správu vláken. V Pythonu by async overhead přidal latenci. Go dává výkon blízký C++ se čitelností blízkou Pythonu.</p>
+<p><strong>Chyby jako hodnoty, ne výjimky:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nx">entry</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">registry</span><span class="p">.</span><span class="nx">Get</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span><span class="nx">http</span><span class="p">.</span><span class="nx">Error</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">.</span><span class="nx">Error</span><span class="p">(),</span><span class="w"> </span><span class="mi">404</span><span class="p">)</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span><span class="k">return</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="p">}</span>
+</code></pre></div>
+Go nemá <code>try/catch</code>. Chyba je návratová hodnota — volající ji musí explicitně ošetřit nebo předat dál. Výsledek: každý kód path kde může nastat chyba je viditelný. Žádné skryté výjimky které probublají přes 5 vrstev zásobníku.</p>
+<hr />
+<h3 id="stdlib-only-nethttp-nethttphttputil-sync-encodingjson">stdlib only (<code>net/http</code>, <code>net/http/httputil</code>, <code>sync</code>, <code>encoding/json</code>)</h3>
+<p><strong>Co je:</strong> Go standardní knihovna — součást každé Go instalace, žádné externí závislosti.</p>
+<p><strong>Proč:</strong> Pro gateway-go není frameworku potřeba. <code>net/http</code> obsahuje production-ready HTTP server (používá ho i Google v interní infrastruktuře). <code>httputil.ReverseProxy</code> implementuje kompletní reverse proxy včetně WebSocket support a streaming.</p>
+<p><strong><code>net/http</code> server je non-trivially dobrý:</strong>
+- Každý request → nová goroutina (automaticky)
+- Connection keepalive
+- Graceful shutdown přes <code>context</code>
+- HTTP/2 out of the box</p>
+<p><strong>Alternativy:</strong> Gin (nejpopulárnější framework, ~40K stars), Echo, Chi (minimalistický router), Fiber (inspirovaný Express.js).</p>
+<hr />
+<h3 id="go-modules-gomod">Go modules (<code>go.mod</code>)</h3>
+<p><strong>Co je:</strong> Správa závislostí zabudovaná v Go od verze 1.11. <code>go.mod</code> definuje modul a závislosti, <code>go.sum</code> obsahuje kryptografické hashe.</p>
+<p><strong>Proč:</strong> Standardní součást Go — žádná volba. <code>go.sum</code> zabraňuje supply chain útokům: pokud se obsah závislosti změní (i u stejné verze), build selže.</p>
+<p><strong>Zajímavost:</strong> gateway-go má prázdný <code>go.mod</code> — žádné <code>require</code>. Veškerá funkcionalita pochází ze stdlib.</p>
+<hr />
+<h2 id="python-bff-python">Python — bff-python</h2>
+<h3 id="filozofie-pythonu">Filozofie Pythonu</h3>
+<p>Python vznikl v roce 1991 (Guido van Rossum) s mottem: <strong>"Readability counts"</strong>. Zdrojový kód se čte mnohem více než píše — Python optimalizuje pro čtenáře, ne pro kompilátor.</p>
+<p><strong>Zen of Python (PEP 20) — vybrané principy:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Krásné je lepší než ošklivé.
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>Explicitní je lepší než implicitní.
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>Jednoduché je lepší než složité.
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>Čitelnost se počítá.
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>Mělo by existovat jedno — a pokud možno jen jedno — zřejmé řešení.
+</code></pre></div></p>
+<p><strong>Dynamické typování:</strong>
+Python zjišťuje typy za běhu, ne při kompilaci. <code>x = 5</code> a pak <code>x = "hello"</code> je validní. Výhoda: rychlé psaní, flexibilita. Nevýhoda: chyby jako <code>TypeError: unsupported operand type(s) for +: 'int' and 'str'</code> se projeví až za běhu, ne při kompilaci.</p>
+<p>Type hints (od Python 3.5) přidávají volitelné anotace — <code>def f(x: int) -&gt; str</code>. Python je ignoruje, ale IDE, mypy a FastAPI je využívají.</p>
+<p><strong>Batteries included:</strong>
+Python stdlib obsahuje vše: HTTP klient (<code>urllib</code>), JSON (<code>json</code>), regex (<code>re</code>), threading (<code>threading</code>), async (<code>asyncio</code>), testy (<code>unittest</code>). Pro web ale stdlib nestačí — proto FastAPI, httpx, uvicorn.</p>
+<p><strong>GIL a jeho dopady:</strong>
+Global Interpreter Lock zabraňuje skutečnému paralelismu v threadech. Pro CPU-bound kód (výpočty, třídění) je Python pomalý. Pro I/O-bound kód (síťová volání, čekání na DB) je asyncio plně dostačující — event loop čeká na I/O bez blokování.</p>
+<p><strong>Proč Python pro bff-python:</strong>
+BFF je lepidlo — přeposílá requesty, agreguje odpovědi, servuje HTML. Žádné těžké výpočty. Python je pro tento úkol ideální: FastAPI dá async HTTP server za 50 řádků, httpx zvládne paralelní volání přes <code>asyncio.gather</code>. Produktivita vývoje je nejvyšší ze všech čtyř jazyků v projektu.</p>
+<hr />
+<h3 id="fastapi">FastAPI</h3>
+<p><strong>Co je:</strong> Moderní async webový framework pro Python. Automaticky generuje OpenAPI dokumentaci, validuje typy přes Pydantic, podporuje dependency injection.</p>
+<p><strong>Proč:</strong> Nejrychlejší Python webový framework (srovnatelný s Node.js). Type hints v signaturách funkcí nejsou jen dokumentace — FastAPI je čte za běhu a automaticky:
+- Parsuje query parametry (<code>q: str = ""</code>)
+- Validuje request body
+- Generuje <code>/docs</code> endpoint s interaktivní dokumentací</p>
+<p><strong>Alternativy:</strong> Flask (synchronní, jednodušší, obrovský ekosystém), Django (batteries-included, pro větší aplikace), Starlette (na čem FastAPI staví, nižší úroveň).</p>
+<hr />
+<h3 id="httpx">httpx</h3>
+<p><strong>Co je:</strong> Async HTTP klient pro Python. API kompatibilní s <code>requests</code>, ale podporuje <code>async/await</code>.</p>
+<p><strong>Proč:</strong> <code>requests</code> je synchronní — blokuje vlákno při čekání na odpověď. V async FastAPI handleru by to zablokoval celý event loop. <code>httpx.AsyncClient</code> je plně async a drží connection pool.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># requests — blokuje event loop ❌</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="c1"># httpx — coroutina, uvolní event loop ✓</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>Alternativy:</strong> <code>aiohttp</code> (starší, méně přívětivé API), <code>httpcore</code> (nízkoúrovňové, na čem httpx staví).</p>
+<hr />
+<h3 id="uvicorn">uvicorn</h3>
+<p><strong>Co je:</strong> ASGI server — spouštěč pro async Python webové aplikace. FastAPI je ASGI aplikace, uvicorn je ten kdo naslouchá na TCP portu a předává requesty.</p>
+<p><strong>Proč:</strong> Nejrychlejší Python ASGI server. Používá <code>uvloop</code> (Cython binding pro libuv — stejná event loop jako Node.js) místo stdlib asyncio event loop → 2–4× vyšší throughput.</p>
+<p><strong>Vztah:</strong> <code>uvicorn</code> (server) → <code>FastAPI</code> (framework) → tvůj kód (handler)</p>
+<p><strong>Alternativy:</strong> Gunicorn + uvicorn workers (pro produkci s více procesy), Hypercorn (HTTP/2 + HTTP/3 support), Daphne (Django Channels).</p>
+<hr />
+<h3 id="uv">uv</h3>
+<p><strong>Co je:</strong> Extrémně rychlý Python package manager a virtual environment manager napsaný v Rustu (Astral). Náhrada za <code>pip</code> + <code>venv</code> + <code>pip-compile</code>.</p>
+<p><strong>Proč:</strong> <code>pip install</code> trvá sekundy až minuty. <code>uv</code> trvá milisekundy — paralelně stahuje, cachuje agresivně, řeší závislosti rychleji. <code>uv run pytest</code> automaticky aktivuje venv bez <code>source .venv/bin/activate</code>.</p>
+<p><strong>Alternativy:</strong> <code>pip</code> + <code>venv</code> (standard, pomalé), <code>poetry</code> (pěkné, pomalé), <code>pipenv</code> (zastaralé).</p>
+<hr />
+<h2 id="infrastruktura">Infrastruktura</h2>
+<h3 id="docker-docker-compose">Docker + Docker Compose</h3>
+<p><strong>Co je:</strong> Docker kontejnerizuje aplikace — zabalí kód + závislosti + runtime do izolovaného obrazu. Docker Compose orchestruje více kontejnerů na jednom hostu.</p>
+<p><strong>Multi-stage build (contacts-cpp, search-rust):</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">FROM</span><span class="w"> </span><span class="s">ubuntu</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="s">builder</span><span class="w">   </span>#<span class="w"> </span>velký<span class="w"> </span>image<span class="w"> </span>se<span class="w"> </span>všemi<span class="w"> </span>build<span class="w"> </span>nástroji
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="k">RUN</span><span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>g++<span class="w"> </span>cmake<span class="w"> </span>libpqxx-dev<span class="w"> </span>...
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="k">COPY</span><span class="w"> </span>.<span class="w"> </span>.
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="k">RUN</span><span class="w"> </span>cmake<span class="w"> </span>--build<span class="w"> </span>.
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="k">FROM</span><span class="w"> </span><span class="s">ubuntu</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="s">runtime</span><span class="w">   </span>#<span class="w"> </span>malý<span class="w"> </span>image<span class="w"> </span>jen<span class="w"> </span>s<span class="w"> </span>runtime
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="k">COPY</span><span class="w"> </span>--from<span class="o">=</span>builder<span class="w"> </span>/app/contacts<span class="w"> </span>.<span class="w">  </span>#<span class="w"> </span>zkopírujeme<span class="w"> </span>jen<span class="w"> </span>binár
+</code></pre></div>
+Výsledek: builder image ~1 GB, runtime image ~50 MB.</p>
+<p><strong><code>depends_on</code> + health checks:</strong> Docker Compose počká až service X je <code>healthy</code> před spuštěním service Y. Bez toho by contacts-cpp startoval dříve než PostgreSQL a okamžitě selhal.</p>
+<p><strong>Alternativy:</strong> Podman (bez daemona, rootless), Kubernetes (pro produkci s více nody), Nomad.</p>
+<hr />
+<h3 id="postgresql-16">PostgreSQL 16</h3>
+<p><strong>Co je:</strong> Nejpokročilejší open-source relační databáze. ACID transakce, MVCC (Multi-Version Concurrency Control), rozšiřitelnost (PostGIS, pg_vector...).</p>
+<p><strong>Proč:</strong> Standard pro transakční workloady. <code>libpqxx</code> má přímou podporu. <code>postgres:16-alpine</code> image má jen ~80 MB (Alpine Linux místo Debian).</p>
+<p><strong>MVCC:</strong> PostgreSQL neblokuje čtení zápisem — čtenáři vidí snapshot databáze z doby začátku jejich transakce, pisatelé pracují s novými verzemi řádků. Výsledek: vysoká souběžnost bez lock contention mezi čtenáři a pisateli.</p>
+<p><strong>Volume <code>postgres_data</code>:</strong> Data přežijí restart kontejneru. Smazána jsou jen pomocí <code>docker compose down -v</code>.</p>
+<hr />
+<h3 id="github-actions-mkdocs-material">GitHub Actions + MkDocs Material</h3>
+<p><strong>Co je:</strong> GitHub Actions je CI/CD platforma. MkDocs je statický generátor dokumentačních webů z Markdown souborů. Material theme přidává moderní design, dark mode, vyhledávání, code copy.</p>
+<p><strong>Workflow:</strong> Push do <code>main</code> → Actions spustí <code>mkdocs build</code> → výsledné HTML soubory pushne do větve <code>gh-pages</code> → GitHub Pages je zveřejní na <code>navidofek-cmyk.github.io/polycontacts</code>.</p>
+<p><strong>Proč MkDocs:</strong> Nulová konfigurace pro základní použití. Markdown → profesionální web za 5 minut. Material theme je de-facto standard pro technickou dokumentaci (používá ho FastAPI, Pydantic, Axum...).</p>
+<p><strong>Alternativy:</strong> Docusaurus (React, populární, složitější), Sphinx (Python ekosystém, reStructuredText), GitBook (SaaS).</p>
+<hr />
+<h2 id="prehledova-tabulka">Přehledová tabulka</h2>
+<table>
+<thead>
+<tr>
+<th>Komponenta</th>
+<th>Technologie</th>
+<th>Klíčová vlastnost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HTTP server (C++)</td>
+<td>cpp-httplib</td>
+<td>Header-only, thread pool</td>
+</tr>
+<tr>
+<td>JSON (C++)</td>
+<td>nlohmann/json</td>
+<td>Header-only, intuitivní API</td>
+</tr>
+<tr>
+<td>PostgreSQL klient</td>
+<td>libpqxx</td>
+<td>RAII transakce, C++ wrapper</td>
+</tr>
+<tr>
+<td>Build (C++)</td>
+<td>CMake + FetchContent</td>
+<td>Správa závislostí bez package manageru</td>
+</tr>
+<tr>
+<td>HTTP server (Rust)</td>
+<td>Axum</td>
+<td>Typově bezpečný, Tokio nativní</td>
+</tr>
+<tr>
+<td>Async runtime</td>
+<td>Tokio</td>
+<td>Work-stealing scheduler</td>
+</tr>
+<tr>
+<td>Serializace</td>
+<td>Serde</td>
+<td>Zero-cost, compile-time</td>
+</tr>
+<tr>
+<td>HTTP klient (Rust)</td>
+<td>Reqwest</td>
+<td>Connection pool, JSON feature</td>
+</tr>
+<tr>
+<td>Build (Rust)</td>
+<td>Cargo</td>
+<td>Integrovaný, reprodukovatelný</td>
+</tr>
+<tr>
+<td>HTTP server (Go)</td>
+<td>net/http stdlib</td>
+<td>Production-ready, goroutiny</td>
+</tr>
+<tr>
+<td>Reverse proxy</td>
+<td>net/http/httputil</td>
+<td>Streaming, WebSocket</td>
+</tr>
+<tr>
+<td>HTTP framework</td>
+<td>FastAPI</td>
+<td>Async, type hints → OpenAPI</td>
+</tr>
+<tr>
+<td>HTTP klient (Python)</td>
+<td>httpx</td>
+<td>Async, connection pool</td>
+</tr>
+<tr>
+<td>ASGI server</td>
+<td>uvicorn</td>
+<td>uvloop, nejrychlejší Python server</td>
+</tr>
+<tr>
+<td>Package manager</td>
+<td>uv</td>
+<td>Rust-powered, milisekundy</td>
+</tr>
+<tr>
+<td>Databáze</td>
+<td>PostgreSQL 16</td>
+<td>MVCC, ACID, Alpine image</td>
+</tr>
+<tr>
+<td>Kontejnery</td>
+<td>Docker Compose</td>
+<td>Multi-stage build, health checks</td>
+</tr>
+<tr>
+<td>CI/CD + docs</td>
+<td>GitHub Actions + MkDocs</td>
+<td>Push → web automaticky</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="oop-objektove-orientovane-programovani-v-projektu">OOP — objektově orientované programování v projektu</h2>
+<p>Každý jazyk implementuje OOP jinak. Projekt ukazuje čtyři různé přístupy ke stejnému problému (enkapsulace stavu + metody nad ním).</p>
+<h3 id="c-tridy-s-explicitni-kontrolou-pristupu">C++ — třídy s explicitní kontrolou přístupu</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">ConnPool</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">queue</span><span class="o">&lt;</span><span class="n">pqxx</span><span class="o">::</span><span class="n">connection</span><span class="o">*&gt;</span><span class="w"> </span><span class="n">pool_</span><span class="p">;</span><span class="w">  </span><span class="c1">// private — skryto před okolím</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="w"> </span><span class="n">mtx_</span><span class="p">;</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">condition_variable</span><span class="w"> </span><span class="n">cv_</span><span class="p">;</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">size_</span><span class="p">;</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="k">public</span><span class="o">:</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">    </span><span class="k">explicit</span><span class="w"> </span><span class="n">ConnPool</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">dsn</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">);</span><span class="w">  </span><span class="c1">// konstruktor</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">    </span><span class="n">pqxx</span><span class="o">::</span><span class="n">connection</span><span class="o">*</span><span class="w"> </span><span class="nf">acquire</span><span class="p">();</span><span class="w">   </span><span class="c1">// veřejné rozhraní</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">release</span><span class="p">(</span><span class="n">pqxx</span><span class="o">::</span><span class="n">connection</span><span class="o">*</span><span class="w"> </span><span class="n">conn</span><span class="p">);</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="w">    </span><span class="o">~</span><span class="n">ConnPool</span><span class="p">();</span><span class="w">                   </span><span class="c1">// destruktor — RAII cleanup</span>
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="p">};</span>
+</code></pre></div>
+<p><strong><code>private</code> / <code>public</code>:</strong> Explicitní kontrola přístupu. <code>pool_</code> je implementační detail — okolní kód nemůže přistoupit přímo, musí použít <code>acquire()</code> / <code>release()</code>. Invariant (pool je vždy konzistentní) je zaručen třídou, ne klientem.</p>
+<p><strong><code>explicit</code> konstruktor:</strong> Zabraňuje implicitním konverzím — <code>ConnPool pool = "postgresql://..."</code> selže na kompilaci. Musí být <code>ConnPool pool("postgresql://...")</code>.</p>
+<p><strong>Destruktor <code>~ConnPool()</code>:</strong> Volá se automaticky při zániku objektu (RAII). Uzavře všechna DB spojení — žádný resource leak i při výjimce.</p>
+<h3 id="rust-struct-impl-bez-dedicnosti">Rust — struct + impl (bez dědičnosti)</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">SearchIndex</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">    </span><span class="n">index</span><span class="p">:</span><span class="w"> </span><span class="nc">HashMap</span><span class="o">&lt;</span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span><span class="n">contacts</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">Contact</span><span class="o">&gt;</span><span class="p">,</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="p">}</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="k">impl</span><span class="w"> </span><span class="n">SearchIndex</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">new</span><span class="p">()</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">Self</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">..</span><span class="p">.</span><span class="w"> </span><span class="p">}</span><span class="w">        </span><span class="c1">// &quot;konstruktor&quot;</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">rebuild</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="o">..</span><span class="p">.)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span><span class="w">  </span><span class="c1">// mutuje self</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">search</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="o">..</span><span class="p">.)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">Contact</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span><span class="w">  </span><span class="c1">// čte self</span>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a><span class="p">}</span>
+</code></pre></div>
+<p>Rust <strong>nemá dědičnost</strong>. Místo ní:
+- <strong>Struct</strong> = data (jako <code>class</code> bez metod)
+- <strong><code>impl</code></strong> = metody na struct
+- <strong>Trait</strong> = sdílené chování (jako interface)</p>
+<p><code>&amp;self</code> vs <code>&amp;mut self</code> v signatuře metody vyjadřuje záměr — kompilátor ověří, že <code>search()</code> skutečně data nemění. Nelze zapomenout na thread safety — <code>&amp;mut self</code> nelze předat do více vláken najednou.</p>
+<h3 id="go-struct-metody-zadne-tridy">Go — struct + metody (žádné třídy)</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Gateway</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">    </span><span class="nx">mu</span><span class="w">       </span><span class="nx">sync</span><span class="p">.</span><span class="nx">RWMutex</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">    </span><span class="nx">services</span><span class="w"> </span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="o">*</span><span class="nx">ServiceEntry</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="p">}</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">g</span><span class="w"> </span><span class="o">*</span><span class="nx">Gateway</span><span class="p">)</span><span class="w"> </span><span class="nx">Register</span><span class="p">(</span><span class="nx">entry</span><span class="w"> </span><span class="nx">ServiceEntry</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">...</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">g</span><span class="w"> </span><span class="o">*</span><span class="nx">Gateway</span><span class="p">)</span><span class="w"> </span><span class="nx">GetAll</span><span class="p">()</span><span class="w"> </span><span class="p">[]</span><span class="nx">ServiceEntry</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">...</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>Go nemá třídy — jen struct + metody s přijímačem (<code>g *Gateway</code>). Enkapsulace přes balíčky: malé písmeno = privátní (<code>mu</code>, <code>services</code>), velké = veřejné (<code>Register</code>, <code>GetAll</code>).</p>
+<p><strong>Pointer receiver <code>*Gateway</code>:</strong> Metody mění stav — musí pracovat s originálním objektem, ne kopií. Value receiver by zkopíroval celý Gateway včetně mutexu — nekorektní.</p>
+<h3 id="python-dynamicke-tridy">Python — dynamické třídy</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">SearchIndex</span><span class="p">:</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_index</span> <span class="o">=</span> <span class="p">{}</span>      <span class="c1"># konvence: _ = &quot;privátní&quot;</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_contacts</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">rebuild</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contacts</span><span class="p">):</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build</span><span class="p">(</span><span class="n">contacts</span><span class="p">)</span>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">):</span>
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+</code></pre></div>
+<p>Python nemá skutečnou enkapsulaci — <code>_index</code> je konvence ("prosím nešahej"), ne vynucení kompilátorem. Kdokoliv může přistoupit k <code>obj._index</code> přímo.</p>
+<p><strong>Dynamické typy:</strong> Python nevyžaduje deklaraci typů — <code>self._index = {}</code> může být v dalším řádku přepsán čímkoliv. Typové anotace (<code>: dict[str, list]</code>) jsou jen dokumentace, ne kontrola.</p>
+<hr />
+<h2 id="sql-schema-a-dotazy-v-projektu">SQL — schéma a dotazy v projektu</h2>
+<h3 id="schema-databaze">Schéma databáze</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">contacts</span><span class="w"> </span><span class="p">(</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">    </span><span class="n">id</span><span class="w">         </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span><span class="w">           </span><span class="c1">-- UUID v4, generuje contacts-cpp</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">    </span><span class="n">first_name</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="w">    </span><span class="n">last_name</span><span class="w">  </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">    </span><span class="n">email</span><span class="w">      </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="w">    </span><span class="n">category</span><span class="w">   </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="s1">&#39;Other&#39;</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="p">);</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">phone_numbers</span><span class="w"> </span><span class="p">(</span>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="w">    </span><span class="n">id</span><span class="w">         </span><span class="n">BIGSERIAL</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span><span class="w">       </span><span class="c1">-- auto-increment integer</span>
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="w">    </span><span class="n">contact_id</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="n">contacts</span><span class="p">(</span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="k">DELETE</span><span class="w"> </span><span class="k">CASCADE</span><span class="p">,</span>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="w">    </span><span class="n">label</span><span class="w">      </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="w">    </span><span class="nb">number</span><span class="w">     </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span>
+<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a><span class="p">);</span>
+</code></pre></div>
+<p><strong><code>TEXT PRIMARY KEY</code> vs <code>SERIAL</code>:</strong> UUID jako primární klíč (TEXT) je horší pro výkon B-tree indexu než celočíselný klíč (sekvenční INT je vždy na konci stromu). Výhoda: UUID lze generovat bez databáze — contacts-cpp generuje id lokálně a vloží ho. Žádný round-trip pro získání klíče.</p>
+<p><strong><code>REFERENCES contacts(id) ON DELETE CASCADE</code>:</strong> Cizí klíč s kaskádovým mazáním. Smazání kontaktu automaticky smaže všechna jeho telefonní čísla — žádný orphan records. PostgreSQL to vynucuje transaktivně.</p>
+<p><strong><code>BIGSERIAL</code>:</strong> Zkratka pro <code>BIGINT GENERATED ALWAYS AS IDENTITY</code> — automaticky inkrementovaný 64-bit integer. Sekvenční klíč pro phone_numbers je efektivnější než UUID (menší index, cache-friendly).</p>
+<h3 id="parametrizovane-dotazy-sql-injection-ochrana">Parametrizované dotazy (SQL injection ochrana)</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1">// Správně — parametrizovaný dotaz</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="n">txn</span><span class="p">.</span><span class="n">exec_params</span><span class="p">(</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">    </span><span class="s">&quot;INSERT INTO contacts (id, first_name, last_name) VALUES ($1, $2, $3)&quot;</span><span class="p">,</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">    </span><span class="n">contact</span><span class="p">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">contact</span><span class="p">.</span><span class="n">first_name</span><span class="p">,</span><span class="w"> </span><span class="n">contact</span><span class="p">.</span><span class="n">last_name</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="p">);</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="c1">// Špatně — string concatenation → SQL injection</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="n">txn</span><span class="p">.</span><span class="n">exec</span><span class="p">(</span><span class="s">&quot;INSERT INTO contacts VALUES (&#39;&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;&#39;, &#39;&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">&quot;&#39;)&quot;</span><span class="p">);</span>
+</code></pre></div>
+<p><strong>SQL injection:</strong> Útočník pošle jako <code>first_name</code> hodnotu <code>'; DROP TABLE contacts; --</code>. String concatenation vloží tento kód přímo do SQL příkazu. <code>exec_params</code> posílá data a SQL odděleně — databáze je nezaměňuje, data jsou vždy data.</p>
+<p><strong><code>$1</code>, <code>$2</code>...</strong> jsou PostgreSQL placeholdery. libpqxx je nahradí hodnotami přes protokol, ne textovou substitucí.</p>
+<h3 id="join-a-n1-problem">JOIN a N+1 problém</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1">-- Načti kontakty s telefony — jeden dotaz (správně)</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="k">SELECT</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">label</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="nb">number</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="k">FROM</span><span class="w"> </span><span class="n">contacts</span><span class="w"> </span><span class="k">c</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="k">LEFT</span><span class="w"> </span><span class="k">JOIN</span><span class="w"> </span><span class="n">phone_numbers</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">contact_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">id</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">last_name</span><span class="p">,</span><span class="w"> </span><span class="k">c</span><span class="p">.</span><span class="n">first_name</span><span class="p">;</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="c1">-- Alternativa: N+1 problém (špatně)</span>
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">contacts</span><span class="p">;</span><span class="w">               </span><span class="c1">-- 1 dotaz</span>
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="c1">-- pro každý kontakt zvlášť:</span>
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">phone_numbers</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="n">contact_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">$</span><span class="mi">1</span><span class="p">;</span><span class="w">  </span><span class="c1">-- N dotazů</span>
+</code></pre></div>
+<p><strong>N+1 problém:</strong> 30 kontaktů = 31 SQL dotazů místo 1. Při 1000 kontaktech = 1001 dotazů. Každý dotaz = network round-trip na databázi (~1ms) → sekvenčně 1 sekunda jen na overhead. JOIN řeší vše jedním dotazem.</p>
+<p>contacts-cpp používá JOIN při načítání, ale pro jednoduchost implementace ukládá telefony zvlášť přes separátní <code>INSERT</code> po vložení kontaktu — přijatelný kompromis pro malý dataset.</p>
+<h3 id="transakce-a-acid">Transakce a ACID</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="n">pqxx</span><span class="o">::</span><span class="n">work</span><span class="w"> </span><span class="nf">txn</span><span class="p">(</span><span class="n">conn</span><span class="p">);</span><span class="w">  </span><span class="c1">// BEGIN</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="c1">// 1. Vlož kontakt</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="n">txn</span><span class="p">.</span><span class="n">exec_params</span><span class="p">(</span><span class="s">&quot;INSERT INTO contacts ...&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">...);</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="c1">// 2. Vlož telefony</span>
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="o">&amp;</span><span class="w"> </span><span class="n">phone</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">contact</span><span class="p">.</span><span class="n">phones</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="w">    </span><span class="n">txn</span><span class="p">.</span><span class="n">exec_params</span><span class="p">(</span><span class="s">&quot;INSERT INTO phone_numbers ...&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">...);</span>
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="p">}</span>
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>
+<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a><span class="n">txn</span><span class="p">.</span><span class="n">commit</span><span class="p">();</span><span class="w">  </span><span class="c1">// COMMIT — buď vše, nebo nic</span>
+</code></pre></div>
+<p><strong>ACID:</strong>
+- <strong>Atomicity:</strong> <code>commit()</code> potvrdí vše najednou. Při chybě po prvním INSERT ale před druhým — ROLLBACK zruší i první INSERT. Databáze zůstane konzistentní.
+- <strong>Consistency:</strong> Cizí klíč <code>REFERENCES contacts</code> nelze porušit — INSERT do phone_numbers bez existujícího contact_id selže.
+- <strong>Isolation:</strong> Souběžné transakce se navzájem neovlivní (PostgreSQL MVCC).
+- <strong>Durability:</strong> Po <code>commit()</code> jsou data na disku i při pádu serveru (WAL — Write-Ahead Log).</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Zpět na začátek
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Zkop\u00edrov\u00e1no do schr\u00e1nky", "clipboard.copy": "Kop\u00edrovat do schr\u00e1nky", "search.result.more.one": "1 dal\u0161\u00ed na t\u00e9to str\u00e1nce", "search.result.more.other": "# v\u00edce na t\u00e9to str\u00e1nce", "search.result.none": "Nenalezeny \u017e\u00e1dn\u00e9 dokumenty", "search.result.one": "Nalezen\u00fd dokument: 1", "search.result.other": "Nalezen\u00e9 dokumenty: #", "search.result.placeholder": "Pi\u0161te co se m\u00e1 vyhledat", "search.result.term.missing": "Chyb\u011bj\u00edc\u00ed", "select.version": "Vyberte verzi"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

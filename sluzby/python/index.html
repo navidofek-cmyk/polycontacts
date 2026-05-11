@@ -1,0 +1,1920 @@
+
+<!doctype html>
+<html lang="cs" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Microservices adresář kontaktů — RE tutorial v C++, Rust, Go, Python">
+      
+      
+      
+        <link rel="canonical" href="https://navidofek-cmyk.github.io/polycontacts/sluzby/python/">
+      
+      
+        <link rel="prev" href="../go/">
+      
+      
+        <link rel="next" href="../../vykon/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>bff-python (Python) - polycontacts</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#bff-python-pruvodce-kodem" class="md-skip">
+          Přeskočit obsah
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Záhlaví">
+    <a href="../.." title="polycontacts" class="md-header__button md-logo" aria-label="polycontacts" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            polycontacts
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              bff-python (Python)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Světlý režim"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Světlý režim" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="deep-purple"  aria-label="Tmavý režim"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Tmavý režim" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Hledat" placeholder="Hledat" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Vyhledávání">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Vyčistit" aria-label="Vyčistit" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializace vyhledávání
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/navidofek-cmyk/polycontacts" title="Přejít do repozitáře" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    navidofek-cmyk/polycontacts
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Karty" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Úvod
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../architektura/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architektura
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../cpp/" class="md-tabs__link">
+          
+  
+  
+  Služby
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../vykon/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Výkon & testy
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../technologie/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Technologický stack
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../re-spec/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  RE Spec
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigace" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="polycontacts" class="md-nav__button md-logo" aria-label="polycontacts" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    polycontacts
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/navidofek-cmyk/polycontacts" title="Přejít do repozitáře" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    navidofek-cmyk/polycontacts
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Úvod
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architektura/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architektura
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Služby
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Služby
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cpp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    contacts-cpp (C++20)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rust/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    search-rust (Rust)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../go/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    gateway-go (Go)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    bff-python (Python)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    bff-python (Python)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Obsah">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Obsah
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#teorie-event-loop-a-gil" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Teorie: Event loop a GIL
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#teorie-asynciogather-a-fan-out-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Teorie: asyncio.gather a fan-out pattern
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#teorie-httpxasyncclient-a-connection-reuse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Teorie: httpx.AsyncClient a connection reuse
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prehled-a-bff-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Přehled a BFF pattern
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#konfigurace-a-env-promenne" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Konfigurace a env proměnné
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lifespan-context-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        lifespan context manager
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="lifespan context manager">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#asynccontextmanager-stary-i-novy-zpusob" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        @asynccontextmanager — starý i nový způsob
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#proc-sdileny-httpxasyncclient" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proč sdílený httpx.AsyncClient
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#registrace-u-gateway-proc-tryexcept-pass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registrace u gateway — proč try/except pass
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yield-startup-vs-shutdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        yield — startup vs shutdown
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_proxy-helper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        _proxy() helper
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#endpointy-projdi-kazdy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Endpointy — projdi každý
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Endpointy — projdi každý">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#health" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /health
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#index" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        / (index)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apicontacts-crud" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /api/contacts — CRUD
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apisearch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /api/search
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apidb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /api/db
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apidedup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /api/dedup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apianalytics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /api/analytics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apiexportvcard-a-apiimportvcard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /api/export/vcard a /api/import/vcard
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apiservices-a-apitopology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /api/services a /api/topology
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apistats-paralelni-fan-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /api/stats — paralelní fan-out
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#staticfiles-mount" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        StaticFiles mount
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#jak-testovat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Jak testovat
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#klicove-prvky-jazyka-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Klíčové prvky jazyka Python
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Klíčové prvky jazyka Python">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#asynccontextmanager-dekorator-generator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        @asynccontextmanager — dekorátor + generátor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#async-def-a-await-coroutiny" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        async def a await — coroutiny
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fastapi-dekoratory-appget-routing-jako-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FastAPI dekorátory @app.get — routing jako metadata
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#asynciogather-paralelni-fan-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        asyncio.gather — paralelní fan-out
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typove-anotace-a-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Typové anotace a str = ""
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../vykon/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Výkon & testy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../technologie/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technologický stack
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../re-spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RE Spec
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Obsah">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Obsah
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#teorie-event-loop-a-gil" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Teorie: Event loop a GIL
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#teorie-asynciogather-a-fan-out-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Teorie: asyncio.gather a fan-out pattern
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#teorie-httpxasyncclient-a-connection-reuse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Teorie: httpx.AsyncClient a connection reuse
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prehled-a-bff-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Přehled a BFF pattern
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#konfigurace-a-env-promenne" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Konfigurace a env proměnné
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lifespan-context-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        lifespan context manager
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="lifespan context manager">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#asynccontextmanager-stary-i-novy-zpusob" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        @asynccontextmanager — starý i nový způsob
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#proc-sdileny-httpxasyncclient" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proč sdílený httpx.AsyncClient
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#registrace-u-gateway-proc-tryexcept-pass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registrace u gateway — proč try/except pass
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#yield-startup-vs-shutdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        yield — startup vs shutdown
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_proxy-helper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        _proxy() helper
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#endpointy-projdi-kazdy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Endpointy — projdi každý
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Endpointy — projdi každý">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#health" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /health
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#index" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        / (index)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apicontacts-crud" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /api/contacts — CRUD
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apisearch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /api/search
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apidb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /api/db
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apidedup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /api/dedup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apianalytics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /api/analytics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apiexportvcard-a-apiimportvcard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /api/export/vcard a /api/import/vcard
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apiservices-a-apitopology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /api/services a /api/topology
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apistats-paralelni-fan-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        /api/stats — paralelní fan-out
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#staticfiles-mount" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        StaticFiles mount
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#jak-testovat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Jak testovat
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#klicove-prvky-jazyka-python" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Klíčové prvky jazyka Python
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Klíčové prvky jazyka Python">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#asynccontextmanager-dekorator-generator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        @asynccontextmanager — dekorátor + generátor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#async-def-a-await-coroutiny" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        async def a await — coroutiny
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fastapi-dekoratory-appget-routing-jako-metadata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FastAPI dekorátory @app.get — routing jako metadata
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#asynciogather-paralelni-fan-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        asyncio.gather — paralelní fan-out
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#typove-anotace-a-str" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Typové anotace a str = ""
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="bff-python-pruvodce-kodem">bff-python — Průvodce kódem</h1>
+<h2 id="teorie-event-loop-a-gil">Teorie: Event loop a GIL</h2>
+<p>Python má <strong>GIL</strong> (Global Interpreter Lock) — mutex který zabraňuje skutečnému paralelnímu vykonávání Python bytekódu ve více vláknech zároveň. Dvě Python vlákna nemohou vykonávat Python kód současně.</p>
+<p>Důsledek: Python thready jsou zbytečné pro CPU-bound paralelismus (třídění, výpočty). Pro I/O-bound práci (síťová volání, disk) GIL není problém — vlákno stejně čeká na OS a GIL mezitím uvolní.</p>
+<p><strong>asyncio</strong> obchází GIL jinak: jeden thread, jeden event loop, žádné context switching:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Thread 1 (event loop):
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  → request přijde
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  → await httpx.get(contacts_url)   ← uvolní řízení event loopu
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    → event loop obslouží jiný request
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    → event loop obslouží jiný request  
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  → odpověď přišla, pokračuj
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>  → vrátí odpověď
+</code></pre></div>
+<p>Tisíce souběžných HTTP requestů = tisíce coroutine objektů v paměti (kilobajty), ne tisíce OS vláken (megabajty).</p>
+<h2 id="teorie-asynciogather-a-fan-out-pattern">Teorie: asyncio.gather a fan-out pattern</h2>
+<p><code>/api/stats</code> potřebuje statistiky ze tří backendů. Sekvenční přístup:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">r1</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">contacts_url</span><span class="p">)</span>   <span class="c1"># čekáme ~5ms</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">r2</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">search_url</span><span class="p">)</span>     <span class="c1"># čekáme ~5ms  </span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">r3</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">gateway_url</span><span class="p">)</span>    <span class="c1"># čekáme ~5ms</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># celkem: ~15ms</span>
+</code></pre></div>
+<p>S <code>asyncio.gather</code> (fan-out):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">r1</span><span class="p">,</span> <span class="n">r2</span><span class="p">,</span> <span class="n">r3</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">contacts_url</span><span class="p">),</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">search_url</span><span class="p">),</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">gateway_url</span><span class="p">),</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">)</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="c1"># celkem: max(5ms, 5ms, 5ms) = ~5ms</span>
+</code></pre></div>
+<p><code>gather</code> spustí všechny coroutiny "najednou" — event loop střídá mezi nimi při každém <code>await</code>. Výsledná latence je <code>max(t1, t2, t3)</code> místo <code>t1 + t2 + t3</code>. Při třech backendech je to 3× zrychlení.</p>
+<p><code>return_exceptions=True</code> zabrání tomu, aby selhání jednoho backendu zrušilo celý gather — ostatní výsledky se vrátí normálně, chyba se vrátí jako exception objekt v poli výsledků.</p>
+<h2 id="teorie-httpxasyncclient-a-connection-reuse">Teorie: httpx.AsyncClient a connection reuse</h2>
+<p><code>requests</code> (synchronní knihovna) otevírá nové TCP spojení na každý request (pokud se explicitně nepoužívá Session). Pro BFF, která dělá stovky requestů za sekundu na stejné backendy, je to zbytečné.</p>
+<p><code>httpx.AsyncClient</code> udržuje <strong>connection pool</strong> — sdružené TCP spojení na každý backend. HTTP/1.1 keep-alive nechá spojení otevřené po dokončení requestu pro další použití.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Špatně — nové spojení na každý request</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">bad</span><span class="p">():</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="k">async</span> <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">c</span><span class="p">:</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>        <span class="k">return</span> <span class="k">await</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="c1"># Správně — sdílené spojení po celou dobu životnosti aplikace  </span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">_client</span><span class="p">:</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span>   <span class="c1"># globální, inicializován v lifespan()</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">good</span><span class="p">():</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+</code></pre></div>
+<p>Sdílený klient se vytvoří jednou v <code>lifespan()</code> a zůstane otevřený po celou dobu běhu aplikace. FastAPI <code>lifespan</code> je context manager — <code>yield</code> odděluje startup (před ním) od shutdown (po něm).</p>
+<h2 id="prehled-a-bff-pattern">Přehled a BFF pattern</h2>
+<p><strong>Backend-for-Frontend (BFF)</strong> je architektonický vzor: server, který sedí mezi prohlížečem a interní sítí backendových služeb. Prohlížeč nezná nic o kontejnerech, interních adresách ani o tom, kolik backendů existuje — komunikuje jen s jednou adresou (<code>http://localhost:8989</code>).</p>
+<p>Bez BFF by prohlížeč musel:</p>
+<ul>
+<li>znát adresy všech tří backendů (<code>contacts-cpp:8080</code>, <code>search-rust:8081</code>, <code>gateway-go:9000</code>)</li>
+<li>řešit CORS hlavičky pro každý z nich zvlášť</li>
+<li>sám paralelizovat volání při sestavování souhrnné stránky (např. <code>/api/stats</code>)</li>
+</ul>
+<p>BFF tyto problémy řeší na straně serveru. Prohlížeč dostane jednu konzistentní API bez závislosti na topologii interní sítě.</p>
+<p><code>bff-python</code> je napsán ve FastAPI a komunikuje s backendy přes sdíleného <code>httpx.AsyncClient</code>. Zároveň obsluhuje statické soubory frontendu — prohlížeč stáhne HTML/JS/CSS ze stejné adresy jako volá API.</p>
+<hr />
+<h2 id="konfigurace-a-env-promenne">Konfigurace a env proměnné</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">GATEWAY_URL</span>  <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;GATEWAY_URL&quot;</span><span class="p">,</span>  <span class="s2">&quot;http://localhost:9000&quot;</span><span class="p">)</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">CONTACTS_URL</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;CONTACTS_URL&quot;</span><span class="p">,</span> <span class="s2">&quot;http://localhost:8080&quot;</span><span class="p">)</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">SEARCH_URL</span>   <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;SEARCH_URL&quot;</span><span class="p">,</span>   <span class="s2">&quot;http://localhost:8081&quot;</span><span class="p">)</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">PORT</span>         <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PORT&quot;</span><span class="p">,</span>     <span class="s2">&quot;8989&quot;</span><span class="p">))</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="n">STATIC_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;static&quot;</span>
+</code></pre></div>
+<p>Každá proměnná používá <code>os.getenv(název, výchozí_hodnota)</code> — dvouhodnotová varianta, která vrátí výchozí hodnotu pokud proměnná prostředí není nastavena. Tento vzor zajistí:</p>
+<ul>
+<li><strong>Lokální vývoj</strong> — <code>python main.py</code> funguje bez nastavení čehokoliv, výchozí adresy míří na <code>localhost</code>.</li>
+<li><strong>Docker / Kubernetes</strong> — orchestrátor nastaví proměnné prostředí (<code>CONTACTS_URL=http://contacts-cpp:8080</code>) a aplikace je automaticky použije.</li>
+</ul>
+<p><code>STATIC_DIR</code> je konstruován relativně vůči souboru <code>main.py</code> pomocí <code>Path(__file__).parent</code> — funguje správně bez ohledu na to, odkud je aplikace spuštěna (cwd se nemění).</p>
+<hr />
+<h2 id="lifespan-context-manager">lifespan context manager</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nd">@asynccontextmanager</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">lifespan</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">):</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="k">global</span> <span class="n">_client</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">_client</span> <span class="o">=</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>        <span class="k">await</span> <span class="n">_client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">GATEWAY_URL</span><span class="si">}</span><span class="s2">/services&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>            <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;bff-python&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>                <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;http://bff-python:8989&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>                <span class="s2">&quot;health_path&quot;</span><span class="p">:</span> <span class="s2">&quot;/health&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>            <span class="p">},</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>        <span class="p">)</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>        <span class="k">pass</span>
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>    <span class="k">yield</span>
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>    <span class="k">await</span> <span class="n">_client</span><span class="o">.</span><span class="n">aclose</span><span class="p">()</span>
+<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>
+<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>
+<a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a><span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;bff-python&quot;</span><span class="p">,</span> <span class="n">lifespan</span><span class="o">=</span><span class="n">lifespan</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="asynccontextmanager-stary-i-novy-zpusob"><code>@asynccontextmanager</code> — starý i nový způsob</h3>
+<p>FastAPI původně používal <code>on_startup</code> / <code>on_shutdown</code> event handlery. Od verze 0.95+ je preferovaný způsob <code>lifespan</code> — jeden kontextový manažer, který zahrnuje obě fáze životního cyklu. <code>@asynccontextmanager</code> z <code>contextlib</code> umožňuje zapsat startup a shutdown kód do jedné funkce s <code>yield</code> jako dělítkem.</p>
+<h3 id="proc-sdileny-httpxasyncclient">Proč sdílený <code>httpx.AsyncClient</code></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">_client</span> <span class="o">=</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>  <span class="c1"># jednou při startu</span>
+</code></pre></div>
+<p><code>httpx.AsyncClient</code> interně spravuje <strong>connection pool</strong> — udržuje otevřená TCP spojení na každý backend a znovu je používá pro další požadavky. Vytvoření nového klienta per požadavek by znamenalo:</p>
+<ol>
+<li>Nové TCP spojení (3-way handshake) pro každý požadavek — latence desítek ms navíc.</li>
+<li>TLS handshake pokud backend používá HTTPS.</li>
+<li>Zbytečnou alokaci a garbage collection.</li>
+</ol>
+<p>Sdílený klient tyto náklady amortizuje přes všechny příchozí požadavky.</p>
+<h3 id="registrace-u-gateway-proc-tryexcept-pass">Registrace u gateway — proč <code>try/except pass</code></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="k">await</span> <span class="n">_client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">GATEWAY_URL</span><span class="si">}</span><span class="s2">/services&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span><span class="o">...</span><span class="p">})</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="k">pass</span>  <span class="c1"># gateway may not be up yet; ignore</span>
+</code></pre></div>
+<p>Pořadí startu Docker kontejnerů není deterministické. BFF se může spustit dříve než gateway, síť nemusí být ještě připravená, nebo gateway může být v restart loopě. Selhání registrace není fatální — gateway má vlastní health checker, který BFF časem objeví. Ignorování výjimky (<code>pass</code>) je zde správné rozhodnutí: chceme, aby BFF nastartoval i bez gateway.</p>
+<div class="admonition warning">
+<p class="admonition-title">Proč ne <code>except Exception as e: log.warning(...)</code></p>
+<p>V produkčním systému bychom výjimku logovali pro snadnější debugging. Zde je <code>pass</code> přijatelný zkratkovitý zápis pro vývojové prostředí.</p>
+</div>
+<h3 id="yield-startup-vs-shutdown"><code>yield</code> — startup vs shutdown</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">lifespan</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">):</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="c1"># === STARTUP ===</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="n">_client</span> <span class="o">=</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>        <span class="k">await</span> <span class="n">_client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>  <span class="c1"># registrace u gateway</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>        <span class="k">pass</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>    <span class="k">yield</span>  <span class="c1"># &lt;-- zde FastAPI spustí server a začne přijímat požadavky</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>    <span class="c1"># === SHUTDOWN ===</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>    <span class="k">await</span> <span class="n">_client</span><span class="o">.</span><span class="n">aclose</span><span class="p">()</span>  <span class="c1"># korektní uzavření spojení</span>
+</code></pre></div>
+<p>Kód před <code>yield</code> se spustí jednou při startu — inicializace sdílených zdrojů. Kód po <code>yield</code> se spustí jednou při vypnutí — úklid. <code>_client.aclose()</code> korektně uzavře všechna otevřená TCP spojení a uvolní porty, místo aby čekal na garbage collector.</p>
+<hr />
+<h2 id="_proxy-helper"><code>_proxy()</code> helper</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_proxy</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>    <span class="n">body</span> <span class="o">=</span> <span class="k">await</span> <span class="n">request</span><span class="o">.</span><span class="n">body</span><span class="p">()</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>    <span class="n">upstream</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_client</span><span class="o">.</span><span class="n">request</span><span class="p">(</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>        <span class="n">method</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">method</span><span class="p">,</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>        <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>        <span class="n">content</span><span class="o">=</span><span class="n">body</span><span class="p">,</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>        <span class="n">headers</span><span class="o">=</span><span class="p">{</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>            <span class="n">k</span><span class="p">:</span> <span class="n">v</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>            <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;host&quot;</span><span class="p">,</span> <span class="s2">&quot;content-length&quot;</span><span class="p">)</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>        <span class="p">},</span>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>    <span class="p">)</span>
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>        <span class="n">content</span><span class="o">=</span><span class="n">upstream</span><span class="o">.</span><span class="n">content</span><span class="p">,</span>
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>        <span class="n">status_code</span><span class="o">=</span><span class="n">upstream</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a>        <span class="n">media_type</span><span class="o">=</span><span class="n">upstream</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content-type&quot;</span><span class="p">,</span> <span class="s2">&quot;application/json&quot;</span><span class="p">),</span>
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a>    <span class="p">)</span>
+</code></pre></div>
+<p>Řádek po řádku:</p>
+<p><strong><code>body = await request.body()</code></strong>
+FastAPI tělo požadavku nenačítá automaticky — <code>request.body()</code> je coroutine, která ho přečte z síťového streamu. Explicitní <code>await</code> je nutné: bez něj bychom předali prázdné tělo. Pro <code>GET</code> požadavky vrátí prázdný <code>bytes</code>, což je správné.</p>
+<p><strong><code>method=request.method</code></strong>
+Přeposílá HTTP metodu beze změny — <code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>DELETE</code> vše putuje k upstream službě.</p>
+<p><strong><code>content=body</code></strong>
+<code>httpx</code> rozlišuje <code>content=</code> (raw bytes) a <code>json=</code> (automatická serializace). Používáme <code>content=</code> protože tělo jsme přečetli jako raw bytes a nechceme ho znovu parsovat ani enkódovat.</p>
+<p><strong>Filtrování headers:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;host&quot;</span><span class="p">,</span> <span class="s2">&quot;content-length&quot;</span><span class="p">)</span>
+</code></pre></div></p>
+<ul>
+<li><strong><code>host</code></strong> — HTTP header <code>Host</code> říká serveru, na jakou doménu požadavek míří. BFF pošle <code>Host: localhost:8989</code> (svou vlastní adresu). Upstream backend (<code>contacts-cpp:8080</code>) by tento header odmítl nebo špatně interpretoval, protože se neshoduje s jeho konfigurací. <code>httpx</code> automaticky nastaví správný <code>Host</code> pro cílovou URL.</li>
+<li><strong><code>content-length</code></strong> — délka těla v bytech. <code>httpx</code> ji přepočítá automaticky z předaného <code>content=body</code>. Pokud bychom přeposlali původní <code>content-length</code> a tělo bylo přeformátováno, došlo by k neshodě délky a upstream by vrátil <code>400 Bad Request</code>.</li>
+</ul>
+<p><strong><code>**kwargs</code></strong>
+Volitelné klíčové argumenty předané přímo do <code>httpx.AsyncClient.request()</code>. Endpointy je používají pro <code>params=</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="k">return</span> <span class="k">await</span> <span class="n">_proxy</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONTACTS_URL</span><span class="si">}</span><span class="s2">/dedup&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;threshold&quot;</span><span class="p">:</span> <span class="n">threshold</span><span class="p">})</span>
+</code></pre></div>
+<p><code>params={"threshold": 0.85}</code> se přemění na query string <code>?threshold=0.85</code> v cílové URL — upstream vidí parametr přesně tak, jak ho klient poslal na BFF.</p>
+<p><strong><code>Response(...)</code></strong>
+Vrátíme FastAPI <code>Response</code> objekt s raw <code>content</code> z upstream odpovědi. Nepoužíváme <code>JSONResponse</code> záměrně — neznáme a nechceme modifikovat obsah odpovědi, jen ho přeposlat. <code>media_type</code> bereme z upstream <code>Content-Type</code> headeru.</p>
+<hr />
+<h2 id="endpointy-projdi-kazdy">Endpointy — projdi každý</h2>
+<h3 id="health"><code>/health</code></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/health&quot;</span><span class="p">)</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">health</span><span class="p">():</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">,</span> <span class="s2">&quot;service&quot;</span><span class="p">:</span> <span class="s2">&quot;bff-python&quot;</span><span class="p">}</span>
+</code></pre></div>
+<p>Jednoduchý liveness endpoint. Gateway ho volá každých 10 sekund, aby věděla, zda je tato instance nahoře. Neověřuje dostupnost backendů — jen potvrzuje, že BFF sám běží.</p>
+<h3 id="index"><code>/</code> (index)</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">index</span><span class="p">():</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>    <span class="k">return</span> <span class="n">FileResponse</span><span class="p">(</span><span class="n">STATIC_DIR</span> <span class="o">/</span> <span class="s2">&quot;index.html&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Vrátí hlavní HTML soubor SPA (Single-Page Application). Veškerá interakce s API probíhá přes JavaScript uvnitř stránky. Explicitní route musí existovat, protože <code>StaticFiles</code> mount (mountovaný jako poslední) by pro <code>/</code> vrátil directory listing nebo <code>403</code>, ne <code>index.html</code>.</p>
+<h3 id="apicontacts-crud"><code>/api/contacts</code> — CRUD</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/api/contacts&quot;</span><span class="p">)</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_contacts</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">_proxy</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONTACTS_URL</span><span class="si">}</span><span class="s2">/contacts&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;q&quot;</span><span class="p">:</span> <span class="n">q</span><span class="p">})</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/api/contacts&quot;</span><span class="p">)</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_contact</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">_proxy</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONTACTS_URL</span><span class="si">}</span><span class="s2">/contacts&quot;</span><span class="p">)</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="nd">@app</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;/api/contacts/{contact_id:path}&quot;</span><span class="p">)</span>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">update_contact</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">contact_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">_proxy</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONTACTS_URL</span><span class="si">}</span><span class="s2">/contacts/</span><span class="si">{</span><span class="n">contact_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a>
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a><span class="nd">@app</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;/api/contacts/{contact_id:path}&quot;</span><span class="p">)</span>
+<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">delete_contact</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">contact_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">_proxy</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONTACTS_URL</span><span class="si">}</span><span class="s2">/contacts/</span><span class="si">{</span><span class="n">contact_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Přímé přesměrování na <code>contacts-cpp</code>. Parametr <code>:path</code> v <code>{contact_id:path}</code> umožňuje ID obsahovat lomítka — bez něj by FastAPI vrátil <code>404</code> pro ID jako <code>user/123</code>.</p>
+<h3 id="apisearch"><code>/api/search</code></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/api/search&quot;</span><span class="p">)</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">search</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">_proxy</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">SEARCH_URL</span><span class="si">}</span><span class="s2">/search&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;q&quot;</span><span class="p">:</span> <span class="n">q</span><span class="p">})</span>
+</code></pre></div>
+<p>Přesměruje fulltext dotaz do <code>search-rust</code>, který udržuje invertovaný index nad kontakty.</p>
+<h3 id="apidb"><code>/api/db</code></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/api/db&quot;</span><span class="p">)</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">db_tables</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">_proxy</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONTACTS_URL</span><span class="si">}</span><span class="s2">/db/tables&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Diagnostický endpoint — vrátí raw obsah PostgreSQL tabulek pro vývojářský pohled v UI.</p>
+<h3 id="apidedup"><code>/api/dedup</code></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/api/dedup&quot;</span><span class="p">)</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">dedup</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.85</span><span class="p">):</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">_proxy</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONTACTS_URL</span><span class="si">}</span><span class="s2">/dedup&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;threshold&quot;</span><span class="p">:</span> <span class="n">threshold</span><span class="p">})</span>
+</code></pre></div>
+<p>Najde potenciální duplicity; <code>threshold</code> (0–1) určuje minimální míru podobnosti. Výchozí hodnota 0.85 je praktický kompromis — nízká hodnota způsobí příliš mnoho false positives, vysoká přehlédne reálné duplicity.</p>
+<h3 id="apianalytics"><code>/api/analytics</code></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/api/analytics&quot;</span><span class="p">)</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">analytics</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">_proxy</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONTACTS_URL</span><span class="si">}</span><span class="s2">/analytics&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Vrátí agregované metriky (rozdělení kategorií, počty kontaktů podle příjmení atd.) z <code>contacts-cpp</code>.</p>
+<h3 id="apiexportvcard-a-apiimportvcard"><code>/api/export/vcard</code> a <code>/api/import/vcard</code></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/api/export/vcard&quot;</span><span class="p">)</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">export_vcard</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">_proxy</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONTACTS_URL</span><span class="si">}</span><span class="s2">/export/vcard&quot;</span><span class="p">)</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/api/import/vcard&quot;</span><span class="p">)</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">import_vcard</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">_proxy</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONTACTS_URL</span><span class="si">}</span><span class="s2">/import/vcard&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Export vrátí <code>.vcf</code> soubor se všemi kontakty. Import přijme multipart nebo raw vCard tělo a dávkově naimportuje kontakty do <code>contacts-cpp</code>.</p>
+<h3 id="apiservices-a-apitopology"><code>/api/services</code> a <code>/api/topology</code></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/api/services&quot;</span><span class="p">)</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">services</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">_proxy</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">GATEWAY_URL</span><span class="si">}</span><span class="s2">/services&quot;</span><span class="p">)</span>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/api/topology&quot;</span><span class="p">)</span>
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">topology</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">_proxy</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">GATEWAY_URL</span><span class="si">}</span><span class="s2">/topology&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Přesměrují dotaz přímo na <code>gateway-go</code> — registry registrovaných služeb a graf závislostí pro vizualizaci v UI.</p>
+<h3 id="apistats-paralelni-fan-out"><code>/api/stats</code> — paralelní fan-out</h3>
+<p>Toto je jediný endpoint BFF, který <strong>agreguje data z více zdrojů</strong> namísto prostého přesměrování.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_fetch_stats</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>        <span class="n">r</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">base_url</span><span class="si">}</span><span class="s2">/stats&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>        <span class="n">data</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span> <span class="k">else</span> <span class="p">{}</span>
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;service&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">}</span>
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;service&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)}</span>
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>
+<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>
+<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/api/stats&quot;</span><span class="p">)</span>
+<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">stats</span><span class="p">():</span>
+<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>    <span class="n">targets</span> <span class="o">=</span> <span class="p">[</span>
+<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a>        <span class="p">(</span><span class="s2">&quot;contacts-cpp&quot;</span><span class="p">,</span> <span class="n">CONTACTS_URL</span><span class="p">),</span>
+<a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a>        <span class="p">(</span><span class="s2">&quot;search-rust&quot;</span><span class="p">,</span>  <span class="n">SEARCH_URL</span><span class="p">),</span>
+<a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a>        <span class="p">(</span><span class="s2">&quot;gateway-go&quot;</span><span class="p">,</span>   <span class="n">GATEWAY_URL</span><span class="p">),</span>
+<a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a>    <span class="p">]</span>
+<a id="__codelineno-21-17" name="__codelineno-21-17" href="#__codelineno-21-17"></a>    <span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+<a id="__codelineno-21-18" name="__codelineno-21-18" href="#__codelineno-21-18"></a>        <span class="o">*</span><span class="p">[</span><span class="n">_fetch_stats</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">]</span>
+<a id="__codelineno-21-19" name="__codelineno-21-19" href="#__codelineno-21-19"></a>    <span class="p">)</span>
+<a id="__codelineno-21-20" name="__codelineno-21-20" href="#__codelineno-21-20"></a>    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+</code></pre></div>
+<p><strong><code>_fetch_stats</code> — degradovaný záznam místo výjimky:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;service&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)}</span>
+</code></pre></div>
+<p>Pokud <code>contacts-cpp</code> neodpovídá, <code>_fetch_stats</code> vrátí <code>{"service": "contacts-cpp", "error": "Connection refused"}</code> místo vyvolání výjimky. To je <strong>degraded response</strong> vzor — jeden nedostupný backend nezabránil zobrazení statistik ostatních dvou. Caller (<code>stats()</code>) dostane výsledky ze všech tří volání bez ohledu na to, zda selhaly.</p>
+<p><strong><code>asyncio.gather</code> — proč celková latence = max(3 backends):</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>    <span class="n">_fetch_stats</span><span class="p">(</span><span class="s2">&quot;contacts-cpp&quot;</span><span class="p">,</span> <span class="n">CONTACTS_URL</span><span class="p">),</span>  <span class="c1"># spustí se okamžitě</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>    <span class="n">_fetch_stats</span><span class="p">(</span><span class="s2">&quot;search-rust&quot;</span><span class="p">,</span>  <span class="n">SEARCH_URL</span><span class="p">),</span>    <span class="c1"># spustí se okamžitě</span>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a>    <span class="n">_fetch_stats</span><span class="p">(</span><span class="s2">&quot;gateway-go&quot;</span><span class="p">,</span>   <span class="n">GATEWAY_URL</span><span class="p">),</span>   <span class="c1"># spustí se okamžitě</span>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="p">)</span>
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="c1"># čeká, dokud všechny tři nedokončí — celková latence = max(latence A, B, C)</span>
+</code></pre></div>
+<p><code>asyncio.gather</code> spustí všechny coroutines <strong>souběžně</strong> v rámci jednoho event loop threadu — ne paralelně v OS smyslu, ale přepíná mezi nimi v každém <code>await</code> bodě. Každé <code>_fetch_stats</code> čeká na síťovou odpověď (<code>await _client.get(...)</code>) — v době čekání event loop obslouží ostatní coroutines. Výsledkem je, že všechna tři volání probíhají překrytě:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>Sekvenčně:    |--A(3s)--|--B(2s)--|--C(5s)--|  = 10s celkem
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>asyncio.gather: |--A(3s)--|
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>               |--B(2s)--|
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>               |------C(5s)------|  = 5s celkem (max)
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">asyncio není threading</p>
+<p><code>asyncio.gather</code> nevytváří vlákna ani procesy. Vše běží v jednom Python threadu. Paralelismus vzniká tím, že I/O operace (síťová volání) uvolní event loop pro ostatní coroutines. CPU-bound operace by se takto nezrychlily.</p>
+</div>
+<hr />
+<h2 id="staticfiles-mount">StaticFiles mount</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="n">app</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">StaticFiles</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">STATIC_DIR</span><span class="p">),</span> <span class="n">html</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;static&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p><code>StaticFiles</code> mount musí být <strong>poslední</strong> — FastAPI prochází routes v pořadí registrace a vrátí první shodu. Pokud by <code>StaticFiles</code> byl mountován dříve, zachytil by všechny požadavky na <code>/</code> (včetně <code>/api/contacts</code>, <code>/health</code> atd.) a vrátil by statický soubor nebo <code>404</code>.</p>
+<p>Parametr <code>html=True</code> aktivuje fallback chování: pokud soubor <code>static/api/contacts</code> neexistuje, <code>StaticFiles</code> vrátí <code>404</code> a FastAPI pokračuje hledáním další shody — takže explicitní route výše zachytí požadavek správně. Bez <code>html=True</code> by <code>StaticFiles</code> vrátil vlastní <code>404</code> okamžitě.</p>
+<div class="admonition note">
+<p class="admonition-title">Proč mount na <code>/</code> a ne na <code>/static</code></p>
+<p>Frontend je SPA — HTML, JS a CSS jsou servovány ze stejné základní adresy jako API. Prohlížeč tak nemusí řešit cross-origin požadavky a celá aplikace funguje na jednom portu.</p>
+</div>
+<hr />
+<h2 id="jak-testovat">Jak testovat</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="nb">cd</span><span class="w"> </span>services/bff-python<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/<span class="w"> </span>-v
+</code></pre></div>
+<p>Spustí unit testy BFF. <code>uv run</code> zajistí správné virtuální prostředí bez nutnosti <code>venv activate</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>curl<span class="w"> </span>http://localhost:8989/api/analytics
+</code></pre></div>
+<p>Vrátí agregované metriky z <code>contacts-cpp</code> — rozdělení kontaktů podle kategorií, počty atd.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>curl<span class="w"> </span>http://localhost:8989/api/dedup?threshold<span class="o">=</span><span class="m">0</span>.8
+</code></pre></div>
+<p>Najde potenciální duplicity s mírou podobnosti ≥ 80 %. Nižší threshold vrátí více výsledků (více false positives), vyšší méně (přísnější shoda).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>curl<span class="w"> </span>http://localhost:8989/api/stats
+</code></pre></div>
+<p>Agregované statistiky ze všech tří backendů souběžně — výsledek by měl přijít do ~5 sekund bez ohledu na to, kolik backendů odpovídá.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>http://localhost:8989/api/contacts<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a><span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;name&quot;: &quot;Jana Nováková&quot;, &quot;email&quot;: &quot;jana@example.com&quot;}&#39;</span>
+</code></pre></div>
+<p>Vytvoří nový kontakt — BFF předá tělo beze změny do <code>contacts-cpp</code>.</p>
+<hr />
+<h2 id="klicove-prvky-jazyka-python">Klíčové prvky jazyka Python</h2>
+<h3 id="asynccontextmanager-dekorator-generator"><code>@asynccontextmanager</code> — dekorátor + generátor</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="nd">@asynccontextmanager</span>
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">lifespan</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">):</span>
+<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>    <span class="n">_client</span> <span class="o">=</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span>
+<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a>    <span class="k">yield</span>          <span class="c1"># ← FastAPI spustí aplikaci zde</span>
+<a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a>    <span class="k">await</span> <span class="n">_client</span><span class="o">.</span><span class="n">aclose</span><span class="p">()</span>
+</code></pre></div>
+<p><code>@asynccontextmanager</code> kombinuje dva koncepty:</p>
+<p><strong>Dekorátor</strong> (<code>@</code>) — funkce která obalí jinou funkci. <code>asynccontextmanager</code> přemění generátorovou funkci na context manager použitelný s <code>async with</code>.</p>
+<p><strong>Generátor</strong> — funkce s <code>yield</code>. Při prvním volání běží do <code>yield</code> (startup). Při ukončení (nebo výjimce) pokračuje za <code>yield</code> (shutdown). Stav mezi <code>yield</code> je zachován v closure.</p>
+<p>Výsledek: startup kód → <code>yield</code> → aplikace běží → shutdown kód. Přirozené a čitelné bez nutnosti psát třídu s <code>__aenter__</code> a <code>__aexit__</code>.</p>
+<h3 id="async-def-a-await-coroutiny"><code>async def</code> a <code>await</code> — coroutiny</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_contacts</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>    <span class="k">return</span> <span class="k">await</span> <span class="n">_proxy</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONTACTS_URL</span><span class="si">}</span><span class="s2">/contacts&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;q&quot;</span><span class="p">:</span> <span class="n">q</span><span class="p">})</span>
+</code></pre></div>
+<p><code>async def</code> definuje <strong>coroutinu</strong> — funkci která může být pozastavena. <code>await</code> je bod pozastavení: předá řízení event loopu, který může obsluhovat jiné coroutiny, a obnoví tuto funkci až výsledek bude dostupný.</p>
+<p>Klíčový rozdíl od synchronního kódu: <code>await httpx.get(url)</code> nepozastaví <strong>celé vlákno</strong> (jako <code>requests.get(url)</code>), jen <strong>tuto coroutinu</strong>. Event loop mezitím obslouží stovky dalších requestů.</p>
+<h3 id="fastapi-dekoratory-appget-routing-jako-metadata">FastAPI dekorátory <code>@app.get</code> — routing jako metadata</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/api/contacts&quot;</span><span class="p">)</span>
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_contacts</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>    <span class="o">...</span>
+</code></pre></div>
+<p><code>@app.get("/api/contacts")</code> je dekorátor který <strong>zaregistruje</strong> funkci jako handler pro <code>GET /api/contacts</code>. FastAPI při startu projde všechny dekorované funkce a sestaví routing tabulku.</p>
+<p>Parametry funkce FastAPI automaticky mapuje:
+- <code>request: Request</code> → celý HTTP request objekt
+- <code>q: str = ""</code> → query parametr <code>?q=</code> s výchozí hodnotou <code>""</code>
+- <code>contact_id: str</code> v path <code>/{contact_id:path}</code> → část URL</p>
+<p><code>:path</code> v <code>{contact_id:path}</code> říká FastAPI: tento segment může obsahovat lomítka (pro UUID je to sice zbytečné, ale robustní).</p>
+<h3 id="asynciogather-paralelni-fan-out"><code>asyncio.gather</code> — paralelní fan-out</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>    <span class="n">fetch_stats</span><span class="p">(</span><span class="n">CONTACTS_URL</span><span class="p">,</span> <span class="s2">&quot;contacts&quot;</span><span class="p">),</span>
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>    <span class="n">fetch_stats</span><span class="p">(</span><span class="n">SEARCH_URL</span><span class="p">,</span> <span class="s2">&quot;search&quot;</span><span class="p">),</span>
+<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a>    <span class="n">fetch_stats</span><span class="p">(</span><span class="n">GATEWAY_URL</span><span class="p">,</span> <span class="s2">&quot;gateway&quot;</span><span class="p">),</span>
+<a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a>    <span class="n">return_exceptions</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-34-6" name="__codelineno-34-6" href="#__codelineno-34-6"></a><span class="p">)</span>
+</code></pre></div>
+<p><code>gather</code> přijme N coroutin a spustí je <strong>konkurentně</strong> v jednom event loopu. Vrátí se až všechny skončí (nebo selžou).</p>
+<p><code>return_exceptions=True</code> — kritická volba: bez toho by první výjimka zrušila celý gather a ostatní výsledky by se ztratily. S tímto parametrem se výjimka vrátí jako hodnota v poli výsledků — volající může ošetřit každý výsledek zvlášť.</p>
+<h3 id="typove-anotace-a-str">Typové anotace a <code>str = ""</code></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_contacts</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+</code></pre></div>
+<p>Python typové anotace (<code>:str</code>, <code>-&gt; Response</code>) jsou za běhu <strong>informativní</strong> — interpret je ignoruje. FastAPI je ale čte přes <code>inspect</code> modul a používá je pro:
+- automatické parsování a validaci parametrů
+- generování OpenAPI dokumentace (<code>/docs</code>)
+- srozumitelné chybové hlášky při špatném typu</p>
+<p>Výchozí hodnota <code>q: str = ""</code> říká: parametr je volitelný, pokud chybí, použij <code>""</code>. FastAPI nepošle <code>?q=</code> do backendu pokud je prázdné — params se filtrují.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Zpět na začátek
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Zkop\u00edrov\u00e1no do schr\u00e1nky", "clipboard.copy": "Kop\u00edrovat do schr\u00e1nky", "search.result.more.one": "1 dal\u0161\u00ed na t\u00e9to str\u00e1nce", "search.result.more.other": "# v\u00edce na t\u00e9to str\u00e1nce", "search.result.none": "Nenalezeny \u017e\u00e1dn\u00e9 dokumenty", "search.result.one": "Nalezen\u00fd dokument: 1", "search.result.other": "Nalezen\u00e9 dokumenty: #", "search.result.placeholder": "Pi\u0161te co se m\u00e1 vyhledat", "search.result.term.missing": "Chyb\u011bj\u00edc\u00ed", "select.version": "Vyberte verzi"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
