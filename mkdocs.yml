@@ -48,4 +48,5 @@ nav:
     - gateway-go (Go): sluzby/go.md
     - bff-python (Python): sluzby/python.md
   - Výkon & testy: vykon.md
+  - Technologický stack: technologie.md
   - RE Spec: re-spec.md
