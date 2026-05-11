@@ -6,6 +6,35 @@ Přehled všeho co bylo použito v projektu — každá knihovna, framework, ná
 
 ## C++ — contacts-cpp
 
+### Filozofie C++
+
+C++ vznikl v 80. letech (Bjarne Stroustrup) jako "C s třídami" — rozšíření C o OOP. Dnes je to jeden z nejkomplexnějších jazyků vůbec: C++20 má přes 1800 stran standardu.
+
+**Klíčový princip: Zero-cost abstractions.**
+Abstrakce v C++ nesmí stát výkon. `std::vector` je stejně rychlý jako ruční alokace pole. `std::optional` nekompiluje na nullptr check s overhead — je to union s bool. Pokud nevyužiješ feature, nezaplatíš za ni nic v runtime.
+
+```cpp
+// std::ranges::sort kompiluje na stejný strojový kód jako ručně psaný quicksort
+std::ranges::sort(contacts, [](const auto& a, const auto& b) {
+    return a.last_name < b.last_name;
+});
+```
+
+**Tři generace C++:**
+- **C++98/03** — základy OOP, STL (vector, map, algorithm)
+- **C++11/14/17** — moderní C++: move semantics, lambda, `auto`, smart pointery, `constexpr`
+- **C++20** — ranges, coroutines, concepts, `std::format`, modules
+
+Contacts-cpp používá C++20 — `std::format`, `std::ranges`, `std::views`. Na starším kompilátoru by to nezkompiloval.
+
+**Proč C++ pro contacts-cpp:**
+CRUD nad databází potřebuje přímou kontrolu nad vlákny (thread pool, connection pool) a nízkou latenci. C++ dává plnou kontrolu nad pamětí a vlákny bez garbage collectoru. libpqxx je kvalitní C++ knihovna pro PostgreSQL. Alternativa v Go nebo Javě by přidala GC overhead a méně přímou kontrolu nad connection poolem.
+
+**Cena komplexity:**
+C++ je nejtěžší jazyk v projektu — undefined behavior (přístup za hranici pole, use-after-free) kompilátor nezachytí, runtime nesignalizuje, program jen "funguje divně". Proto Rust existuje — stejný výkon, ale bez undefined behavior.
+
+---
+
 ### cpp-httplib
 **Co je:** Header-only HTTP/1.1 server a klient. Celý kód je v jediném souboru `httplib.h` — žádné linkování, stačí `#include`.
 
@@ -62,6 +91,33 @@ target_link_libraries(contacts nlohmann_json pqxx pq)
 
 ## Rust — search-rust
 
+### Filozofie Rustu
+
+Rust vznikl v Mozille v roce 2010 (Graydon Hoare) s jedním cílem: **systems programming bez memory safety bugů**. 70 % bezpečnostních zranitelností v C/C++ kódu pochází z memory safety chyb (CVE databáze Microsoftu, Chromium). Rust tyto chyby eliminuje na úrovni kompilátoru.
+
+**Ownership systém — tři pravidla:**
+1. Každá hodnota má právě jednoho vlastníka
+2. Může existovat buď N sdílených referencí `&T`, nebo jedna exkluzivní `&mut T` — nikdy obojí
+3. Reference nesmí přežít hodnotu na kterou ukazuje
+
+```rust
+let s = String::from("hello");
+let r1 = &s;   // sdílená reference — ok
+let r2 = &s;   // druhá sdílená reference — ok
+// let r3 = &mut s;  // ← CHYBA: nelze mít &mut zároveň s &
+println!("{} {}", r1, r2);
+```
+
+Borrow checker ověří tato pravidla při kompilaci. Data race = dvě vlákna přistupují ke stejné paměti, aspoň jedno zapisuje → undefined behavior v C++. V Rustu je data race **compile error**.
+
+**Zero-cost async:**
+`async fn` v Rustu generuje stavový automat — žádný runtime overhead oproti ručně psanému kódu. Coroutiny jsou v Rustu knihovní feature (Tokio), ne součást jazyka — jazyk jen poskytuje syntaxi.
+
+**Proč Rust pro search-rust:**
+Invertovaný index v paměti = kritická sekce přistupovaná z tisíců souběžných requestů. Rust garantuje, že `RwLock` je použit správně — zapomenout na `read()`/`write()` je compile error. V C++ by stejný kód mohl tiše způsobit data race. Bez GC je latence konzistentní — žádné GC pauzy, p99 je 2× p50 (ne 100×).
+
+---
+
 ### Axum
 **Co je:** Webový framework postavený nad `tokio` a `hyper`. Routing, extrakce parametrů, middleware přes `tower`.
 
@@ -116,6 +172,36 @@ async fn handle_search(
 
 ## Go — gateway-go
 
+### Filozofie Go
+
+Go vznikl v Googlu v roce 2009 (Rob Pike, Ken Thompson, Robert Griesemer) jako reakce na problémy s C++ v rozsáhlých kódových základnách — dlouhé kompilace, komplexní dependency management, těžká čitelnost.
+
+**Tři pilíře Go:**
+
+**1. Jednoduchost nad expresivností.**
+Go má záměrně méně features než C++, Java nebo Rust. Žádná dědičnost, žádné generické typy (až Go 1.18), žádné výjimky, žádné přetěžování operátorů. Výsledek: kód napsaný jedním programátorem vypadá skoro stejně jako kód jiného — Go kód je předvídatelný.
+
+**2. Kompilace v sekundách.**
+C++ projekt může kompilovat minuty. Go kompiluje staticky zalinkovaný binár v sekundách — gateway-go (`docker build`) trvá ~3s. Rychlá kompilace mění vývojový cyklus: edit → compile → test je okamžitý.
+
+**3. Souběžnost jako první třída.**
+Goroutiny a kanály jsou jazykové primitiva, ne knihovna. `go func()` spustí novou "vlákno" v jednom klíčovém slově. Žádný `Thread`, žádný `ExecutorService`, žádný `asyncio.create_task`.
+
+**Proč Go pro gateway:**
+Gateway je infrastrukturní komponenta — síťový kód, souběžnost, jednoduchost. Přesně tam kde Go exceluje. Kdyby byl gateway v C++, měl by 3× více kódu pro správu vláken. V Pythonu by async overhead přidal latenci. Go dává výkon blízký C++ se čitelností blízkou Pythonu.
+
+**Chyby jako hodnoty, ne výjimky:**
+```go
+entry, err := registry.Get(name)
+if err != nil {
+    http.Error(w, err.Error(), 404)
+    return
+}
+```
+Go nemá `try/catch`. Chyba je návratová hodnota — volající ji musí explicitně ošetřit nebo předat dál. Výsledek: každý kód path kde může nastat chyba je viditelný. Žádné skryté výjimky které probublají přes 5 vrstev zásobníku.
+
+---
+
 ### stdlib only (`net/http`, `net/http/httputil`, `sync`, `encoding/json`)
 **Co je:** Go standardní knihovna — součást každé Go instalace, žádné externí závislosti.
 
@@ -141,6 +227,35 @@ async fn handle_search(
 ---
 
 ## Python — bff-python
+
+### Filozofie Pythonu
+
+Python vznikl v roce 1991 (Guido van Rossum) s mottem: **"Readability counts"**. Zdrojový kód se čte mnohem více než píše — Python optimalizuje pro čtenáře, ne pro kompilátor.
+
+**Zen of Python (PEP 20) — vybrané principy:**
+```
+Krásné je lepší než ošklivé.
+Explicitní je lepší než implicitní.
+Jednoduché je lepší než složité.
+Čitelnost se počítá.
+Mělo by existovat jedno — a pokud možno jen jedno — zřejmé řešení.
+```
+
+**Dynamické typování:**
+Python zjišťuje typy za běhu, ne při kompilaci. `x = 5` a pak `x = "hello"` je validní. Výhoda: rychlé psaní, flexibilita. Nevýhoda: chyby jako `TypeError: unsupported operand type(s) for +: 'int' and 'str'` se projeví až za běhu, ne při kompilaci.
+
+Type hints (od Python 3.5) přidávají volitelné anotace — `def f(x: int) -> str`. Python je ignoruje, ale IDE, mypy a FastAPI je využívají.
+
+**Batteries included:**
+Python stdlib obsahuje vše: HTTP klient (`urllib`), JSON (`json`), regex (`re`), threading (`threading`), async (`asyncio`), testy (`unittest`). Pro web ale stdlib nestačí — proto FastAPI, httpx, uvicorn.
+
+**GIL a jeho dopady:**
+Global Interpreter Lock zabraňuje skutečnému paralelismu v threadech. Pro CPU-bound kód (výpočty, třídění) je Python pomalý. Pro I/O-bound kód (síťová volání, čekání na DB) je asyncio plně dostačující — event loop čeká na I/O bez blokování.
+
+**Proč Python pro bff-python:**
+BFF je lepidlo — přeposílá requesty, agreguje odpovědi, servuje HTML. Žádné těžké výpočty. Python je pro tento úkol ideální: FastAPI dá async HTTP server za 50 řádků, httpx zvládne paralelní volání přes `asyncio.gather`. Produktivita vývoje je nejvyšší ze všech čtyř jazyků v projektu.
+
+---
 
 ### FastAPI
 **Co je:** Moderní async webový framework pro Python. Automaticky generuje OpenAPI dokumentaci, validuje typy přes Pydantic, podporuje dependency injection.
