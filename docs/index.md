@@ -28,3 +28,17 @@ Po spuštění Docker Compose nastartuje všechny služby ve správném pořadí
 - **Jak funguje BFF pattern** — proč prohlížeč volá jen jednu adresu, i když za ní běží tři různé backendy
 - **Jak Rust, Go a C++ řeší souběžnost jinak** — RwLock bez GC, goroutiny, shared_mutex + condition_variable
 - **Proč se výkonnostní charakteristiky tak liší** — od 186 req/s (Python fan-out) po 4193 req/s (Rust in-memory index)
+
+## Klíčové koncepty
+
+Tento projekt ilustruje několik obecných principů návrhu distribuovaných systémů:
+
+**Eventual consistency.** contacts-cpp zapisuje do PostgreSQL a asynchronně notifikuje search-rust. V krátkém okně po zápisu může vyhledávání vrátit stará data. Systém upřednostňuje dostupnost před okamžitou konzistencí — klasická volba **AP** z CAP theoremu.
+
+**Fire-and-forget.** Notifikace search indexu probíhá v detached threadu bez potvrzení. Zápis kontaktu neblokuje na dostupnosti search-rust. Jednoduchá alternativa k message queue pro nekritické side effects.
+
+**Invertovaný index.** search-rust neprohledává databázi při každém dotazu — předem si sestaví index: pro každé slovo seznam kontaktů kde se vyskytuje. Vyhledávání pak trvá O(1) místo O(n). Stejný princip používají Elasticsearch nebo Lucene.
+
+**Polyglot microservices.** Každá služba je nasazena jako izolovaný Docker kontejner s vlastními závislostmi. C++ může používat libpqxx, Rust tokio, Go stdlib — bez konfliktů. Komunikační rozhraní (HTTP/JSON) je jazykově neutrální.
+
+**p99 latence jako metrika kvality.** Průměrná latence skryje outlinery. contacts-cpp má p50 = 3 ms ale p99 = 453 ms — každý stý uživatel čeká 150× déle. Příčina je lock contention na shared_mutex, viditelná pouze v percentilech.

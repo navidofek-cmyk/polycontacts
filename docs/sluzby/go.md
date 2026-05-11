@@ -1,5 +1,57 @@
 # gateway-go — Průvodce kódem
 
+## Teorie: Goroutiny a CSP
+
+Go je postaveno na teorii **CSP** (Communicating Sequential Processes, Tony Hoare, 1978) — souběžné procesy komunikují přes kanály, ne přes sdílenou paměť.
+
+**Goroutina** je lehké zelené vlákno spravované Go runtime, ne OS:
+
+| | OS vlákno | Goroutina |
+|---|---|---|
+| Paměť zásobníku | ~1 MB (fixní) | ~2 KB (roste dynamicky) |
+| Vytvoření | ~100 µs | ~1 µs |
+| Context switch | kernel → uživatelský prostor | čistě uživatelský prostor |
+| Maximální počet | tisíce | miliony |
+
+Go runtime implementuje **M:N threading** — M goroutiny běží na N OS vláknech (typicky N = počet CPU jader). Scheduler je součástí Go runtime a rozhoduje kdy která goroutina běží.
+
+V gateway-go goroutiny používáme pro:
+- Každý příchozí HTTP request → obsloužen v nové goroutině
+- Background health checker → běží jako `go healthChecker()`
+- Paralelní health checky všech služeb najednou
+
+## Teorie: Mutex vs RWMutex
+
+Gateway drží registry služeb v mapě `map[string]*ServiceEntry`. Čtení (GET /services) i zápis (POST /services) přistupují ke stejné mapě → race condition bez synchronizace.
+
+**`sync.Mutex`** — exkluzivní zámek. Jeden přistupuje, všichni ostatní čekají. Jednoduché, ale zbytečně pomalé pro read-heavy workload.
+
+**`sync.RWMutex`** — čtecí/zápisový zámek:
+- `RLock()` — sdílená reference. Více goroutiny může číst zároveň.
+- `Lock()` — exkluzivní. Zápis čeká na dokončení všech čtení, pak blokuje nová čtení.
+
+```
+Goroutiny čtou:   [R1]─────────┐
+                  [R2]──────┐  │
+                  [R3]───┐  │  │
+Goroutina píše:            [W]──────   (čeká na R1, R2, R3, pak blokuje nová čtení)
+```
+
+Pro registry služeb je čtení (health check dotazy, UI) výrazně častější než zápis (registrace při startu). `RWMutex` proto dává vyšší propustnost než plain `Mutex`.
+
+## Teorie: Reverse Proxy
+
+`httputil.ReverseProxy` ze stdlib implementuje **transparentní proxy** — přijme request, upraví hlavičky a přepošle ho na backend, odpověď přepošle zpět.
+
+Klíčové kroky:
+1. Parsuj URL prefix (`/contacts-cpp/contacts`) → najdi backend v registry
+2. Uprav `req.URL.Host` a `req.URL.Scheme` na backend adresu
+3. Odstraň prefix ze `req.URL.Path` (`/contacts-cpp/contacts` → `/contacts`)
+4. Přidej `X-Forwarded-For` hlavičku s IP klienta
+5. Přepošli request na backend a streamuj odpověď zpět
+
+`statusRecorder` wrappuje `http.ResponseWriter` pro zachycení status kódu — stdlib `ResponseWriter` neumožňuje po odeslání zjistit jaký kód byl použit.
+
 ## Přehled
 
 `gateway-go` je centrální API gateway celého systému. Plní tři role najednou:

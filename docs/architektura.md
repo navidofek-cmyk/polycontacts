@@ -1,5 +1,31 @@
 # Architektura
 
+## Proč microservices?
+
+Monolitická aplikace je jednodušší na vývoj, ale obtížnější na škálování a údržbu. Microservices rozdělují systém na **nezávisle nasaditelné jednotky** — každá má vlastní zodpovědnost, vlastní proces a vlastní technologický stack.
+
+Tři principy za tímto projektem:
+
+**Separation of concerns.** `contacts-cpp` řeší persistence, `search-rust` řeší vyhledávání, `gateway-go` řeší discovery. Žádná služba nezná interní implementaci jiné — komunikují pouze přes HTTP/JSON kontrakty.
+
+**Polyglot persistence a jazyk.** Každý problém si vybere nejvhodnější nástroj. Vyhledávání potřebuje rychlý in-memory index → Rust. CRUD s transakcemi → C++ s libpqxx. Orchestrace a proxy → Go stdlib. UI a lepidlo → Python/FastAPI.
+
+**Nezávislé škálování.** Kdybychom search-rust dostali pod větší zátěž, nasadíme více instancí bez dotyku ostatních služeb. V tomto projektu to neřešíme (jeden Docker host), ale architektura to umožňuje.
+
+## BFF pattern (Backend for Frontend)
+
+`bff-python` implementuje pattern **Backend for Frontend** — jeden agregační backend navržený specificky pro jednoho klienta (webový prohlížeč).
+
+Bez BFF by prohlížeč musel volat tři různé backendy (contacts-cpp, search-rust, gateway-go), řešit CORS, znát jejich adresy a agregovat výsledky sám. BFF tuto komplexitu skryje za jednu adresu `:8989`.
+
+Klíčová vlastnost: `/api/stats` volá tři backendy **paralelně** přes `asyncio.gather`. Výsledná latence je `max(t1, t2, t3)`, ne `t1 + t2 + t3`. Bez asyncio by stejný endpoint trval 3× déle.
+
+## Service Registry pattern
+
+`gateway-go` implementuje **Service Registry** — centrální katalog kde běžící služby. Každá služba se při startu zaregistruje (`POST /services`) a gateway ji od té chvíle pravidelně pinguje (`GET /health` každých 10 s) a měří latenci.
+
+Alternativou by bylo statické nastavení adres v config souboru. Registry přidává dynamiku — pokud kontejner padne a nastartuje na jiné adrese, stačí se znovu zaregistrovat. V tomto projektu jsou adresy statické (Docker Compose DNS), ale pattern zůstává stejný jako v produkčních systémech (Consul, etcd).
+
 ## Tok dat
 
 ```
@@ -18,6 +44,36 @@ contacts-cpp  ──►  postgres :5432  (persistentní úložiště)
 
 všechny služby  ──►  gateway-go  (registrace při startu)
 ```
+
+## CAP theorem v tomto systému
+
+CAP theorem říká, že distribuovaný systém může garantovat současně nejvýše dvě ze tří vlastností: **Consistency** (všichni vidí stejná data), **Availability** (systém vždy odpovídá) a **Partition tolerance** (systém funguje i při výpadku sítě mezi uzly).
+
+Polycontacts volí **AP** — dostupnost nad konzistencí:
+
+- `contacts-cpp` zapíše kontakt do PostgreSQL a **asynchronně** notifikuje `search-rust`
+- V okně mezi zápisem a doručením notifikace vrátí search stará data
+- Systém preferuje odpovědět rychle a možná trochu zastarale před čekáním na plnou synchronizaci
+
+Tato forma nekonzistence se nazývá **eventual consistency** — systém se časem dostane do konzistentního stavu, ale nezaručuje to okamžitě. Pro adresář kontaktů je to přijatelný kompromis.
+
+## Fire-and-forget pattern
+
+`contacts-cpp` po každém POST/PUT spustí **detached thread** který pošle `POST /index` na `search-rust`. Thread není nijak sledován — pokud selže (search-rust je dole, síť je přetížená), chyba se zahodí.
+
+```
+POST /contacts
+    │
+    ├── uloží do PostgreSQL  (synchronně, musí uspět)
+    └── spustí detached thread → POST /index na search-rust  (asynchronně, best-effort)
+         │
+         └── chyba? zahodí se. Žádný retry, žádný log.
+```
+
+Výhoda: zápis kontaktu je rychlý, neblokuje ho dostupnost search-rust.
+Nevýhoda: search index může zaostávat za databází.
+
+V produkčních systémech se tento pattern řeší **message queue** (Kafka, RabbitMQ) — zpráva se uloží durably a search-rust ji zpracuje až bude ready. My záměrně používáme jednodušší přístup.
 
 ## Co gateway NENÍ
 

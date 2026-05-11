@@ -1,5 +1,72 @@
 # bff-python — Průvodce kódem
 
+## Teorie: Event loop a GIL
+
+Python má **GIL** (Global Interpreter Lock) — mutex který zabraňuje skutečnému paralelnímu vykonávání Python bytekódu ve více vláknech zároveň. Dvě Python vlákna nemohou vykonávat Python kód současně.
+
+Důsledek: Python thready jsou zbytečné pro CPU-bound paralelismus (třídění, výpočty). Pro I/O-bound práci (síťová volání, disk) GIL není problém — vlákno stejně čeká na OS a GIL mezitím uvolní.
+
+**asyncio** obchází GIL jinak: jeden thread, jeden event loop, žádné context switching:
+
+```
+Thread 1 (event loop):
+  → request přijde
+  → await httpx.get(contacts_url)   ← uvolní řízení event loopu
+    → event loop obslouží jiný request
+    → event loop obslouží jiný request  
+  → odpověď přišla, pokračuj
+  → vrátí odpověď
+```
+
+Tisíce souběžných HTTP requestů = tisíce coroutine objektů v paměti (kilobajty), ne tisíce OS vláken (megabajty).
+
+## Teorie: asyncio.gather a fan-out pattern
+
+`/api/stats` potřebuje statistiky ze tří backendů. Sekvenční přístup:
+
+```python
+r1 = await client.get(contacts_url)   # čekáme ~5ms
+r2 = await client.get(search_url)     # čekáme ~5ms  
+r3 = await client.get(gateway_url)    # čekáme ~5ms
+# celkem: ~15ms
+```
+
+S `asyncio.gather` (fan-out):
+
+```python
+r1, r2, r3 = await asyncio.gather(
+    client.get(contacts_url),
+    client.get(search_url),
+    client.get(gateway_url),
+)
+# celkem: max(5ms, 5ms, 5ms) = ~5ms
+```
+
+`gather` spustí všechny coroutiny "najednou" — event loop střídá mezi nimi při každém `await`. Výsledná latence je `max(t1, t2, t3)` místo `t1 + t2 + t3`. Při třech backendech je to 3× zrychlení.
+
+`return_exceptions=True` zabrání tomu, aby selhání jednoho backendu zrušilo celý gather — ostatní výsledky se vrátí normálně, chyba se vrátí jako exception objekt v poli výsledků.
+
+## Teorie: httpx.AsyncClient a connection reuse
+
+`requests` (synchronní knihovna) otevírá nové TCP spojení na každý request (pokud se explicitně nepoužívá Session). Pro BFF, která dělá stovky requestů za sekundu na stejné backendy, je to zbytečné.
+
+`httpx.AsyncClient` udržuje **connection pool** — sdružené TCP spojení na každý backend. HTTP/1.1 keep-alive nechá spojení otevřené po dokončení requestu pro další použití.
+
+```python
+# Špatně — nové spojení na každý request
+async def bad():
+    async with httpx.AsyncClient() as c:
+        return await c.get(url)
+
+# Správně — sdílené spojení po celou dobu životnosti aplikace  
+_client: httpx.AsyncClient   # globální, inicializován v lifespan()
+
+async def good():
+    return await _client.get(url)
+```
+
+Sdílený klient se vytvoří jednou v `lifespan()` a zůstane otevřený po celou dobu běhu aplikace. FastAPI `lifespan` je context manager — `yield` odděluje startup (před ním) od shutdown (po něm).
+
 ## Přehled a BFF pattern
 
 **Backend-for-Frontend (BFF)** je architektonický vzor: server, který sedí mezi prohlížečem a interní sítí backendových služeb. Prohlížeč nezná nic o kontejnerech, interních adresách ani o tom, kolik backendů existuje — komunikuje jen s jednou adresou (`http://localhost:8989`).

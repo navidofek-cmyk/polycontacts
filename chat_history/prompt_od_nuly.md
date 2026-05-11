@@ -371,6 +371,184 @@ Testuje interní logiku přímo (ne HTTP):
 
 ---
 
+## MCP Memory Server
+
+Střední vrstva mezi Claude Code CLI a pamětí projektu. Claude místo pasivního čtení MD souborů aktivně dotazuje strukturovanou databázi.
+
+### Jak to funguje
+
+```
+Claude Code CLI
+      │  volá tool: memory_search("PostgreSQL port")
+      ▼
+.claude/mcp_server.py          ← Python subprocess, stdio transport
+      │
+      ├── .claude/memory.db    ← SQLite + FTS5, přenositelné s projektem
+      ├── git log              ← historie změn
+      └── ./status.sh          ← živý stav kontejnerů
+```
+
+Claude Code spustí MCP server jako subprocess při startu session. Komunikace probíhá přes stdin/stdout (žádný HTTP port).
+
+### Konfigurace (přidat do `.claude/settings.local.json`)
+
+```json
+{
+  "mcpServers": {
+    "polycontacts-memory": {
+      "command": "python3",
+      "args": [".claude/mcp_server.py"]
+    }
+  }
+}
+```
+
+### Nástroje které MCP server vystavuje
+
+**`memory_search(query: str) → list`**
+Full-text hledání v SQLite FTS5. Vrátí relevantní záznamy.
+```
+memory_search("PostgreSQL port") → ["Port 5432 byl obsazený → 5433", ...]
+memory_search("bug registrace")  → ["contacts-cpp volal /register místo /services", ...]
+```
+
+**`memory_add(category: str, content: str) → ok`**
+Uloží nový záznam do databáze. Claude volá automaticky při důležitých zjištěních.
+```
+memory_add("bug", "search-rust musí nastartovat až po contacts-cpp")
+memory_add("decision", "BFF volá backends přímo, gateway jen pro registry")
+```
+
+**`project_status() → dict`**
+Spustí `./status.sh --json` a vrátí strukturovaný stav kontejnerů, HTTP health, počet kontaktů v DB.
+
+**`recent_changes(days: int = 7) → list`**
+Parsuje `git log --since=N.days.ago` a vrátí seznam commitů s diffstaty.
+
+### Implementace `.claude/mcp_server.py`
+
+```python
+#!/usr/bin/env python3
+"""MCP Memory Server pro polycontacts."""
+import sqlite3, subprocess, json, sys
+from pathlib import Path
+from mcp.server import Server
+from mcp.server.stdio import stdio_server
+from mcp import types
+
+DB_PATH = Path(__file__).parent / "memory.db"
+PROJECT_ROOT = Path(__file__).parent.parent
+
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute("""
+        CREATE VIRTUAL TABLE IF NOT EXISTS memories USING fts5(
+            category, content, created_at UNINDEXED
+        )
+    """)
+    conn.commit()
+    return conn
+
+server = Server("polycontacts-memory")
+
+@server.list_tools()
+async def list_tools():
+    return [
+        types.Tool(name="memory_search",
+            description="Hledej v paměti projektu",
+            inputSchema={"type":"object","properties":{"query":{"type":"string"}},"required":["query"]}),
+        types.Tool(name="memory_add",
+            description="Ulož nový záznam do paměti",
+            inputSchema={"type":"object","properties":{"category":{"type":"string"},"content":{"type":"string"}},"required":["category","content"]}),
+        types.Tool(name="project_status",
+            description="Živý stav kontejnerů a služeb",
+            inputSchema={"type":"object","properties":{}}),
+        types.Tool(name="recent_changes",
+            description="Poslední změny v git historii",
+            inputSchema={"type":"object","properties":{"days":{"type":"integer","default":7}}}),
+    ]
+
+@server.call_tool()
+async def call_tool(name: str, arguments: dict):
+    conn = init_db()
+
+    if name == "memory_search":
+        rows = conn.execute(
+            "SELECT category, content FROM memories WHERE memories MATCH ? ORDER BY rank LIMIT 10",
+            (arguments["query"],)
+        ).fetchall()
+        result = [{"category": r[0], "content": r[1]} for r in rows]
+        return [types.TextContent(type="text", text=json.dumps(result, ensure_ascii=False))]
+
+    if name == "memory_add":
+        from datetime import datetime
+        conn.execute("INSERT INTO memories VALUES (?, ?, ?)",
+            (arguments["category"], arguments["content"], datetime.now().isoformat()))
+        conn.commit()
+        return [types.TextContent(type="text", text='{"ok": true}')]
+
+    if name == "project_status":
+        try:
+            result = subprocess.run(
+                ["docker", "compose", "ps", "--format", "json"],
+                cwd=PROJECT_ROOT / "services",
+                capture_output=True, text=True, timeout=10
+            )
+            services = [json.loads(l) for l in result.stdout.splitlines() if l.strip()]
+            status = [{"service": s.get("Service"), "state": s.get("State"), "health": s.get("Health")} for s in services]
+        except Exception as e:
+            status = {"error": str(e)}
+        return [types.TextContent(type="text", text=json.dumps(status, ensure_ascii=False))]
+
+    if name == "recent_changes":
+        days = arguments.get("days", 7)
+        result = subprocess.run(
+            ["git", "log", f"--since={days}.days.ago", "--oneline", "--stat"],
+            cwd=PROJECT_ROOT, capture_output=True, text=True
+        )
+        return [types.TextContent(type="text", text=result.stdout or "Žádné změny")]
+
+    return [types.TextContent(type="text", text='{"error": "unknown tool"}')]
+
+async def main():
+    async with stdio_server() as (r, w):
+        await server.run(r, w, server.create_initialization_options())
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())
+```
+
+### Instalace závislosti
+
+```bash
+pip install mcp
+# nebo přidat do pyproject.toml bff-python jako dev závislost
+```
+
+### Přenositelnost
+
+```bash
+# .gitignore — přidat:
+.claude/memory.db      # lokální data, přenáší se přes export.sh
+
+# export.sh automaticky zabalí .claude/ včetně memory.db
+# bootstrap.sh nainstaluje pip install mcp
+```
+
+### Seed data do memory.db při prvním spuštění
+
+Po postavení projektu spustit jednou:
+```
+memory_add("architecture", "BFF volá contacts-cpp a search-rust přímo — gateway jen pro /services a /topology")
+memory_add("architecture", "search index není perzistentní — při restartu se přeindexuje z PostgreSQL")
+memory_add("bug", "contacts-cpp musí registrovat Docker hostname http://contacts-cpp:8080, ne localhost")
+memory_add("config", "PostgreSQL na portu 5433 na hostu, 5432 uvnitř Dockeru")
+memory_add("config", "search-rust startuje až po contacts-cpp healthy — potřebuje data pro indexaci")
+```
+
+---
+
 ## Soubory ke vzniku (kompletní seznam)
 
 ```
@@ -378,6 +556,9 @@ Testuje interní logiku přímo (ne HTTP):
 README.md
 ARCHITECTURE.md
 start.sh                              (bash, kontrola prerekvizit + spuštění)
+status.sh                             (bash, live check: kontejnery, HTTP, DB, logy)
+export.sh                             (bash, tar.gz snapshot projektu)
+bootstrap.sh                          (bash, nastavení na novém stroji)
 services/docker-compose.yml           (postgres:16-alpine service + postgres_data volume)
 services/contacts-cpp/Dockerfile      (builder: libpqxx-dev libpq-dev; runtime: libpq5)
 services/contacts-cpp/CMakeLists.txt  (libpqxx + libpq závislosti)
@@ -396,4 +577,6 @@ services/bff-python/app/main.py
 services/bff-python/app/static/index.html
 services/bff-python/tests/__init__.py
 services/bff-python/tests/test_main.py
+.claude/mcp_server.py                 (MCP memory server — Python, SQLite FTS5)
+.claude/settings.local.json           (bypassPermissions + hooks + mcpServers)
 ```

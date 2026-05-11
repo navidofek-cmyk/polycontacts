@@ -1,5 +1,64 @@
 # search-rust — Průvodce kódem
 
+## Teorie: Invertovaný index
+
+Přímé vyhledávání (`SELECT * FROM contacts WHERE name LIKE '%jan%'`) projde každý řádek — O(n) při každém dotazu. Při 10 000 kontaktech a 100 req/s to zvládneme, ale při 1 000 000 kontaktech nebo složitějších dotazech to přestane stačit.
+
+**Invertovaný index** obrátí vztah: místo "kontakt → slova" ukládáme "slovo → seznam kontaktů":
+
+```
+Přímý přístup:
+  kontakt_1 = {first: "Jana", last: "Nováková", email: "jana@..."}
+  kontakt_2 = {first: "Jan",  last: "Novák",    email: "jan@..."}
+
+Invertovaný index:
+  "jana"    → [kontakt_1]
+  "novakova"→ [kontakt_1]
+  "jan"     → [kontakt_1, kontakt_2]   ← prefix "jan" matchuje oba
+  "novak"   → [kontakt_2]
+```
+
+Vyhledávání dotazu "jan novak" pak:
+1. Tokenizuje dotaz → ["jan", "novak"]
+2. Pro každý token najde odpovídající seznam v indexu (O(1) hash lookup)
+3. Agreguje skóre podle váh (příjmení = 3×, jméno = 2×, email = 1×)
+4. Seřadí výsledky sestupně dle skóre
+
+Výsledek: latence nezávisí na počtu kontaktů, ale na délce dotazu. Stejný princip používá Elasticsearch, Lucene nebo PostgreSQL `tsvector`.
+
+## Teorie: Ownership a Borrow Checker
+
+Rust garantuje memory safety **bez garbage collectoru** pomocí systému vlastnictví (ownership):
+
+1. **Každá hodnota má právě jednoho vlastníka.** Když vlastník zaniká, hodnota se uvolní.
+2. **Půjčování (borrowing).** Hodnotu lze půjčit jako `&T` (sdílená reference, pouze čtení) nebo `&mut T` (exkluzivní reference, čtení i zápis). Obojí zároveň není možné.
+3. **Žádné dangling references.** Kompilátor ověří, že reference nepřežije hodnotu na kterou ukazuje.
+
+```rust
+let index = Arc::new(RwLock::new(SearchIndex::new()));
+
+// Sdílíme index mezi vlákny přes Arc (Atomic Reference Counting)
+// Arc zajistí, že index žije dokud existuje aspoň jedna kopie Arc
+
+let idx = index.read().await;   // sdílená reference — může číst více vláken najednou
+// idx.write() — exkluzivní — blokuje dokud všichni čtenáři neskončí
+```
+
+Kompilátor odmítne kód, který by způsobil data race nebo use-after-free. Chyby které v C++ najdeme za běhu (nebo vůbec nenajdeme), Rust odmítne zkompilovat.
+
+## Teorie: Async/await a Tokio runtime
+
+`async fn` v Rustu je syntaktický cukr — kompilátor z ní vygeneruje stavový automat (state machine). Každý `await` bod je místo kde může být vykonávání pozastaveno a obnoveno.
+
+Tokio runtime spravuje **executor** — thread pool který vybírá připravené tasky a spouští je. Jedno OS vlákno může obsloužit tisíce async tasků, protože při čekání na I/O (síť, disk) task uvolní vlákno a executor ho může použít pro jiný task.
+
+```
+OS vlákno 1:  task_A (čte ze sítě →) [čeká] task_B (odpovídá) task_C (čte ze sítě →) [čeká]
+OS vlákno 2:  task_D (zpracovává) task_E (odpovídá) task_A (pokračuje po příchodu dat)
+```
+
+Oproti thread-per-request modelu (Apache): 1 000 souběžných spojení = 1 000 OS vláken × ~1 MB = 1 GB jen pro zásobníky. S async: stovky tasků na jedno vlákno, každý task zabírá jen nutný stav (kilobajty).
+
 Tento dokument prochází celý zdrojový kód služby `search-rust` krok po kroku. Místo abstraktního přehledu rovnou vysvětlujeme každý řádek — proč tam je a co by se stalo, kdyby tam nebyl.
 
 ## Přehled

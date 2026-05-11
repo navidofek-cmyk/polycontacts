@@ -1,5 +1,47 @@
 # contacts-cpp — Průvodce kódem
 
+## Teorie: RAII a deterministické uvolňování paměti
+
+C++ používá princip **RAII** (Resource Acquisition Is Initialization) — každý zdroj (paměť, DB spojení, mutex lock) je vlastněn objektem, a když objekt zanikne, destruktor automaticky zdroj uvolní.
+
+```cpp
+{
+    pqxx::work txn(conn);   // BEGIN transakce
+    txn.exec(...);
+    txn.commit();           // COMMIT
+}                           // destruktor txn: pokud commit neproběhl → automatický ROLLBACK
+```
+
+Toto je opakem garbage collectoru — GC nevíme kdy spustí, RAII víme přesně. Destruktor se volá deterministicky na konci scope. Výsledek: žádné resource leaky, žádné GC pauzy.
+
+## Teorie: Connection pool
+
+Otevírání DB spojení je drahé — TCP handshake, TLS, autentizace PostgreSQL, alokace paměti na serveru. Při 1 499 req/s by nové spojení na každý request nebylo únosné.
+
+**Connection pool** udržuje N připravených spojení. Request si vezme jedno ze zásobníku, použije ho a vrátí zpět.
+
+```
+Fronta volných spojení: [conn1, conn2, conn3, ... conn8]
+                              │
+Request přijde → vezme conn1 → vykoná dotaz → vrátí conn1
+```
+
+Pokud jsou všechna spojení obsazená, nový request čeká na `condition_variable.wait()` — OS vlákno se uspí a probudí se až spojení bude vráceno. Toto je efektivnější než busy-wait (neustálé ptaní "je volné?").
+
+## Teorie: Levenshtein distance pro deduplikaci
+
+`/dedup` endpoint hledá podobné kontakty pomocí **Levenshteinovy vzdálenosti** — minimálního počtu editací (vložení, smazání, nahrazení znaku) pro přeměnu jednoho řetězce na druhý.
+
+```
+"Novák"  →  "Novak"  =  vzdálenost 1  (nahrazení á→a)
+"Jana"   →  "Jan"    =  vzdálenost 1  (smazání a)
+"Pavel"  →  "Pavel"  =  vzdálenost 0  (identické)
+```
+
+Algoritmus používá **dynamické programování** — matici n×m kde `dp[i][j]` = vzdálenost prvních i znaků s1 od prvních j znaků s2. Složitost O(n×m), paměť O(n×m).
+
+Deduplikace pak porovná každou dvojici kontaktů — O(n²) párů — a vrátí ty kde vzdálenost ÷ délka < threshold.
+
 ## Přehled
 
 `contacts-cpp` je autoritativní zdroj dat o kontaktech v systému polycontacts. Implementuje kompletní REST API nad PostgreSQL databází — od CRUD operací přes fuzzy deduplikaci až po import/export ve formátu vCard — vše v jediném C++20 souboru `main.cpp`.
